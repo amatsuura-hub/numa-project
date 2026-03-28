@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { Node } from "@xyflow/react";
 import { useEditorStore } from "../../stores/editorStore";
 
@@ -24,6 +24,8 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("#4c6ef5");
   const [url, setUrl] = useState("");
+  const panelRef = useRef<HTMLDivElement>(null);
+  const labelInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (node) {
@@ -31,8 +33,26 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
       setDescription((node.data.description as string) || "");
       setColor((node.data.color as string) || "#4c6ef5");
       setUrl((node.data.url as string) || "");
+      // Focus the label input when panel opens
+      setTimeout(() => labelInputRef.current?.focus(), 0);
     }
   }, [node]);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    },
+    [onClose],
+  );
+
+  useEffect(() => {
+    if (node) {
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [node, handleKeyDown]);
 
   if (!node) return null;
 
@@ -46,12 +66,13 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
   };
 
   return (
-    <div className="absolute right-0 top-0 z-10 h-full w-80 border-l border-gray-200 bg-white p-4 shadow-lg">
+    <div ref={panelRef} role="dialog" aria-label="ノード編集" className="absolute right-0 top-0 z-10 h-full w-80 border-l border-gray-200 bg-white p-4 shadow-lg">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-lg font-semibold">ノード編集</h3>
         <button
           onClick={onClose}
           className="text-gray-400 hover:text-gray-600"
+          aria-label="閉じる"
         >
           ✕
         </button>
@@ -59,10 +80,12 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
 
       <div className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="node-label" className="mb-1 block text-sm font-medium text-gray-700">
             ラベル
           </label>
           <input
+            ref={labelInputRef}
+            id="node-label"
             type="text"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
@@ -73,10 +96,11 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="node-description" className="mb-1 block text-sm font-medium text-gray-700">
             説明
           </label>
           <textarea
+            id="node-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             onBlur={handleSave}
@@ -102,16 +126,19 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
                   color === c ? "border-gray-800" : "border-transparent"
                 }`}
                 style={{ backgroundColor: c }}
+                aria-label={`色 ${c}`}
+                aria-pressed={color === c}
               />
             ))}
           </div>
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label htmlFor="node-url" className="mb-1 block text-sm font-medium text-gray-700">
             外部URL
           </label>
           <input
+            id="node-url"
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}

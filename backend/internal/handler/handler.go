@@ -10,10 +10,10 @@ import (
 )
 
 type Handler struct {
-	repo *repository.DynamoDB
+	repo repository.Repository
 }
 
-func New(repo *repository.DynamoDB) *Handler {
+func New(repo repository.Repository) *Handler {
 	return &Handler{repo: repo}
 }
 

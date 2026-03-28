@@ -73,7 +73,11 @@ func route(ctx context.Context, req events.APIGatewayProxyRequest, h *handler.Ha
 	case method == "PUT" && path == "/api/users/me":
 		resp, handleErr = h.UpdateMyProfile(ctx, userID, req.Body)
 		statusCode = http.StatusOK
-	case method == "GET" && strings.HasPrefix(path, "/api/users/"):
+	case method == "GET" && matchPath(path, "/api/users/*/roadmaps"):
+		targetUserID := extractSegment(path, 3)
+		resp, handleErr = h.GetUserPublicRoadmaps(ctx, targetUserID, req.QueryStringParameters)
+		statusCode = http.StatusOK
+	case method == "GET" && strings.HasPrefix(path, "/api/users/") && !strings.Contains(strings.TrimPrefix(path, "/api/users/"), "/"):
 		targetUserID := strings.TrimPrefix(path, "/api/users/")
 		resp, handleErr = h.GetUserProfile(ctx, targetUserID)
 		statusCode = http.StatusOK

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useEditorStore } from "../../stores/editorStore";
 import { CATEGORIES } from "../../types";
 
@@ -29,11 +29,29 @@ function MetaEditPanel() {
     });
   };
 
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        setIsOpen(false);
+      }
+    },
+    [isOpen],
+  );
+
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [isOpen, handleKeyDown]);
+
   return (
     <div className="absolute left-4 top-4 z-10">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="rounded-md bg-white px-3 py-2 text-sm font-medium shadow-md hover:bg-gray-50"
+        aria-expanded={isOpen}
+        aria-label="ロードマップ設定"
       >
         {isOpen ? "閉じる" : "設定"}
       </button>
@@ -42,10 +60,11 @@ function MetaEditPanel() {
         <div className="mt-2 w-72 rounded-lg bg-white p-4 shadow-lg">
           <div className="space-y-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="meta-title" className="mb-1 block text-sm font-medium text-gray-700">
                 タイトル
               </label>
               <input
+                id="meta-title"
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -56,10 +75,11 @@ function MetaEditPanel() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="meta-description" className="mb-1 block text-sm font-medium text-gray-700">
                 説明
               </label>
               <textarea
+                id="meta-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onBlur={handleSave}
@@ -70,10 +90,11 @@ function MetaEditPanel() {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="meta-category" className="mb-1 block text-sm font-medium text-gray-700">
                 カテゴリ
               </label>
               <select
+                id="meta-category"
                 value={category}
                 onChange={(e) => {
                   setCategory(e.target.value);

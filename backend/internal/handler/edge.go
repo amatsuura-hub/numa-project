@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/google/uuid"
 	"github.com/numa-project/backend/internal/model"
@@ -20,12 +19,8 @@ func (h *Handler) CreateEdge(ctx context.Context, userID string, roadmapID strin
 	}
 
 	var req CreateEdgeRequest
-	if err := json.Unmarshal([]byte(body), &req); err != nil {
-		return nil, NewAPIError(ErrBadRequest, "Invalid request body")
-	}
-
-	if req.SourceNodeID == "" || req.TargetNodeID == "" {
-		return nil, NewAPIError(ErrBadRequest, "sourceNodeId and targetNodeId are required")
+	if err := validateCreateEdgeBody(body, &req); err != nil {
+		return nil, err
 	}
 
 	// Check edge count limit

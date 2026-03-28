@@ -12,6 +12,7 @@ function EditorToolbar() {
         onClick={save}
         disabled={!isDirty || isSaving}
         className="rounded-md bg-numa-600 px-3 py-1.5 text-sm text-white hover:bg-numa-700 disabled:opacity-50"
+        aria-label={isSaving ? "保存中" : isDirty ? "変更を保存" : "保存済み"}
       >
         保存
       </button>

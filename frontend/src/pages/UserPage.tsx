@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { userApi } from "../api/user";
-import { roadmapApi } from "../api/roadmap";
 import type { User, RoadmapMeta } from "../types";
 import RoadmapCard from "../components/common/RoadmapCard";
 
@@ -23,13 +22,8 @@ function UserPage() {
       const { data: user } = await userApi.getUser(userId);
       setUserProfile(user);
 
-      // TODO: dedicated endpoint for user's public roadmaps
-      // For now we use explore and filter client-side
-      const { data } = await roadmapApi.explore({ limit: 50 });
-      const userRoadmaps = (data.roadmaps || []).filter(
-        (r) => r.userId === userId,
-      );
-      setRoadmaps(userRoadmaps);
+      const { data } = await userApi.getUserRoadmaps(userId, { limit: 50 });
+      setRoadmaps(data.roadmaps || []);
     } catch (e) {
       const msg = (e as Error).message;
       setError(msg);

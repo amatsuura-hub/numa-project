@@ -3,6 +3,7 @@ package repository
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
@@ -20,20 +21,20 @@ func encodeCursor(key map[string]types.AttributeValue) string {
 }
 
 // decodeCursor decodes a base64 cursor string to a DynamoDB ExclusiveStartKey.
-func decodeCursor(cursor string) map[string]types.AttributeValue {
+func decodeCursor(cursor string) (map[string]types.AttributeValue, error) {
 	b, err := base64.URLEncoding.DecodeString(cursor)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("invalid cursor: %w", err)
 	}
 
 	var m map[string]string
 	if err := json.Unmarshal(b, &m); err != nil {
-		return nil
+		return nil, fmt.Errorf("invalid cursor format: %w", err)
 	}
 
 	key := make(map[string]types.AttributeValue)
 	for k, v := range m {
 		key[k] = &types.AttributeValueMemberS{Value: v}
 	}
-	return key
+	return key, nil
 }

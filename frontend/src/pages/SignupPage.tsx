@@ -11,9 +11,20 @@ function SignupPage() {
   const { signup, confirmSignup, error } = useAuthStore();
   const navigate = useNavigate();
 
+  const validatePassword = (pw: string): string | null => {
+    if (pw.length < 8) return "パスワードは8文字以上にしてください";
+    if (!/[A-Z]/.test(pw)) return "大文字を含めてください";
+    if (!/[a-z]/.test(pw)) return "小文字を含めてください";
+    if (!/[0-9]/.test(pw)) return "数字を含めてください";
+    if (!/[^A-Za-z0-9]/.test(pw)) return "記号を含めてください";
+    return null;
+  };
+
+  const passwordError = password ? validatePassword(password) : null;
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
+    if (password !== confirmPassword || passwordError) {
       return;
     }
     try {
@@ -112,9 +123,13 @@ function SignupPage() {
             minLength={8}
             className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-numa-500 focus:outline-none focus:ring-1 focus:ring-numa-500"
           />
-          <p className="mt-1 text-xs text-gray-500">
-            8文字以上、大文字・小文字・数字・記号を含む
-          </p>
+          {passwordError ? (
+            <p className="mt-1 text-xs text-red-500">{passwordError}</p>
+          ) : (
+            <p className="mt-1 text-xs text-gray-500">
+              8文字以上、大文字・小文字・数字・記号を含む
+            </p>
+          )}
         </div>
 
         <div>
@@ -136,7 +151,7 @@ function SignupPage() {
 
         <button
           type="submit"
-          disabled={password !== confirmPassword}
+          disabled={password !== confirmPassword || !!passwordError}
           className="w-full rounded-md bg-numa-600 px-4 py-2 font-medium text-white hover:bg-numa-700 disabled:opacity-50"
         >
           サインアップ

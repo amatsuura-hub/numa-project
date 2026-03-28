@@ -48,6 +48,12 @@ function Header() {
                 ダッシュボード
               </Link>
               <Link
+                to="/profile"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                プロフィール
+              </Link>
+              <Link
                 to="/roadmaps/new"
                 className="rounded-md bg-numa-600 px-4 py-2 text-sm font-medium text-white hover:bg-numa-700"
               >
@@ -99,6 +105,13 @@ function Header() {
                   className="text-gray-600 hover:text-gray-900"
                 >
                   ダッシュボード
+                </Link>
+                <Link
+                  to="/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  プロフィール
                 </Link>
                 <Link
                   to="/roadmaps/new"

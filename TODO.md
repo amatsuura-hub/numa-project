@@ -168,3 +168,43 @@
 - [ ] Lighthouse でパフォーマンス確認
 - [ ] セキュリティ確認（認可チェック漏れ、XSS、インジェクション）
 - [ ] README.md 最終更新（セットアップ手順、デプロイ手順）
+
+---
+
+## Phase 5: 品質改善・残タスク
+
+### 5.1 バックエンド テスト追加
+- [x] handler 層のユニットテスト（user, roadmap, node, edge, like, bookmark）
+- [ ] repository 層の統合テスト（DynamoDB Local 使用）
+- [x] service 層の導入検討（現在ハンドラにロジックが直書き → MVP では現状維持、Repository インターフェース導入済み）
+
+### 5.2 バックエンド コード品質
+- [x] 定義済みバリデーション関数の実際の呼び出し（`validation.go` の関数が未使用）
+- [x] `GetRoadmap` の `IsLiked`/`IsBookmarked` エラーハンドリング（現在エラーを無視）
+- [x] ノード作成/更新時の追加バリデーション（Color の形式、URL の形式、PosX/PosY の範囲）
+- [x] `UpdateRoadmapMeta` が PutItem を使用 → UpdateItem に変更（同時更新時のデータ消失防止）
+- [x] カーソルデコード失敗時のエラーハンドリング改善（`cursor.go`）
+
+### 5.3 フロントエンド テスト追加
+- [x] 認証フローのテスト（サインアップ、ログイン、ログアウト）
+- [ ] ダッシュボード・Explore ページのテスト
+- [x] API クライアントのテスト
+
+### 5.4 フロントエンド コード品質
+- [x] Error Boundary コンポーネント追加（グローバルエラーハンドリング）
+- [x] Cognito セッションリフレッシュ実装（トークン期限切れ対応）
+- [x] 未保存変更時のページ離脱確認ダイアログ（エディタ）
+- [x] サインアップのパスワードバリデーション強化（大文字・小文字・数字・記号チェック）
+- [x] UserPage のユーザー公開ロードマップ取得を専用 API エンドポイントに変更（現在クライアント側フィルタリング）
+- [x] Header にプロフィールページへのリンク追加
+- [x] `VITE_COGNITO_DOMAIN` 環境変数が定義されているが未使用 → 削除
+
+### 5.5 アクセシビリティ改善
+- [x] NodeEditPanel / MetaEditPanel のフォーカス管理（開閉時）
+- [x] モーダル/パネルの Escape キーで閉じる対応
+- [x] インタラクティブ要素への aria-label 追加（エディタツールバー等）
+- [x] フォームの label と input の紐づけ確認
+
+### 5.6 インフラ・デプロイ
+- [x] GitHub Actions の vars 設定（API_LAMBDA_NAME, S3_BUCKET_NAME, CLOUDFRONT_DISTRIBUTION_ID 等）→ README に設定手順を記載
+- [x] Cognito ↔ Lambda 初回デプロイ時の循環依存対応手順の文書化

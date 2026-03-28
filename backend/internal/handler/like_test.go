@@ -1,26 +1,84 @@
 package handler
 
 import (
+	"context"
 	"testing"
 )
 
-func TestLikeRequiresAuth(t *testing.T) {
-	h := &Handler{repo: nil}
-
-	err := h.LikeRoadmap(nil, "", "roadmap-1")
-	if err == nil {
-		t.Fatal("expected error for empty userID")
+func TestLikeRoadmap(t *testing.T) {
+	tests := []struct {
+		name    string
+		userID  string
+		wantErr string
+	}{
+		{
+			name:    "requires auth",
+			userID:  "",
+			wantErr: "Authentication required",
+		},
+		{
+			name:   "success",
+			userID: "user-1",
+		},
 	}
-	if err.Error() != "Authentication required" {
-		t.Errorf("got %q, want %q", err.Error(), "Authentication required")
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := newMockRepo()
+			h := New(repo)
+
+			err := h.LikeRoadmap(context.Background(), tt.userID, "roadmap-1")
+			if tt.wantErr != "" {
+				if err == nil || err.Error() != tt.wantErr {
+					t.Errorf("got err=%v, want %q", err, tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !repo.likeRoadmapCalled {
+				t.Error("expected LikeRoadmap to be called")
+			}
+		})
 	}
 }
 
-func TestUnlikeRequiresAuth(t *testing.T) {
-	h := &Handler{repo: nil}
+func TestUnlikeRoadmap(t *testing.T) {
+	tests := []struct {
+		name    string
+		userID  string
+		wantErr string
+	}{
+		{
+			name:    "requires auth",
+			userID:  "",
+			wantErr: "Authentication required",
+		},
+		{
+			name:   "success",
+			userID: "user-1",
+		},
+	}
 
-	err := h.UnlikeRoadmap(nil, "", "roadmap-1")
-	if err == nil {
-		t.Fatal("expected error for empty userID")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := newMockRepo()
+			h := New(repo)
+
+			err := h.UnlikeRoadmap(context.Background(), tt.userID, "roadmap-1")
+			if tt.wantErr != "" {
+				if err == nil || err.Error() != tt.wantErr {
+					t.Errorf("got err=%v, want %q", err, tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !repo.unlikeRoadmapCalled {
+				t.Error("expected UnlikeRoadmap to be called")
+			}
+		})
 	}
 }

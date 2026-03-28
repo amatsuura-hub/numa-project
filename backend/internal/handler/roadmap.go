@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"strconv"
 	"time"
 
@@ -32,21 +31,8 @@ func (h *Handler) CreateRoadmap(ctx context.Context, userID string, body string)
 	}
 
 	var req CreateRoadmapRequest
-	if err := json.Unmarshal([]byte(body), &req); err != nil {
-		return nil, NewAPIError(ErrBadRequest, "Invalid request body")
-	}
-
-	if req.Title == "" {
-		return nil, NewAPIError(ErrBadRequest, "title is required")
-	}
-	if len(req.Title) > 100 {
-		return nil, NewAPIError(ErrBadRequest, "title must be 100 characters or less")
-	}
-	if len(req.Description) > 1000 {
-		return nil, NewAPIError(ErrBadRequest, "description must be 1000 characters or less")
-	}
-	if len(req.Tags) > 5 {
-		return nil, NewAPIError(ErrBadRequest, "maximum 5 tags allowed")
+	if err := validateCreateRoadmapBody(body, &req); err != nil {
+		return nil, err
 	}
 
 	// Check user roadmap count limit
@@ -120,8 +106,17 @@ func (h *Handler) GetRoadmap(ctx context.Context, userID string, roadmapID strin
 
 	// Check like/bookmark status for authenticated users
 	if userID != "" {
-		resp.IsLiked, _ = h.repo.IsLiked(ctx, roadmapID, userID)
-		resp.IsBookmarked, _ = h.repo.IsBookmarked(ctx, userID, roadmapID)
+		liked, err := h.repo.IsLiked(ctx, roadmapID, userID)
+		if err != nil {
+			return nil, NewAPIError(ErrInternal, "Failed to check like status")
+		}
+		resp.IsLiked = liked
+
+		bookmarked, err := h.repo.IsBookmarked(ctx, userID, roadmapID)
+		if err != nil {
+			return nil, NewAPIError(ErrInternal, "Failed to check bookmark status")
+		}
+		resp.IsBookmarked = bookmarked
 	}
 
 	return resp, nil
@@ -144,21 +139,8 @@ func (h *Handler) UpdateRoadmap(ctx context.Context, userID string, roadmapID st
 	}
 
 	var req UpdateRoadmapRequest
-	if err := json.Unmarshal([]byte(body), &req); err != nil {
-		return nil, NewAPIError(ErrBadRequest, "Invalid request body")
-	}
-
-	if req.Title == "" {
-		return nil, NewAPIError(ErrBadRequest, "title is required")
-	}
-	if len(req.Title) > 100 {
-		return nil, NewAPIError(ErrBadRequest, "title must be 100 characters or less")
-	}
-	if len(req.Description) > 1000 {
-		return nil, NewAPIError(ErrBadRequest, "description must be 1000 characters or less")
-	}
-	if len(req.Tags) > 5 {
-		return nil, NewAPIError(ErrBadRequest, "maximum 5 tags allowed")
+	if err := validateUpdateRoadmapBody(body, &req); err != nil {
+		return nil, err
 	}
 
 	now := time.Now().UTC().Format(time.RFC3339)

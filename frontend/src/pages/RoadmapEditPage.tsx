@@ -1,15 +1,33 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useEditorStore } from "../stores/editorStore";
 import { CATEGORIES } from "../types";
 import RoadmapEditor from "../components/editor/RoadmapEditor";
 
+function useUnsavedChangesWarning(isDirty: boolean) {
+  const handleBeforeUnload = useCallback(
+    (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+      }
+    },
+    [isDirty],
+  );
+
+  useEffect(() => {
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [handleBeforeUnload]);
+}
+
 function RoadmapEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { loadRoadmap, createRoadmap, isLoading, reset } = useEditorStore();
+  const { loadRoadmap, createRoadmap, isLoading, isDirty, reset } = useEditorStore();
   const [showCreateForm, setShowCreateForm] = useState(false);
+
+  useUnsavedChangesWarning(isDirty);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -55,10 +73,11 @@ function RoadmapEditPage() {
 
         <form onSubmit={handleCreate} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="new-title" className="mb-1 block text-sm font-medium text-gray-700">
               タイトル
             </label>
             <input
+              id="new-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -70,10 +89,11 @@ function RoadmapEditPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="new-description" className="mb-1 block text-sm font-medium text-gray-700">
               説明
             </label>
             <textarea
+              id="new-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={1000}
@@ -84,10 +104,11 @@ function RoadmapEditPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
+            <label htmlFor="new-category" className="mb-1 block text-sm font-medium text-gray-700">
               カテゴリ
             </label>
             <select
+              id="new-category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-numa-500 focus:outline-none"

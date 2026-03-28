@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 
 	"github.com/google/uuid"
 	"github.com/numa-project/backend/internal/model"
@@ -67,18 +66,8 @@ func (h *Handler) CreateNode(ctx context.Context, userID string, roadmapID strin
 	}
 
 	var req CreateNodeRequest
-	if err := json.Unmarshal([]byte(body), &req); err != nil {
-		return nil, NewAPIError(ErrBadRequest, "Invalid request body")
-	}
-
-	if req.Label == "" {
-		return nil, NewAPIError(ErrBadRequest, "label is required")
-	}
-	if len(req.Label) > 50 {
-		return nil, NewAPIError(ErrBadRequest, "label must be 50 characters or less")
-	}
-	if len(req.Description) > 500 {
-		return nil, NewAPIError(ErrBadRequest, "description must be 500 characters or less")
+	if err := validateCreateNodeBody(body, &req); err != nil {
+		return nil, err
 	}
 
 	// Check node count limit
@@ -116,32 +105,23 @@ func (h *Handler) UpdateNode(ctx context.Context, userID string, roadmapID strin
 		return nil, err
 	}
 
-	var req UpdateNodeRequest
-	if err := json.Unmarshal([]byte(body), &req); err != nil {
-		return nil, NewAPIError(ErrBadRequest, "Invalid request body")
-	}
-
-	if req.Label == "" {
-		return nil, NewAPIError(ErrBadRequest, "label is required")
-	}
-	if len(req.Label) > 50 {
-		return nil, NewAPIError(ErrBadRequest, "label must be 50 characters or less")
-	}
-	if len(req.Description) > 500 {
-		return nil, NewAPIError(ErrBadRequest, "description must be 500 characters or less")
+	// Reuse CreateNodeRequest for validation (same fields)
+	var cnReq CreateNodeRequest
+	if err := validateCreateNodeBody(body, &cnReq); err != nil {
+		return nil, err
 	}
 
 	node := &model.Node{
 		PK:          "ROADMAP#" + roadmapID,
 		SK:          "NODE#" + nodeID,
 		NodeID:      nodeID,
-		Label:       req.Label,
-		Description: req.Description,
-		PosX:        req.PosX,
-		PosY:        req.PosY,
-		Color:       req.Color,
-		URL:         req.URL,
-		Order:       req.Order,
+		Label:       cnReq.Label,
+		Description: cnReq.Description,
+		PosX:        cnReq.PosX,
+		PosY:        cnReq.PosY,
+		Color:       cnReq.Color,
+		URL:         cnReq.URL,
+		Order:       cnReq.Order,
 	}
 
 	if err := h.repo.PutNode(ctx, node); err != nil {
@@ -168,22 +148,12 @@ func (h *Handler) BatchUpdateNodes(ctx context.Context, userID string, roadmapID
 	}
 
 	var req BatchUpdateNodesRequest
-	if err := json.Unmarshal([]byte(body), &req); err != nil {
-		return nil, NewAPIError(ErrBadRequest, "Invalid request body")
-	}
-
-	if len(req.Nodes) == 0 {
-		return nil, NewAPIError(ErrBadRequest, "nodes array is required")
-	}
-	if len(req.Nodes) > 100 {
-		return nil, NewAPIError(ErrBadRequest, "maximum 100 nodes per batch")
+	if err := validateBatchUpdateNodesBody(body, &req); err != nil {
+		return nil, err
 	}
 
 	var nodes []model.Node
 	for _, n := range req.Nodes {
-		if n.NodeID == "" {
-			return nil, NewAPIError(ErrBadRequest, "nodeId is required for each node")
-		}
 		nodes = append(nodes, model.Node{
 			PK:          "ROADMAP#" + roadmapID,
 			SK:          "NODE#" + n.NodeID,

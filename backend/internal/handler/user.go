@@ -3,6 +3,9 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"strconv"
+
+	"github.com/numa-project/backend/internal/model"
 )
 
 type UpdateProfileRequest struct {
@@ -65,4 +68,37 @@ func (h *Handler) GetUserProfile(ctx context.Context, targetUserID string) (inte
 		return nil, NewAPIError(ErrNotFound, "User not found")
 	}
 	return user, nil
+}
+
+func (h *Handler) GetUserPublicRoadmaps(ctx context.Context, targetUserID string, params map[string]string) (interface{}, error) {
+	limit := int32(20)
+	if l, ok := params["limit"]; ok {
+		if v, err := strconv.Atoi(l); err == nil && v > 0 && v <= 50 {
+			limit = int32(v)
+		}
+	}
+
+	roadmaps, cursor, err := h.repo.GetMyRoadmaps(ctx, targetUserID, limit, params["cursor"])
+	if err != nil {
+		return nil, NewAPIError(ErrInternal, "Failed to get roadmaps")
+	}
+
+	// Filter to only public roadmaps
+	var publicRoadmaps []model.RoadmapMeta
+	for _, r := range roadmaps {
+		if r.IsPublic {
+			publicRoadmaps = append(publicRoadmaps, r)
+		}
+	}
+	if publicRoadmaps == nil {
+		publicRoadmaps = []model.RoadmapMeta{}
+	}
+
+	result := map[string]interface{}{
+		"roadmaps": publicRoadmaps,
+	}
+	if cursor != "" {
+		result["cursor"] = cursor
+	}
+	return result, nil
 }

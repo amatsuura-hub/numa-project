@@ -146,8 +146,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     let token: string | null = null;
     cognitoUser.getSession(
       (err: Error | null, session: CognitoUserSession | null) => {
-        if (!err && session?.isValid()) {
+        if (err || !session) {
+          // Session expired and refresh failed — clear user state
+          set({ user: null });
+          return;
+        }
+        if (session.isValid()) {
           token = session.getIdToken().getJwtToken();
+        } else {
+          // Session invalid — clear user state
+          set({ user: null });
         }
       },
     );

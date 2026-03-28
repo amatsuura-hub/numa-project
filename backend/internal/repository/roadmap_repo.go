@@ -105,16 +105,41 @@ func (d *DynamoDB) GetRoadmapDetail(ctx context.Context, roadmapID string) (*mod
 }
 
 func (d *DynamoDB) UpdateRoadmapMeta(ctx context.Context, meta *model.RoadmapMeta) error {
-	item, err := attributevalue.MarshalMap(meta)
-	if err != nil {
-		return fmt.Errorf("marshaling roadmap: %w", err)
-	}
-
-	_, err = d.Client.PutItem(ctx, &dynamodb.PutItemInput{
+	_, err := d.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
 		TableName: &d.TableName,
-		Item:      item,
+		Key: map[string]types.AttributeValue{
+			"PK": &types.AttributeValueMemberS{Value: meta.PK},
+			"SK": &types.AttributeValueMemberS{Value: meta.SK},
+		},
+		UpdateExpression: aws.String("SET title = :t, description = :d, category = :c, tags = :tags, isPublic = :pub, updatedAt = :ua, GSI1PK = :g1pk, GSI1SK = :g1sk, GSI2PK = :g2pk, GSI2SK = :g2sk"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":t":    &types.AttributeValueMemberS{Value: meta.Title},
+			":d":    &types.AttributeValueMemberS{Value: meta.Description},
+			":c":    &types.AttributeValueMemberS{Value: meta.Category},
+			":tags": marshalTags(meta.Tags),
+			":pub":  &types.AttributeValueMemberBOOL{Value: meta.IsPublic},
+			":ua":   &types.AttributeValueMemberS{Value: meta.UpdatedAt},
+			":g1pk": &types.AttributeValueMemberS{Value: meta.GSI1PK},
+			":g1sk": &types.AttributeValueMemberS{Value: meta.GSI1SK},
+			":g2pk": &types.AttributeValueMemberS{Value: meta.GSI2PK},
+			":g2sk": &types.AttributeValueMemberS{Value: meta.GSI2SK},
+		},
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("updating roadmap meta: %w", err)
+	}
+	return nil
+}
+
+func marshalTags(tags []string) types.AttributeValue {
+	if len(tags) == 0 {
+		return &types.AttributeValueMemberL{Value: []types.AttributeValue{}}
+	}
+	var items []types.AttributeValue
+	for _, t := range tags {
+		items = append(items, &types.AttributeValueMemberS{Value: t})
+	}
+	return &types.AttributeValueMemberL{Value: items}
 }
 
 // DeleteRoadmap deletes META + all Nodes + all Edges for a roadmap.
@@ -176,7 +201,11 @@ func (d *DynamoDB) GetMyRoadmaps(ctx context.Context, userID string, limit int32
 	}
 
 	if cursor != "" {
-		input.ExclusiveStartKey = decodeCursor(cursor)
+		key, err := decodeCursor(cursor)
+		if err != nil {
+			return nil, "", fmt.Errorf("decoding cursor: %w", err)
+		}
+		input.ExclusiveStartKey = key
 	}
 
 	out, err := d.Client.Query(ctx, input)
@@ -220,7 +249,11 @@ func (d *DynamoDB) ExploreRoadmaps(ctx context.Context, category string, limit i
 	}
 
 	if cursor != "" {
-		input.ExclusiveStartKey = decodeCursor(cursor)
+		key, err := decodeCursor(cursor)
+		if err != nil {
+			return nil, "", fmt.Errorf("decoding cursor: %w", err)
+		}
+		input.ExclusiveStartKey = key
 	}
 
 	out, err := d.Client.Query(ctx, input)

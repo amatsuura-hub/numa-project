@@ -75,7 +75,11 @@ func (d *DynamoDB) GetMyBookmarks(ctx context.Context, userID string, limit int3
 	}
 
 	if cursor != "" {
-		input.ExclusiveStartKey = decodeCursor(cursor)
+		key, err := decodeCursor(cursor)
+		if err != nil {
+			return nil, "", fmt.Errorf("decoding cursor: %w", err)
+		}
+		input.ExclusiveStartKey = key
 	}
 
 	out, err := d.Client.Query(ctx, input)
