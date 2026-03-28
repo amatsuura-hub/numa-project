@@ -20,7 +20,10 @@ func (d *DynamoDB) PutEdge(ctx context.Context, edge *model.Edge) error {
 		TableName: &d.TableName,
 		Item:      item,
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("putting edge: %w", err)
+	}
+	return nil
 }
 
 func (d *DynamoDB) DeleteEdge(ctx context.Context, roadmapID, edgeID string) error {
@@ -31,5 +34,8 @@ func (d *DynamoDB) DeleteEdge(ctx context.Context, roadmapID, edgeID string) err
 			"SK": &types.AttributeValueMemberS{Value: "EDGE#" + edgeID},
 		},
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("deleting edge: %w", err)
+	}
+	return nil
 }

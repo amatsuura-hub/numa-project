@@ -5,7 +5,7 @@ import { api } from "./client";
 vi.mock("../stores/authStore", () => ({
   useAuthStore: {
     getState: () => ({
-      getIdToken: () => "mock-token",
+      getIdToken: () => Promise.resolve("mock-token"),
     }),
   },
 }));

@@ -27,7 +27,7 @@ interface AuthState {
   confirmSignup: (email: string, code: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  getIdToken: () => string | null;
+  getIdToken: () => Promise<string | null>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -140,25 +140,28 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   getIdToken: () => {
-    const cognitoUser = userPool.getCurrentUser();
-    if (!cognitoUser) return null;
+    return new Promise<string | null>((resolve) => {
+      const cognitoUser = userPool.getCurrentUser();
+      if (!cognitoUser) {
+        resolve(null);
+        return;
+      }
 
-    let token: string | null = null;
-    cognitoUser.getSession(
-      (err: Error | null, session: CognitoUserSession | null) => {
-        if (err || !session) {
-          // Session expired and refresh failed — clear user state
-          set({ user: null });
-          return;
-        }
-        if (session.isValid()) {
-          token = session.getIdToken().getJwtToken();
-        } else {
-          // Session invalid — clear user state
-          set({ user: null });
-        }
-      },
-    );
-    return token;
+      cognitoUser.getSession(
+        (err: Error | null, session: CognitoUserSession | null) => {
+          if (err || !session) {
+            set({ user: null });
+            resolve(null);
+            return;
+          }
+          if (session.isValid()) {
+            resolve(session.getIdToken().getJwtToken());
+          } else {
+            set({ user: null });
+            resolve(null);
+          }
+        },
+      );
+    });
   },
 }));

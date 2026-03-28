@@ -208,3 +208,133 @@
 ### 5.6 インフラ・デプロイ
 - [x] GitHub Actions の vars 設定（API_LAMBDA_NAME, S3_BUCKET_NAME, CLOUDFRONT_DISTRIBUTION_ID 等）→ README に設定手順を記載
 - [x] Cognito ↔ Lambda 初回デプロイ時の循環依存対応手順の文書化
+
+---
+
+## Phase 6: クリティカルバグ修正
+
+### 6.1 フロントエンド認証バグ
+- [x] `authStore.initialize()` がアプリ起動時に呼ばれていない（`isLoading` が永遠に `true` → AuthGuard がスピナー表示のまま）
+- [x] `getIdToken()` の非同期コールバック問題（`cognitoUser.getSession` がトークンリフレッシュ時に非同期になり `null` を返す → API 認証ヘッダが欠落する可能性）
+
+### 6.2 バックエンド データ整合性
+- [x] `main.go` の `json.Marshal` エラーが無視されている（L181: `body, _ := json.Marshal(...)` → レスポンスが空になる可能性）
+- [x] `BookmarkRoadmap` の ConditionExpression が `PK` のみチェック（`attribute_not_exists(PK) AND attribute_not_exists(SK)` にすべき）
+- [x] Repository 層のエラーラップ不足（`node_repo.go`, `edge_repo.go` で `fmt.Errorf` 未使用）
+
+### 6.3 バックエンド 安全性
+- [x] `postconfirmation/main.go` の `email` 属性が空の場合のバリデーション不足
+- [x] CORS デフォルト値が `*`（ワイルドカード）→ 本番環境では明示的に設定を必須化
+
+---
+
+## Phase 7: セキュリティ強化
+
+### 7.1 API セキュリティ
+- [ ] API Gateway にスロットリング / レート制限設定追加
+- [ ] API Gateway に WAF（Web Application Firewall）追加
+- [ ] API Gateway のアクセスログ有効化（CloudWatch Logs）
+- [ ] ヘルスチェックエンドポイント追加（`GET /health`）
+- [ ] リクエスト ID をレスポンスヘッダとログに含める（トレーサビリティ）
+
+### 7.2 Cognito セキュリティ
+- [ ] MFA 設定追加（`OPTIONAL` 以上）
+- [ ] アドバンスドセキュリティ機能の有効化（アカウント乗っ取り検知）
+
+### 7.3 インフラセキュリティ
+- [ ] S3 バケット暗号化（サーバーサイド暗号化設定）
+- [ ] S3 バージョニング有効化（誤削除対策）
+- [ ] CloudFront にセキュリティヘッダ追加（CSP, X-Frame-Options, X-Content-Type-Options）
+- [ ] CloudFront に WAF 追加
+- [ ] DynamoDB テーブル暗号化設定の明示
+
+### 7.4 バックエンド バリデーション追加
+- [ ] タグの一意性チェック・個別文字数制限（最大30文字）・空文字チェック
+- [ ] カテゴリフィールドの文字数制限（最大50文字）
+- [ ] Explore API の `limit` パラメータ上限バリデーション（1〜100）
+
+---
+
+## Phase 8: 可観測性（Observability）
+
+### 8.1 ログ強化
+- [ ] バックエンドに構造化ログ導入（`log/slog` 等）
+- [ ] API リクエスト/レスポンスログ（メソッド、パス、ステータスコード、レイテンシ）
+- [ ] 認可失敗・エラー発生時の警告ログ
+- [ ] CloudFront アクセスログ有効化
+- [ ] S3 アクセスログ有効化
+
+### 8.2 監視・アラート
+- [ ] CloudWatch アラーム設定（Lambda エラー率、DynamoDB スロットリング、API Gateway 5xx）
+- [ ] Lambda に X-Ray トレーシング有効化
+- [ ] API Gateway に X-Ray トレーシング有効化
+
+---
+
+## Phase 9: インフラ改善
+
+### 9.1 Terraform 状態管理
+- [ ] Terraform リモートバックエンド設定（S3 + DynamoDB ロック）
+- [ ] dev/prod 環境分離（環境別 state ファイル）
+- [ ] prod 用 `terraform.tfvars` 作成
+
+### 9.2 Lambda 改善
+- [ ] Lambda に Dead Letter Queue（DLQ）設定
+- [ ] Lambda の予約同時実行数設定
+- [ ] Lambda のメモリ・タイムアウトを環境変数で設定可能に
+
+### 9.3 CI/CD 改善
+- [ ] CI に `terraform validate` / `terraform fmt --check` 追加
+- [ ] CI にセキュリティスキャン追加（`gosec`, `trivy` 等）
+- [ ] CI にコードカバレッジレポート追加
+- [ ] Deploy ワークフローに手動承認ゲート追加（本番デプロイ時）
+- [ ] Deploy 失敗時の通知設定（Slack or メール）
+- [ ] Deploy ワークフローにロールバック戦略追加
+
+### 9.4 その他インフラ
+- [ ] S3 ライフサイクルポリシー設定（古いバージョンの自動削除）
+- [ ] CloudFront キャッシュポリシーを最新方式に変更（`forwarded_values` → `cache_policy_id`）
+- [ ] CORS プリフライトに `Access-Control-Max-Age` ヘッダ追加（ブラウザキャッシュ）
+
+---
+
+## Phase 10: フロントエンド品質改善
+
+### 10.1 テスト追加
+- [ ] ダッシュボードページのテスト
+- [ ] Explore ページのテスト
+- [ ] エディタコンポーネントのテスト（React Flow 操作含む）
+- [ ] プロフィールページのテスト
+- [ ] ログイン/サインアップページのテスト
+- [ ] EditorStore のテスト
+
+### 10.2 パフォーマンス改善
+- [ ] `RoadmapCard` の `React.memo` ラップ
+- [ ] エディタ内のコールバック関数に `useCallback` 追加（`handleNodeClick`, `handlePaneClick`）
+- [ ] コード分割（React.lazy）によるバンドルサイズ削減（エディタページ等）
+
+### 10.3 UX 改善
+- [ ] エラー表示に「再試行」ボタン追加（RoadmapDetailPage 等）
+- [ ] 削除操作を「取り消し付きトースト」に変更（`confirm()` ダイアログ置き換え）
+- [ ] X ハンドルのフォーマットバリデーション（`@` なしのユーザー名形式）
+- [ ] SignupPage のパスワードエラーに `aria-describedby` 追加
+
+### 10.4 SEO 対策
+- [ ] `react-helmet-async` 導入（ページごとの title/meta タグ設定）
+- [ ] OGP メタタグ追加（ロードマップ共有時のプレビュー表示）
+
+---
+
+## Phase 11: 残テスト・最終チェック
+
+### 11.1 バックエンド テスト
+- [ ] Repository 層の統合テスト（DynamoDB Local 使用）
+- [ ] カーソルページネーションのエッジケーステスト（空結果、最終ページ、不正カーソル）
+- [ ] 大量バッチ操作テスト（100ノード一括更新）
+
+### 11.2 最終チェック（Phase 4.4 再掲）
+- [ ] 全 API エンドポイントの動作確認
+- [ ] クロスブラウザ確認（Chrome, Safari, Firefox）
+- [ ] Lighthouse でパフォーマンス確認
+- [ ] セキュリティ確認（認可チェック漏れ、XSS、インジェクション）
+- [ ] README.md 最終更新（セットアップ手順、デプロイ手順）

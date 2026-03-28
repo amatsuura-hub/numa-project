@@ -46,7 +46,7 @@ func (d *DynamoDB) BookmarkRoadmap(ctx context.Context, userID, roadmapID string
 	_, err = d.Client.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName:           &d.TableName,
 		Item:                item,
-		ConditionExpression: aws.String("attribute_not_exists(PK)"),
+		ConditionExpression: aws.String("attribute_not_exists(PK) AND attribute_not_exists(SK)"),
 	})
 	return err
 }

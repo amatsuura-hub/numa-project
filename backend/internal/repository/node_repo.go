@@ -20,7 +20,10 @@ func (d *DynamoDB) PutNode(ctx context.Context, node *model.Node) error {
 		TableName: &d.TableName,
 		Item:      item,
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("putting node: %w", err)
+	}
+	return nil
 }
 
 func (d *DynamoDB) DeleteNode(ctx context.Context, roadmapID, nodeID string) error {
@@ -31,7 +34,10 @@ func (d *DynamoDB) DeleteNode(ctx context.Context, roadmapID, nodeID string) err
 			"SK": &types.AttributeValueMemberS{Value: "NODE#" + nodeID},
 		},
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("deleting node: %w", err)
+	}
+	return nil
 }
 
 func (d *DynamoDB) BatchPutNodes(ctx context.Context, nodes []model.Node) error {

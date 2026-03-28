@@ -23,6 +23,11 @@ func main() {
 
 	allowedOrigin := os.Getenv("ALLOWED_ORIGIN")
 	if allowedOrigin == "" {
+		env := os.Getenv("ENVIRONMENT")
+		if env != "" && env != "dev" {
+			log.Fatalf("ALLOWED_ORIGIN environment variable is required in %s environment", env)
+		}
+		log.Println("WARNING: ALLOWED_ORIGIN not set, defaulting to '*'. Do not use in production.")
 		allowedOrigin = "*"
 	}
 
@@ -178,7 +183,15 @@ func route(ctx context.Context, req events.APIGatewayProxyRequest, h *handler.Ha
 		}, nil
 	}
 
-	body, _ := json.Marshal(map[string]interface{}{"data": resp})
+	body, err := json.Marshal(map[string]interface{}{"data": resp})
+	if err != nil {
+		log.Printf("ERROR: failed to marshal response: %v", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Headers:    corsHeaders,
+			Body:       `{"error":{"code":"INTERNAL","message":"Response serialization failed"}}`,
+		}, nil
+	}
 	return events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Headers:    corsHeaders,

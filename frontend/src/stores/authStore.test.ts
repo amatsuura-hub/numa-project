@@ -85,7 +85,7 @@ describe("authStore", () => {
 
   it("getIdToken returns null when no user", async () => {
     const { useAuthStore } = await import("./authStore");
-    const token = useAuthStore.getState().getIdToken();
+    const token = await useAuthStore.getState().getIdToken();
     expect(token).toBeNull();
   });
 

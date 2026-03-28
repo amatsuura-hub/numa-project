@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 1000;
 
-function getAuthToken(): string | null {
+async function getAuthToken(): Promise<string | null> {
   return useAuthStore.getState().getIdToken();
 }
 
@@ -22,7 +22,7 @@ async function request<T>(
     "Content-Type": "application/json",
   };
 
-  const token = getAuthToken();
+  const token = await getAuthToken();
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }

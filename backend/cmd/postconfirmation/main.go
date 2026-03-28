@@ -34,10 +34,21 @@ func handler(ctx context.Context, event events.CognitoEventUserPoolsPostConfirma
 	client := dynamodb.NewFromConfig(cfg)
 
 	userID := event.Request.UserAttributes["sub"]
+	if userID == "" {
+		return event, fmt.Errorf("sub attribute missing from Cognito event")
+	}
+
 	email := event.Request.UserAttributes["email"]
+	if email == "" {
+		return event, fmt.Errorf("email attribute missing from Cognito event")
+	}
 
 	// Use part before @ as default display name
-	displayName := strings.Split(email, "@")[0]
+	parts := strings.Split(email, "@")
+	if len(parts) < 2 || parts[0] == "" {
+		return event, fmt.Errorf("invalid email format: %s", email)
+	}
+	displayName := parts[0]
 
 	user := model.User{
 		PK:          "USER#" + userID,
