@@ -1,0 +1,246 @@
+package repository
+
+import (
+	"context"
+	"fmt"
+	"strings"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/numa-project/backend/internal/model"
+)
+
+func (d *DynamoDB) PutRoadmap(ctx context.Context, meta *model.RoadmapMeta) error {
+	item, err := attributevalue.MarshalMap(meta)
+	if err != nil {
+		return fmt.Errorf("marshaling roadmap: %w", err)
+	}
+
+	_, err = d.Client.PutItem(ctx, &dynamodb.PutItemInput{
+		TableName: &d.TableName,
+		Item:      item,
+	})
+	if err != nil {
+		return fmt.Errorf("putting roadmap: %w", err)
+	}
+	return nil
+}
+
+func (d *DynamoDB) GetRoadmapMeta(ctx context.Context, roadmapID string) (*model.RoadmapMeta, error) {
+	out, err := d.Client.GetItem(ctx, &dynamodb.GetItemInput{
+		TableName: &d.TableName,
+		Key: map[string]types.AttributeValue{
+			"PK": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
+			"SK": &types.AttributeValueMemberS{Value: "META"},
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getting roadmap meta: %w", err)
+	}
+	if out.Item == nil {
+		return nil, nil
+	}
+
+	var meta model.RoadmapMeta
+	if err := attributevalue.UnmarshalMap(out.Item, &meta); err != nil {
+		return nil, fmt.Errorf("unmarshaling roadmap meta: %w", err)
+	}
+	return &meta, nil
+}
+
+// GetRoadmapDetail fetches META + all Nodes + all Edges in a single Query.
+func (d *DynamoDB) GetRoadmapDetail(ctx context.Context, roadmapID string) (*model.RoadmapDetail, error) {
+	out, err := d.Client.Query(ctx, &dynamodb.QueryInput{
+		TableName:              &d.TableName,
+		KeyConditionExpression: aws.String("PK = :pk"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":pk": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("querying roadmap detail: %w", err)
+	}
+
+	detail := &model.RoadmapDetail{}
+	for _, item := range out.Items {
+		sk := ""
+		if v, ok := item["SK"].(*types.AttributeValueMemberS); ok {
+			sk = v.Value
+		}
+
+		switch {
+		case sk == "META":
+			if err := attributevalue.UnmarshalMap(item, &detail.Meta); err != nil {
+				return nil, fmt.Errorf("unmarshaling meta: %w", err)
+			}
+		case strings.HasPrefix(sk, "NODE#"):
+			var node model.Node
+			if err := attributevalue.UnmarshalMap(item, &node); err != nil {
+				return nil, fmt.Errorf("unmarshaling node: %w", err)
+			}
+			detail.Nodes = append(detail.Nodes, node)
+		case strings.HasPrefix(sk, "EDGE#"):
+			var edge model.Edge
+			if err := attributevalue.UnmarshalMap(item, &edge); err != nil {
+				return nil, fmt.Errorf("unmarshaling edge: %w", err)
+			}
+			detail.Edges = append(detail.Edges, edge)
+		}
+	}
+
+	if detail.Meta.RoadmapID == "" {
+		return nil, nil
+	}
+
+	if detail.Nodes == nil {
+		detail.Nodes = []model.Node{}
+	}
+	if detail.Edges == nil {
+		detail.Edges = []model.Edge{}
+	}
+
+	return detail, nil
+}
+
+func (d *DynamoDB) UpdateRoadmapMeta(ctx context.Context, meta *model.RoadmapMeta) error {
+	item, err := attributevalue.MarshalMap(meta)
+	if err != nil {
+		return fmt.Errorf("marshaling roadmap: %w", err)
+	}
+
+	_, err = d.Client.PutItem(ctx, &dynamodb.PutItemInput{
+		TableName: &d.TableName,
+		Item:      item,
+	})
+	return err
+}
+
+// DeleteRoadmap deletes META + all Nodes + all Edges for a roadmap.
+func (d *DynamoDB) DeleteRoadmap(ctx context.Context, roadmapID string) error {
+	// First query all items with this PK
+	out, err := d.Client.Query(ctx, &dynamodb.QueryInput{
+		TableName:              &d.TableName,
+		KeyConditionExpression: aws.String("PK = :pk"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":pk": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
+		},
+		ProjectionExpression: aws.String("PK, SK"),
+	})
+	if err != nil {
+		return fmt.Errorf("querying roadmap items: %w", err)
+	}
+
+	// Batch delete in groups of 25
+	for i := 0; i < len(out.Items); i += 25 {
+		end := i + 25
+		if end > len(out.Items) {
+			end = len(out.Items)
+		}
+
+		var requests []types.WriteRequest
+		for _, item := range out.Items[i:end] {
+			requests = append(requests, types.WriteRequest{
+				DeleteRequest: &types.DeleteRequest{Key: map[string]types.AttributeValue{
+					"PK": item["PK"],
+					"SK": item["SK"],
+				}},
+			})
+		}
+
+		_, err := d.Client.BatchWriteItem(ctx, &dynamodb.BatchWriteItemInput{
+			RequestItems: map[string][]types.WriteRequest{
+				d.TableName: requests,
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("batch deleting roadmap items: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// GetMyRoadmaps queries GSI1 for user's roadmaps.
+func (d *DynamoDB) GetMyRoadmaps(ctx context.Context, userID string, limit int32, cursor string) ([]model.RoadmapMeta, string, error) {
+	input := &dynamodb.QueryInput{
+		TableName:              &d.TableName,
+		IndexName:              aws.String("GSI1"),
+		KeyConditionExpression: aws.String("GSI1PK = :pk"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":pk": &types.AttributeValueMemberS{Value: "USER#" + userID},
+		},
+		ScanIndexForward: aws.Bool(false),
+		Limit:            &limit,
+	}
+
+	if cursor != "" {
+		input.ExclusiveStartKey = decodeCursor(cursor)
+	}
+
+	out, err := d.Client.Query(ctx, input)
+	if err != nil {
+		return nil, "", fmt.Errorf("querying my roadmaps: %w", err)
+	}
+
+	var roadmaps []model.RoadmapMeta
+	for _, item := range out.Items {
+		var meta model.RoadmapMeta
+		if err := attributevalue.UnmarshalMap(item, &meta); err != nil {
+			return nil, "", fmt.Errorf("unmarshaling roadmap: %w", err)
+		}
+		roadmaps = append(roadmaps, meta)
+	}
+
+	nextCursor := ""
+	if out.LastEvaluatedKey != nil {
+		nextCursor = encodeCursor(out.LastEvaluatedKey)
+	}
+
+	return roadmaps, nextCursor, nil
+}
+
+// ExploreRoadmaps queries GSI2 for public roadmaps.
+func (d *DynamoDB) ExploreRoadmaps(ctx context.Context, category string, limit int32, cursor string) ([]model.RoadmapMeta, string, error) {
+	gsi2pk := "PUBLIC"
+	if category != "" {
+		gsi2pk = "CAT#" + category
+	}
+
+	input := &dynamodb.QueryInput{
+		TableName:              &d.TableName,
+		IndexName:              aws.String("GSI2"),
+		KeyConditionExpression: aws.String("GSI2PK = :pk"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":pk": &types.AttributeValueMemberS{Value: gsi2pk},
+		},
+		ScanIndexForward: aws.Bool(false),
+		Limit:            &limit,
+	}
+
+	if cursor != "" {
+		input.ExclusiveStartKey = decodeCursor(cursor)
+	}
+
+	out, err := d.Client.Query(ctx, input)
+	if err != nil {
+		return nil, "", fmt.Errorf("querying explore roadmaps: %w", err)
+	}
+
+	var roadmaps []model.RoadmapMeta
+	for _, item := range out.Items {
+		var meta model.RoadmapMeta
+		if err := attributevalue.UnmarshalMap(item, &meta); err != nil {
+			return nil, "", fmt.Errorf("unmarshaling roadmap: %w", err)
+		}
+		roadmaps = append(roadmaps, meta)
+	}
+
+	nextCursor := ""
+	if out.LastEvaluatedKey != nil {
+		nextCursor = encodeCursor(out.LastEvaluatedKey)
+	}
+
+	return roadmaps, nextCursor, nil
+}

@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+frontend/dist/
+backend/bootstrap
+backend/bin/
+
+# Environment
+.env
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+
+# Terraform
+infra/**/*.tfvars
+!infra/environments/dev/terraform.tfvars.example
+!infra/environments/prod/terraform.tfvars.example
+infra/.terraform/
+infra/**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.out
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+Thumbs.db
