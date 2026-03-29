@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ReactFlow,
@@ -16,9 +16,71 @@ import RoadmapNode from "../components/editor/RoadmapNode";
 import LikeButton from "../components/common/LikeButton";
 import BookmarkButton from "../components/common/BookmarkButton";
 import ShareButton from "../components/common/ShareButton";
-import type { RoadmapDetail } from "../types";
-import { CATEGORIES, type Category } from "../types";
+import type { RoadmapDetail, Progress } from "../types";
+import { CATEGORIES, NUMA_LEVELS, type Category } from "../types";
 import PageHead from "../components/common/PageHead";
+
+function ProgressDashboard({
+  progress,
+  totalNodes,
+}: {
+  progress: Progress;
+  totalNodes: number;
+}) {
+  const completedCount = progress.completedNodes.length;
+  const rate = totalNodes > 0 ? Math.round((completedCount / totalNodes) * 100) : 0;
+  const levelInfo = NUMA_LEVELS[progress.numaLevel] || NUMA_LEVELS[0];
+
+  return (
+    <div className="mt-6 rounded-lg border border-numa-200 bg-white p-4 sm:p-6">
+      <h3 className="mb-4 text-lg font-bold text-gray-900">進捗状況</h3>
+
+      {/* Metric cards */}
+      <div className="mb-4 grid grid-cols-3 gap-3">
+        <div className="rounded-lg bg-numa-50 p-3 text-center">
+          <div className="text-2xl font-bold text-numa-700">
+            {completedCount}/{totalNodes}
+          </div>
+          <div className="text-xs text-gray-500">完了ノード</div>
+        </div>
+        <div className="rounded-lg bg-numa-50 p-3 text-center">
+          <div className="text-2xl font-bold text-numa-700">{rate}%</div>
+          <div className="text-xs text-gray-500">達成率</div>
+        </div>
+        <div className="rounded-lg p-3 text-center" style={{ backgroundColor: levelInfo.color + "33" }}>
+          <div className="text-2xl font-bold" style={{ color: levelInfo.color }}>
+            Lv.{progress.numaLevel}
+          </div>
+          <div className="text-xs text-gray-500">{levelInfo.name}</div>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="mb-2 h-3 w-full overflow-hidden rounded-full bg-gray-100">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            width: `${rate}%`,
+            backgroundColor: levelInfo.color,
+          }}
+        />
+      </div>
+
+      {/* Level indicators */}
+      <div className="flex justify-between">
+        {NUMA_LEVELS.map((l) => (
+          <div
+            key={l.level}
+            className={`text-xs ${progress.numaLevel >= l.level ? "font-bold" : "text-gray-300"}`}
+            style={{ color: progress.numaLevel >= l.level ? l.color : undefined }}
+          >
+            Lv.{l.level}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function RoadmapDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +88,7 @@ function RoadmapDetailPage() {
   const [detail, setDetail] = useState<RoadmapDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<Progress | null>(null);
 
   const nodeTypes = useMemo(() => ({ roadmapNode: RoadmapNode }), []);
 
@@ -33,6 +96,12 @@ function RoadmapDetailPage() {
     if (!id) return;
     loadRoadmap(id);
   }, [id]);
+
+  // Load progress when user and detail are available
+  useEffect(() => {
+    if (!user || !id || !detail) return;
+    loadProgress(id);
+  }, [user, id, detail]);
 
   const loadRoadmap = async (roadmapId: string) => {
     try {
@@ -46,6 +115,39 @@ function RoadmapDetailPage() {
       setIsLoading(false);
     }
   };
+
+  const loadProgress = async (roadmapId: string) => {
+    try {
+      const { data } = await roadmapApi.getProgress(roadmapId);
+      setProgress(data);
+    } catch {
+      // non-critical — user may not have started this roadmap
+    }
+  };
+
+  const handleToggleComplete = useCallback(
+    async (nodeId: string) => {
+      if (!user || !id) {
+        toast.error("ログインが必要です");
+        return;
+      }
+
+      const isCompleted = progress?.completedNodes.includes(nodeId) ?? false;
+
+      try {
+        if (isCompleted) {
+          const { data } = await roadmapApi.uncompleteNode(id, nodeId);
+          setProgress(data);
+        } else {
+          const { data } = await roadmapApi.completeNode(id, nodeId);
+          setProgress(data);
+        }
+      } catch {
+        toast.error("進捗の更新に失敗しました");
+      }
+    },
+    [user, id, progress],
+  );
 
   if (isLoading) {
     return (
@@ -83,6 +185,8 @@ function RoadmapDetailPage() {
     );
   }
 
+  const completedSet = new Set(progress?.completedNodes ?? []);
+
   const flowNodes: Node[] = detail.nodes.map((n) => ({
     id: n.nodeId,
     position: { x: n.posX, y: n.posY },
@@ -91,6 +195,9 @@ function RoadmapDetailPage() {
       description: n.description || "",
       color: n.color || "#16a34a",
       url: n.url || "",
+      isCompleted: completedSet.has(n.nodeId),
+      onToggleComplete: user ? handleToggleComplete : undefined,
+      nodeId: n.nodeId,
     },
     type: "roadmapNode",
     draggable: false,
@@ -159,6 +266,12 @@ function RoadmapDetailPage() {
         </div>
       </div>
 
+      {user && (
+        <p className="mb-2 text-xs text-gray-400">
+          ノードをクリックして進捗を記録できます
+        </p>
+      )}
+
       <div className="h-[60vh] w-full rounded-lg border border-numa-200 sm:h-[calc(100vh-250px)]">
         <ReactFlow
           nodes={flowNodes}
@@ -179,6 +292,14 @@ function RoadmapDetailPage() {
           />
         </ReactFlow>
       </div>
+
+      {/* Progress Dashboard */}
+      {user && progress && progress.completedNodes.length > 0 && (
+        <ProgressDashboard
+          progress={progress}
+          totalNodes={detail.nodes.length}
+        />
+      )}
     </div>
   );
 }

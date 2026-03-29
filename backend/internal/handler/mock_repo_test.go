@@ -219,3 +219,43 @@ func (m *mockRepo) GetMyBookmarks(_ context.Context, _ string, _ int32, _ string
 	}
 	return []model.Bookmark{}, "", nil
 }
+
+func (m *mockRepo) GetProgress(_ context.Context, _, _ string) (*model.Progress, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return nil, nil
+}
+
+func (m *mockRepo) PutProgress(_ context.Context, _ *model.Progress) error {
+	return m.err
+}
+
+func (m *mockRepo) GetMyProgress(_ context.Context, _ string) ([]model.Progress, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return []model.Progress{}, nil
+}
+
+func (m *mockRepo) CompleteNode(_ context.Context, _, _, _ string, totalNodes int) (*model.Progress, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return &model.Progress{
+		CompletedNodes: []string{"node1"},
+		TotalNodes:     totalNodes,
+		NumaLevel:      1,
+	}, nil
+}
+
+func (m *mockRepo) UncompleteNode(_ context.Context, _, _, _ string, totalNodes int) (*model.Progress, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	return &model.Progress{
+		CompletedNodes: []string{},
+		TotalNodes:     totalNodes,
+		NumaLevel:      0,
+	}, nil
+}

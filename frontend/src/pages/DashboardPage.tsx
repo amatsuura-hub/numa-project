@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
-import type { RoadmapMeta } from "../types";
-import { CATEGORIES, type Category } from "../types";
+import type { RoadmapMeta, ProgressWithRoadmap } from "../types";
+import { CATEGORIES, NUMA_LEVELS, type Category } from "../types";
 import PageHead from "../components/common/PageHead";
 
-type Tab = "my" | "bookmarks";
+type Tab = "my" | "bookmarks" | "progress";
 
 interface BookmarkItem {
   roadmapId: string;
@@ -18,13 +18,16 @@ function DashboardPage() {
   const [tab, setTab] = useState<Tab>("my");
   const [roadmaps, setRoadmaps] = useState<RoadmapMeta[]>([]);
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
+  const [progressList, setProgressList] = useState<ProgressWithRoadmap[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (tab === "my") {
       loadRoadmaps();
-    } else {
+    } else if (tab === "bookmarks") {
       loadBookmarks();
+    } else {
+      loadProgress();
     }
   }, [tab]);
 
@@ -47,6 +50,18 @@ function DashboardPage() {
       setBookmarks(data.bookmarks || []);
     } catch {
       toast.error("ブックマークの読み込みに失敗しました");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadProgress = async () => {
+    setIsLoading(true);
+    try {
+      const { data } = await roadmapApi.getMyProgress();
+      setProgressList(data.progress || []);
+    } catch {
+      toast.error("進捗データの読み込みに失敗しました");
     } finally {
       setIsLoading(false);
     }
@@ -92,6 +107,12 @@ function DashboardPage() {
     }, 4500);
   };
 
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "my", label: "マイロードマップ" },
+    { key: "bookmarks", label: "ブックマーク" },
+    { key: "progress", label: "進捗中" },
+  ];
+
   return (
     <div>
       <PageHead title="ダッシュボード" />
@@ -107,26 +128,19 @@ function DashboardPage() {
 
       {/* Tabs */}
       <div className="mb-6 flex border-b border-gray-200">
-        <button
-          onClick={() => setTab("my")}
-          className={`px-4 py-2 text-sm font-medium ${
-            tab === "my"
-              ? "border-b-2 border-numa-600 text-numa-600"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          マイロードマップ
-        </button>
-        <button
-          onClick={() => setTab("bookmarks")}
-          className={`px-4 py-2 text-sm font-medium ${
-            tab === "bookmarks"
-              ? "border-b-2 border-numa-600 text-numa-600"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          ブックマーク
-        </button>
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-4 py-2 text-sm font-medium ${
+              tab === t.key
+                ? "border-b-2 border-numa-600 text-numa-600"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {isLoading ? (
@@ -210,7 +224,7 @@ function DashboardPage() {
             ))}
           </div>
         )
-      ) : (
+      ) : tab === "bookmarks" ? (
         // Bookmarks
         bookmarks.length === 0 ? (
           <div className="rounded-lg border border-numa-100 bg-numa-50/30 p-8 text-center">
@@ -252,6 +266,74 @@ function DashboardPage() {
                 </Link>
               ) : null,
             )}
+          </div>
+        )
+      ) : (
+        // Progress tab
+        progressList.length === 0 ? (
+          <div className="rounded-lg border border-numa-100 bg-numa-50/30 p-8 text-center">
+            <p className="text-gray-500">
+              進捗中のロードマップはまだありません。
+            </p>
+            <Link
+              to="/explore"
+              className="mt-4 inline-block rounded-md bg-numa-600 px-6 py-2 text-sm font-medium text-white hover:bg-numa-700"
+            >
+              ロードマップを探す
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {progressList.map((p) => {
+              const rate =
+                p.totalNodes > 0
+                  ? Math.round(
+                      (p.completedNodes.length / p.totalNodes) * 100,
+                    )
+                  : 0;
+              const levelInfo = NUMA_LEVELS[p.numaLevel] || NUMA_LEVELS[0];
+
+              return (
+                <Link
+                  key={p.roadmapId}
+                  to={`/roadmaps/${p.roadmapId}`}
+                  className="block rounded-lg border border-numa-100 bg-white p-4 transition-all hover:border-numa-200 hover:shadow-md"
+                >
+                  <div className="mb-2 flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {p.roadmap?.title || p.roadmapId}
+                    </h3>
+                    <span
+                      className="rounded-full px-2 py-0.5 text-xs font-bold"
+                      style={{
+                        backgroundColor: levelInfo.color + "22",
+                        color: levelInfo.color,
+                      }}
+                    >
+                      Lv.{p.numaLevel} {levelInfo.name}
+                    </span>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="mb-1 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${rate}%`,
+                        backgroundColor: levelInfo.color,
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span>
+                      {p.completedNodes.length}/{p.totalNodes} ノード完了
+                    </span>
+                    <span>{rate}%</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )
       )}

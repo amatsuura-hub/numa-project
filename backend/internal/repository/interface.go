@@ -41,4 +41,11 @@ type Repository interface {
 	BookmarkRoadmap(ctx context.Context, userID, roadmapID string) error
 	UnbookmarkRoadmap(ctx context.Context, userID, roadmapID string) error
 	GetMyBookmarks(ctx context.Context, userID string, limit int32, cursor string) ([]model.Bookmark, string, error)
+
+	// Progress
+	GetProgress(ctx context.Context, userID, roadmapID string) (*model.Progress, error)
+	PutProgress(ctx context.Context, p *model.Progress) error
+	GetMyProgress(ctx context.Context, userID string) ([]model.Progress, error)
+	CompleteNode(ctx context.Context, userID, roadmapID, nodeID string, totalNodes int) (*model.Progress, error)
+	UncompleteNode(ctx context.Context, userID, roadmapID, nodeID string, totalNodes int) (*model.Progress, error)
 }

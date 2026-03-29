@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /roadmaps/new
+Disallow: /roadmaps/*/edit
+
+Sitemap: https://numa-roadmap.com/sitemap.xml

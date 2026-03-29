@@ -200,6 +200,52 @@ func route(ctx context.Context, req events.APIGatewayProxyRequest, h *handler.Ha
 		resp, handleErr = h.GetMyBookmarks(ctx, userID, req.QueryStringParameters)
 		statusCode = http.StatusOK
 
+	// Progress endpoints
+	case method == "GET" && path == "/api/progress":
+		resp, handleErr = h.GetMyProgress(ctx, userID)
+		statusCode = http.StatusOK
+	case method == "GET" && matchPath(path, "/api/roadmaps/*/progress"):
+		roadmapID := extractSegment(path, 3)
+		resp, handleErr = h.GetProgress(ctx, userID, roadmapID)
+		statusCode = http.StatusOK
+	case method == "PUT" && matchPath(path, "/api/roadmaps/*/progress/nodes/*"):
+		roadmapID := extractSegment(path, 3)
+		nodeID := extractSegment(path, 6)
+		resp, handleErr = h.CompleteNode(ctx, userID, roadmapID, nodeID)
+		statusCode = http.StatusOK
+	case method == "DELETE" && matchPath(path, "/api/roadmaps/*/progress/nodes/*"):
+		roadmapID := extractSegment(path, 3)
+		nodeID := extractSegment(path, 6)
+		resp, handleErr = h.UncompleteNode(ctx, userID, roadmapID, nodeID)
+		statusCode = http.StatusOK
+
+	// OGP endpoint
+	case method == "GET" && matchPath(path, "/api/ogp/*"):
+		roadmapID := extractSegment(path, 3)
+		siteURL := req.Headers["x-site-url"]
+		if siteURL == "" {
+			siteURL = allowedOrigin
+			if siteURL == "*" {
+				siteURL = "https://numa.example.com"
+			}
+		}
+		htmlContent, ogpErr := h.HandleOGP(ctx, roadmapID, siteURL)
+		if ogpErr != nil {
+			handleErr = ogpErr
+		} else {
+			ogpHeaders := make(map[string]string)
+			for k, v := range corsHeaders {
+				ogpHeaders[k] = v
+			}
+			ogpHeaders["Content-Type"] = "text/html; charset=utf-8"
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusOK,
+				Headers:    ogpHeaders,
+				Body:       htmlContent,
+			}, nil
+		}
+		statusCode = http.StatusOK
+
 	default:
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusNotFound,

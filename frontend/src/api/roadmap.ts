@@ -4,6 +4,8 @@ import type {
   RoadmapDetail,
   RoadmapNode,
   RoadmapEdge,
+  Progress,
+  ProgressWithRoadmap,
 } from "../types";
 
 export const roadmapApi = {
@@ -103,4 +105,17 @@ export const roadmapApi = {
       cursor?: string;
     }>(`/api/bookmarks${qs ? `?${qs}` : ""}`);
   },
+
+  // Progress
+  getProgress: (roadmapId: string) =>
+    api.get<Progress>(`/api/roadmaps/${roadmapId}/progress`),
+
+  completeNode: (roadmapId: string, nodeId: string) =>
+    api.put<Progress>(`/api/roadmaps/${roadmapId}/progress/nodes/${nodeId}`, {}),
+
+  uncompleteNode: (roadmapId: string, nodeId: string) =>
+    api.delete<Progress>(`/api/roadmaps/${roadmapId}/progress/nodes/${nodeId}`),
+
+  getMyProgress: () =>
+    api.get<{ progress: ProgressWithRoadmap[] }>("/api/progress"),
 };
