@@ -37,3 +37,21 @@ variable "cognito_user_pool_arn" {
   description = "Cognito User Pool ARN"
   type        = string
 }
+
+variable "api_memory_size" {
+  description = "Memory size for API Lambda (MB)"
+  type        = number
+  default     = 128
+}
+
+variable "api_timeout" {
+  description = "Timeout for API Lambda (seconds)"
+  type        = number
+  default     = 30
+}
+
+variable "api_reserved_concurrency" {
+  description = "Reserved concurrent executions for API Lambda (-1 for unreserved)"
+  type        = number
+  default     = -1
+}

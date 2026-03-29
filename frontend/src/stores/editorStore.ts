@@ -56,7 +56,7 @@ function toFlowNode(n: RoadmapNode): Node {
     data: {
       label: n.label,
       description: n.description || "",
-      color: n.color || "#4c6ef5",
+      color: n.color || "#16a34a",
       url: n.url || "",
       order: n.order,
     },
@@ -82,7 +82,7 @@ function fromFlowNode(n: Node): RoadmapNode {
     description: (n.data.description as string) || "",
     posX: n.position.x,
     posY: n.position.y,
-    color: (n.data.color as string) || "#4c6ef5",
+    color: (n.data.color as string) || "#16a34a",
     url: (n.data.url as string) || "",
     order: (n.data.order as number) || 0,
   };
@@ -174,7 +174,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       data: {
         label: `ステップ ${nodeCounter}`,
         description: "",
-        color: "#4c6ef5",
+        color: "#16a34a",
         url: "",
         order: nodeCounter,
       },

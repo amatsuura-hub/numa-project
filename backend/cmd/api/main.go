@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -16,6 +18,12 @@ import (
 )
 
 func main() {
+	// Initialize structured logger (JSON format for CloudWatch)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}))
+	slog.SetDefault(logger)
+
 	tableName := os.Getenv("TABLE_NAME")
 	if tableName == "" {
 		tableName = "dev-numa-main"
@@ -27,7 +35,7 @@ func main() {
 		if env != "" && env != "dev" {
 			log.Fatalf("ALLOWED_ORIGIN environment variable is required in %s environment", env)
 		}
-		log.Println("WARNING: ALLOWED_ORIGIN not set, defaulting to '*'. Do not use in production.")
+		slog.Warn("ALLOWED_ORIGIN not set, defaulting to '*'")
 		allowedOrigin = "*"
 	}
 
@@ -38,12 +46,16 @@ func main() {
 
 	h := handler.New(repo)
 
+	slog.Info("lambda handler starting", "table", tableName)
+
 	lambda.Start(func(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		return route(ctx, req, h, allowedOrigin)
 	})
 }
 
 func route(ctx context.Context, req events.APIGatewayProxyRequest, h *handler.Handler, allowedOrigin string) (events.APIGatewayProxyResponse, error) {
+	start := time.Now()
+
 	// CORS headers
 	corsHeaders := map[string]string{
 		"Access-Control-Allow-Origin":  allowedOrigin,
@@ -52,11 +64,25 @@ func route(ctx context.Context, req events.APIGatewayProxyRequest, h *handler.Ha
 		"Content-Type":                 "application/json",
 	}
 
+	// Add request ID to response headers for traceability
+	requestID := req.RequestContext.RequestID
+	corsHeaders["X-Request-Id"] = requestID
+
 	// OPTIONS preflight
 	if req.HTTPMethod == "OPTIONS" {
+		corsHeaders["Access-Control-Max-Age"] = "86400"
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusOK,
 			Headers:    corsHeaders,
+		}, nil
+	}
+
+	// Health check endpoint (no auth required)
+	if req.HTTPMethod == "GET" && req.Path == "/api/health" {
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusOK,
+			Headers:    corsHeaders,
+			Body:       `{"status":"ok"}`,
 		}, nil
 	}
 
@@ -65,6 +91,16 @@ func route(ctx context.Context, req events.APIGatewayProxyRequest, h *handler.Ha
 
 	path := req.Path
 	method := req.HTTPMethod
+
+	// Warn if auth is missing on a protected endpoint
+	if userID == "" {
+		slog.Warn("request without authenticated user",
+			"request_id", requestID,
+			"method", method,
+			"path", path,
+			"source_ip", req.RequestContext.Identity.SourceIP,
+		)
+	}
 
 	var resp interface{}
 	var statusCode int
@@ -173,10 +209,27 @@ func route(ctx context.Context, req events.APIGatewayProxyRequest, h *handler.Ha
 	}
 
 	if handleErr != nil {
-		return handler.ErrorResponse(handleErr, corsHeaders), nil
+		errResp := handler.ErrorResponse(handleErr, corsHeaders)
+		latency := time.Since(start)
+		slog.Error("request failed",
+			"request_id", requestID,
+			"method", method,
+			"path", path,
+			"status", errResp.StatusCode,
+			"latency_ms", latency.Milliseconds(),
+			"error", handleErr.Error(),
+		)
+		return errResp, nil
 	}
 
 	if statusCode == http.StatusNoContent {
+		slog.Info("request completed",
+			"request_id", requestID,
+			"method", method,
+			"path", path,
+			"status", statusCode,
+			"latency_ms", time.Since(start).Milliseconds(),
+		)
 		return events.APIGatewayProxyResponse{
 			StatusCode: statusCode,
 			Headers:    corsHeaders,
@@ -185,13 +238,25 @@ func route(ctx context.Context, req events.APIGatewayProxyRequest, h *handler.Ha
 
 	body, err := json.Marshal(map[string]interface{}{"data": resp})
 	if err != nil {
-		log.Printf("ERROR: failed to marshal response: %v", err)
+		slog.Error("failed to marshal response",
+			"request_id", requestID,
+			"error", err.Error(),
+		)
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Headers:    corsHeaders,
 			Body:       `{"error":{"code":"INTERNAL","message":"Response serialization failed"}}`,
 		}, nil
 	}
+
+	slog.Info("request completed",
+		"request_id", requestID,
+		"method", method,
+		"path", path,
+		"status", statusCode,
+		"latency_ms", time.Since(start).Milliseconds(),
+	)
+
 	return events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Headers:    corsHeaders,

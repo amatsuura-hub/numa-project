@@ -18,6 +18,24 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+resource "aws_iam_role_policy_attachment" "lambda_xray" {
+  role       = aws_iam_role.lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess"
+}
+
+data "aws_iam_policy_document" "dlq_access" {
+  statement {
+    actions   = ["sqs:SendMessage"]
+    resources = [aws_sqs_queue.api_dlq.arn]
+  }
+}
+
+resource "aws_iam_role_policy" "dlq_access" {
+  name   = "${var.prefix}-dlq-access"
+  role   = aws_iam_role.lambda.id
+  policy = data.aws_iam_policy_document.dlq_access.json
+}
+
 data "aws_iam_policy_document" "dynamodb_access" {
   statement {
     actions = [
@@ -53,16 +71,31 @@ data "archive_file" "placeholder" {
   }
 }
 
+# DLQ for failed Lambda invocations
+resource "aws_sqs_queue" "api_dlq" {
+  name                      = "${var.prefix}-api-dlq"
+  message_retention_seconds = 1209600 # 14 days
+}
+
 resource "aws_lambda_function" "api" {
-  function_name = "${var.prefix}-api"
-  role          = aws_iam_role.lambda.arn
-  handler       = "bootstrap"
-  runtime       = "provided.al2023"
-  memory_size   = 128
-  timeout       = 30
+  function_name                  = "${var.prefix}-api"
+  role                           = aws_iam_role.lambda.arn
+  handler                        = "bootstrap"
+  runtime                        = "provided.al2023"
+  memory_size                    = var.api_memory_size
+  timeout                        = var.api_timeout
+  reserved_concurrent_executions = var.api_reserved_concurrency >= 0 ? var.api_reserved_concurrency : null
 
   filename         = data.archive_file.placeholder.output_path
   source_code_hash = data.archive_file.placeholder.output_base64sha256
+
+  dead_letter_config {
+    target_arn = aws_sqs_queue.api_dlq.arn
+  }
+
+  tracing_config {
+    mode = "Active"
+  }
 
   environment {
     variables = {
@@ -90,6 +123,10 @@ resource "aws_lambda_function" "post_confirmation" {
 
   filename         = data.archive_file.placeholder.output_path
   source_code_hash = data.archive_file.placeholder.output_base64sha256
+
+  tracing_config {
+    mode = "Active"
+  }
 
   environment {
     variables = {

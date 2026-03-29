@@ -7,22 +7,23 @@ interface NodeEditPanelProps {
   onClose: () => void;
 }
 
+// Swamp depth palette — shallow to deep
 const NODE_COLORS = [
-  "#4c6ef5",
-  "#7950f2",
-  "#e64980",
-  "#e8590c",
-  "#f59f00",
-  "#40c057",
-  "#15aabf",
-  "#868e96",
+  "#bbf7d0", // 浅い (shallow)
+  "#86efac",
+  "#4ade80",
+  "#22c55e",
+  "#16a34a", // 中間 (mid)
+  "#15803d",
+  "#166534",
+  "#14532d", // 深い (deep)
 ];
 
 function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
   const { updateNodeData, deleteNode } = useEditorStore();
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
-  const [color, setColor] = useState("#4c6ef5");
+  const [color, setColor] = useState("#16a34a");
   const [url, setUrl] = useState("");
   const panelRef = useRef<HTMLDivElement>(null);
   const labelInputRef = useRef<HTMLInputElement>(null);
@@ -31,7 +32,7 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
     if (node) {
       setLabel((node.data.label as string) || "");
       setDescription((node.data.description as string) || "");
-      setColor((node.data.color as string) || "#4c6ef5");
+      setColor((node.data.color as string) || "#16a34a");
       setUrl((node.data.url as string) || "");
       // Focus the label input when panel opens
       setTimeout(() => labelInputRef.current?.focus(), 0);
@@ -112,8 +113,9 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-gray-700">
-            色
+            深さ（色）
           </label>
+          <p className="mb-2 text-xs text-gray-400">浅い → 深い</p>
           <div className="flex flex-wrap gap-2">
             {NODE_COLORS.map((c) => (
               <button

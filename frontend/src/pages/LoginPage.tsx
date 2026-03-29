@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
+import PageHead from "../components/common/PageHead";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -20,6 +21,7 @@ function LoginPage() {
 
   return (
     <div className="mx-auto max-w-md py-12">
+      <PageHead title="ログイン" />
       <h1 className="mb-8 text-center text-2xl font-bold">ログイン</h1>
 
       {error && (

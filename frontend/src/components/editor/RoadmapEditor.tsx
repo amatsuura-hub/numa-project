@@ -77,7 +77,7 @@ function RoadmapEditor() {
         <Background />
         <Controls />
         <MiniMap
-          nodeColor={(n) => (n.data?.color as string) || "#4c6ef5"}
+          nodeColor={(n) => (n.data?.color as string) || "#16a34a"}
           className="!bottom-4 !right-4"
         />
       </ReactFlow>

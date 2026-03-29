@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
 import type { RoadmapMeta } from "../types";
 import { CATEGORIES, type Category } from "../types";
+import PageHead from "../components/common/PageHead";
 
 type Tab = "my" | "bookmarks";
 
@@ -52,18 +53,48 @@ function DashboardPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("このロードマップを削除しますか？")) return;
-    try {
-      await roadmapApi.delete(id);
-      setRoadmaps((prev) => prev.filter((r) => r.roadmapId !== id));
-      toast.success("ロードマップを削除しました");
-    } catch {
-      toast.error("削除に失敗しました");
-    }
+    const target = roadmaps.find((r) => r.roadmapId === id);
+    if (!target) return;
+
+    // Optimistically remove from UI
+    setRoadmaps((prev) => prev.filter((r) => r.roadmapId !== id));
+
+    let cancelled = false;
+
+    toast(
+      (t) => (
+        <div className="flex items-center gap-3">
+          <span className="text-sm">削除しました</span>
+          <button
+            onClick={() => {
+              cancelled = true;
+              toast.dismiss(t.id);
+              setRoadmaps((prev) => [...prev, target]);
+            }}
+            className="rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-300"
+          >
+            取り消し
+          </button>
+        </div>
+      ),
+      { duration: 4000 },
+    );
+
+    // Wait for undo window, then actually delete
+    setTimeout(async () => {
+      if (cancelled) return;
+      try {
+        await roadmapApi.delete(id);
+      } catch {
+        toast.error("削除に失敗しました");
+        setRoadmaps((prev) => [...prev, target]);
+      }
+    }, 4500);
   };
 
   return (
     <div>
+      <PageHead title="ダッシュボード" />
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold">ダッシュボード</h1>
         <Link
@@ -105,7 +136,7 @@ function DashboardPage() {
       ) : tab === "my" ? (
         // My roadmaps
         roadmaps.length === 0 ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+          <div className="rounded-lg border border-numa-100 bg-numa-50/30 p-8 text-center">
             <p className="text-gray-500">
               まだロードマップがありません。最初のロードマップを作成しましょう！
             </p>
@@ -121,7 +152,7 @@ function DashboardPage() {
             {roadmaps.map((roadmap) => (
               <div
                 key={roadmap.roadmapId}
-                className="rounded-lg border border-gray-200 bg-white p-4"
+                className="rounded-lg border border-numa-100 bg-white p-4"
               >
                 <div className="mb-2 flex items-start justify-between">
                   <Link
@@ -133,7 +164,7 @@ function DashboardPage() {
                   <span
                     className={`ml-2 shrink-0 rounded-full px-2 py-0.5 text-xs ${
                       roadmap.isPublic
-                        ? "bg-green-100 text-green-700"
+                        ? "bg-numa-100 text-numa-700"
                         : "bg-gray-100 text-gray-600"
                     }`}
                   >
@@ -182,7 +213,7 @@ function DashboardPage() {
       ) : (
         // Bookmarks
         bookmarks.length === 0 ? (
-          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+          <div className="rounded-lg border border-numa-100 bg-numa-50/30 p-8 text-center">
             <p className="text-gray-500">
               ブックマークしたロードマップはまだありません。
             </p>
@@ -200,7 +231,7 @@ function DashboardPage() {
                 <Link
                   key={item.roadmapId}
                   to={`/roadmaps/${item.roadmapId}`}
-                  className="block rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md"
+                  className="block rounded-lg border border-numa-100 bg-white p-4 transition-all hover:border-numa-200 hover:shadow-md"
                 >
                   <h3 className="text-lg font-semibold text-gray-900">
                     {item.roadmap.title}

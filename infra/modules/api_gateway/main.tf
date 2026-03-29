@@ -66,6 +66,7 @@ resource "aws_api_gateway_method_response" "proxy_options" {
     "method.response.header.Access-Control-Allow-Headers" = true
     "method.response.header.Access-Control-Allow-Methods" = true
     "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Max-Age"       = true
   }
 }
 
@@ -79,6 +80,7 @@ resource "aws_api_gateway_integration_response" "proxy_options" {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,Authorization'"
     "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,PUT,DELETE,OPTIONS'"
     "method.response.header.Access-Control-Allow-Origin"  = "'${var.allowed_origin}'"
+    "method.response.header.Access-Control-Max-Age"       = "'86400'"
   }
 
   depends_on = [aws_api_gateway_integration.proxy_options]
@@ -107,6 +109,117 @@ resource "aws_api_gateway_stage" "main" {
   deployment_id = aws_api_gateway_deployment.main.id
   rest_api_id   = aws_api_gateway_rest_api.main.id
   stage_name    = var.environment
+
+  xray_tracing_enabled = true
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gateway.arn
+    format = jsonencode({
+      requestId      = "$context.requestId"
+      ip             = "$context.identity.sourceIp"
+      caller         = "$context.identity.caller"
+      user           = "$context.identity.user"
+      requestTime    = "$context.requestTime"
+      httpMethod     = "$context.httpMethod"
+      resourcePath   = "$context.resourcePath"
+      status         = "$context.status"
+      protocol       = "$context.protocol"
+      responseLength = "$context.responseLength"
+      latency        = "$context.integrationLatency"
+    })
+  }
+}
+
+# CloudWatch Log Group for API Gateway access logs
+resource "aws_cloudwatch_log_group" "api_gateway" {
+  name              = "/aws/apigateway/${var.prefix}-api"
+  retention_in_days = 30
+}
+
+# API Gateway method settings — throttling + metrics
+resource "aws_api_gateway_method_settings" "all" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  stage_name  = aws_api_gateway_stage.main.stage_name
+  method_path = "*/*"
+
+  settings {
+    metrics_enabled        = true
+    logging_level          = "ERROR"
+    data_trace_enabled     = false
+    throttling_burst_limit = 50
+    throttling_rate_limit  = 100
+  }
+}
+
+# IAM role for API Gateway CloudWatch logging
+resource "aws_api_gateway_account" "main" {
+  cloudwatch_role_arn = aws_iam_role.api_gateway_cloudwatch.arn
+}
+
+resource "aws_iam_role" "api_gateway_cloudwatch" {
+  name = "${var.prefix}-api-gateway-cloudwatch"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "apigateway.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "api_gateway_cloudwatch" {
+  role       = aws_iam_role.api_gateway_cloudwatch.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+}
+
+# WAF — rate limiting for API Gateway
+resource "aws_wafv2_web_acl" "api" {
+  name        = "${var.prefix}-api-waf"
+  description = "WAF for API Gateway - rate limiting"
+  scope       = "REGIONAL"
+
+  default_action {
+    allow {}
+  }
+
+  rule {
+    name     = "rate-limit"
+    priority = 1
+
+    action {
+      block {}
+    }
+
+    statement {
+      rate_based_statement {
+        limit              = 2000
+        aggregate_key_type = "IP"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.prefix}-api-rate-limit"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "${var.prefix}-api-waf"
+    sampled_requests_enabled   = true
+  }
+}
+
+resource "aws_wafv2_web_acl_association" "api" {
+  resource_arn = aws_api_gateway_stage.main.arn
+  web_acl_arn  = aws_wafv2_web_acl.api.arn
 }
 
 # Lambda permission for API Gateway

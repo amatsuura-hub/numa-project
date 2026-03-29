@@ -15,3 +15,9 @@ variable "aws_region" {
   type        = string
   default     = "ap-northeast-1"
 }
+
+variable "domain_name" {
+  description = "Custom domain name (e.g. example.com). Leave empty to skip DNS setup."
+  type        = string
+  default     = ""
+}

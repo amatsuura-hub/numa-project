@@ -17,11 +17,11 @@ function RoadmapNode({ data, selected }: NodeProps) {
       className={`rounded-lg border-2 bg-white px-4 py-3 shadow-sm transition-shadow ${
         selected ? "shadow-md ring-2 ring-numa-400" : ""
       }`}
-      style={{ borderColor: color || "#4c6ef5", minWidth: 150, maxWidth: 250 }}
+      style={{ borderColor: color || "#16a34a", minWidth: 150, maxWidth: 250 }}
     >
-      <Handle type="target" position={Position.Top} className="!bg-gray-400" />
+      <Handle type="target" position={Position.Top} className="!bg-numa-400" />
 
-      <div className="text-sm font-semibold" style={{ color: color || "#4c6ef5" }}>
+      <div className="text-sm font-semibold" style={{ color: color || "#16a34a" }}>
         {label}
       </div>
 
@@ -29,7 +29,7 @@ function RoadmapNode({ data, selected }: NodeProps) {
         <div className="mt-1 line-clamp-2 text-xs text-gray-500">{description}</div>
       )}
 
-      <Handle type="source" position={Position.Bottom} className="!bg-gray-400" />
+      <Handle type="source" position={Position.Bottom} className="!bg-numa-400" />
     </div>
   );
 }

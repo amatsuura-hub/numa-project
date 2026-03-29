@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
+import PageHead from "../components/common/PageHead";
 
 function SignupPage() {
   const [email, setEmail] = useState("");
@@ -87,6 +88,7 @@ function SignupPage() {
 
   return (
     <div className="mx-auto max-w-md py-12">
+      <PageHead title="サインアップ" />
       <h1 className="mb-8 text-center text-2xl font-bold">サインアップ</h1>
 
       {error && (
@@ -121,12 +123,13 @@ function SignupPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
+            aria-describedby="password-hint"
             className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-numa-500 focus:outline-none focus:ring-1 focus:ring-numa-500"
           />
           {passwordError ? (
-            <p className="mt-1 text-xs text-red-500">{passwordError}</p>
+            <p id="password-hint" role="alert" className="mt-1 text-xs text-red-500">{passwordError}</p>
           ) : (
-            <p className="mt-1 text-xs text-gray-500">
+            <p id="password-hint" className="mt-1 text-xs text-gray-500">
               8文字以上、大文字・小文字・数字・記号を含む
             </p>
           )}

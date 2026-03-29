@@ -18,6 +18,7 @@ import BookmarkButton from "../components/common/BookmarkButton";
 import ShareButton from "../components/common/ShareButton";
 import type { RoadmapDetail } from "../types";
 import { CATEGORIES, type Category } from "../types";
+import PageHead from "../components/common/PageHead";
 
 function RoadmapDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -58,12 +59,26 @@ function RoadmapDetailPage() {
     return (
       <div className="py-20 text-center">
         <p className="text-gray-500">{error || "ロードマップが見つかりません"}</p>
-        <Link
-          to="/explore"
-          className="mt-4 inline-block text-sm text-numa-600 hover:underline"
-        >
-          ロードマップを探す
-        </Link>
+        <div className="mt-4 flex items-center justify-center gap-4">
+          {error && id && (
+            <button
+              onClick={() => {
+                setError(null);
+                setIsLoading(true);
+                loadRoadmap(id);
+              }}
+              className="rounded-md bg-numa-600 px-4 py-2 text-sm font-medium text-white hover:bg-numa-700"
+            >
+              再試行
+            </button>
+          )}
+          <Link
+            to="/explore"
+            className="text-sm text-numa-600 hover:underline"
+          >
+            ロードマップを探す
+          </Link>
+        </div>
       </div>
     );
   }
@@ -74,7 +89,7 @@ function RoadmapDetailPage() {
     data: {
       label: n.label,
       description: n.description || "",
-      color: n.color || "#4c6ef5",
+      color: n.color || "#16a34a",
       url: n.url || "",
     },
     type: "roadmapNode",
@@ -95,6 +110,11 @@ function RoadmapDetailPage() {
 
   return (
     <div>
+      <PageHead
+        title={detail.meta.title}
+        description={detail.meta.description || `${detail.meta.title} のロードマップ`}
+        ogType="article"
+      />
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold sm:text-2xl">{detail.meta.title}</h1>
@@ -139,7 +159,7 @@ function RoadmapDetailPage() {
         </div>
       </div>
 
-      <div className="h-[60vh] w-full rounded-lg border border-gray-200 sm:h-[calc(100vh-250px)]">
+      <div className="h-[60vh] w-full rounded-lg border border-numa-200 sm:h-[calc(100vh-250px)]">
         <ReactFlow
           nodes={flowNodes}
           edges={flowEdges}
@@ -154,7 +174,7 @@ function RoadmapDetailPage() {
           <Background />
           <Controls showInteractive={false} />
           <MiniMap
-            nodeColor={(n) => (n.data?.color as string) || "#4c6ef5"}
+            nodeColor={(n) => (n.data?.color as string) || "#16a34a"}
             className="hidden sm:block"
           />
         </ReactFlow>

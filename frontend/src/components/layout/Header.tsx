@@ -7,7 +7,7 @@ function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="border-b border-gray-200 bg-white">
+    <header className="border-b border-numa-100 bg-white">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link to="/" className="text-2xl font-bold text-numa-700">
           Numa

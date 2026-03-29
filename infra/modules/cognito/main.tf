@@ -4,6 +4,15 @@ resource "aws_cognito_user_pool" "main" {
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
 
+  mfa_configuration = "OPTIONAL"
+
+  software_token_mfa_configuration {
+    enabled = true
+  }
+
+  # Note: advanced_security_mode requires Cognito Plus tier (not available on Essentials)
+  # user_pool_add_ons { advanced_security_mode = "ENFORCED" }
+
   password_policy {
     minimum_length                   = 8
     require_lowercase                = true

@@ -28,8 +28,16 @@ jobs:
           working-directory: backend
           version: latest
 
-      - name: Test
-        run: go test ./... -v -count=1
+      - name: Security scan
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec ./...
+
+      - name: Test with coverage
+        run: go test ./... -v -count=1 -coverprofile=coverage.out -covermode=atomic
+
+      - name: Display coverage
+        run: go tool cover -func=coverage.out
 
       - name: Build
         run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/bootstrap cmd/api/main.go
@@ -61,3 +69,26 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  terraform:
+    name: Terraform Validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5"
+
+      - name: Terraform fmt check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform init -backend=false
+
+      - name: Terraform validate
+        run: terraform validate

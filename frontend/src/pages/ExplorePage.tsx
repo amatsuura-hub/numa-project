@@ -4,6 +4,7 @@ import { roadmapApi } from "../api/roadmap";
 import type { RoadmapMeta } from "../types";
 import { CATEGORIES } from "../types";
 import RoadmapCard from "../components/common/RoadmapCard";
+import PageHead from "../components/common/PageHead";
 
 function ExplorePage() {
   const [roadmaps, setRoadmaps] = useState<RoadmapMeta[]>([]);
@@ -57,6 +58,7 @@ function ExplorePage() {
 
   return (
     <div>
+      <PageHead title="探す" description="公開されているロードマップを探しましょう" />
       <h1 className="mb-6 text-2xl font-bold">ロードマップを探す</h1>
 
       {/* Category filter */}
@@ -92,7 +94,7 @@ function ExplorePage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-numa-600 border-t-transparent" />
         </div>
       ) : roadmaps.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+        <div className="rounded-lg border border-numa-100 bg-numa-50/30 p-8 text-center">
           <p className="text-gray-500">
             {activeCategory
               ? "このカテゴリにはまだロードマップがありません。"

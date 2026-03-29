@@ -17,16 +17,6 @@ type CreateNodeRequest struct {
 	Order       int     `json:"order"`
 }
 
-type UpdateNodeRequest struct {
-	Label       string  `json:"label"`
-	Description string  `json:"description"`
-	PosX        float64 `json:"posX"`
-	PosY        float64 `json:"posY"`
-	Color       string  `json:"color"`
-	URL         string  `json:"url"`
-	Order       int     `json:"order"`
-}
-
 type BatchUpdateNodesRequest struct {
 	Nodes []UpdateNodeBatchItem `json:"nodes"`
 }

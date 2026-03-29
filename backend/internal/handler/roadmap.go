@@ -223,7 +223,7 @@ func (h *Handler) GetMyRoadmaps(ctx context.Context, userID string, params map[s
 func (h *Handler) ExploreRoadmaps(ctx context.Context, params map[string]string) (interface{}, error) {
 	limit := int32(20)
 	if l, ok := params["limit"]; ok {
-		if v, err := strconv.Atoi(l); err == nil && v > 0 && v <= 50 {
+		if v, err := strconv.Atoi(l); err == nil && v > 0 && v <= 100 {
 			limit = int32(v)
 		}
 	}
