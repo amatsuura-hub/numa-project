@@ -12,6 +12,7 @@ import (
 	"github.com/numa-project/backend/internal/model"
 )
 
+// PutRoadmap creates or overwrites a roadmap metadata record.
 func (d *DynamoDB) PutRoadmap(ctx context.Context, meta *model.RoadmapMeta) error {
 	item, err := attributevalue.MarshalMap(meta)
 	if err != nil {
@@ -28,12 +29,13 @@ func (d *DynamoDB) PutRoadmap(ctx context.Context, meta *model.RoadmapMeta) erro
 	return nil
 }
 
+// GetRoadmapMeta returns the metadata for a roadmap, or nil if not found.
 func (d *DynamoDB) GetRoadmapMeta(ctx context.Context, roadmapID string) (*model.RoadmapMeta, error) {
 	out, err := d.Client.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: &d.TableName,
 		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
-			"SK": &types.AttributeValueMemberS{Value: "META"},
+			"PK": &types.AttributeValueMemberS{Value: model.PKPrefixRoadmap + roadmapID},
+			"SK": &types.AttributeValueMemberS{Value: model.SKMeta},
 		},
 	})
 	if err != nil {
@@ -56,7 +58,7 @@ func (d *DynamoDB) GetRoadmapDetail(ctx context.Context, roadmapID string) (*mod
 		TableName:              &d.TableName,
 		KeyConditionExpression: aws.String("PK = :pk"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
+			":pk": &types.AttributeValueMemberS{Value: model.PKPrefixRoadmap + roadmapID},
 		},
 	})
 	if err != nil {
@@ -71,17 +73,17 @@ func (d *DynamoDB) GetRoadmapDetail(ctx context.Context, roadmapID string) (*mod
 		}
 
 		switch {
-		case sk == "META":
+		case sk == model.SKMeta:
 			if err := attributevalue.UnmarshalMap(item, &detail.Meta); err != nil {
 				return nil, fmt.Errorf("unmarshaling meta: %w", err)
 			}
-		case strings.HasPrefix(sk, "NODE#"):
+		case strings.HasPrefix(sk, model.SKPrefixNode):
 			var node model.Node
 			if err := attributevalue.UnmarshalMap(item, &node); err != nil {
 				return nil, fmt.Errorf("unmarshaling node: %w", err)
 			}
 			detail.Nodes = append(detail.Nodes, node)
-		case strings.HasPrefix(sk, "EDGE#"):
+		case strings.HasPrefix(sk, model.SKPrefixEdge):
 			var edge model.Edge
 			if err := attributevalue.UnmarshalMap(item, &edge); err != nil {
 				return nil, fmt.Errorf("unmarshaling edge: %w", err)
@@ -104,6 +106,7 @@ func (d *DynamoDB) GetRoadmapDetail(ctx context.Context, roadmapID string) (*mod
 	return detail, nil
 }
 
+// UpdateRoadmapMeta updates the mutable fields of a roadmap metadata record.
 func (d *DynamoDB) UpdateRoadmapMeta(ctx context.Context, meta *model.RoadmapMeta) error {
 	_, err := d.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
 		TableName: &d.TableName,
@@ -149,7 +152,7 @@ func (d *DynamoDB) DeleteRoadmap(ctx context.Context, roadmapID string) error {
 		TableName:              &d.TableName,
 		KeyConditionExpression: aws.String("PK = :pk"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
+			":pk": &types.AttributeValueMemberS{Value: model.PKPrefixRoadmap + roadmapID},
 		},
 		ProjectionExpression: aws.String("PK, SK"),
 	})
@@ -158,8 +161,8 @@ func (d *DynamoDB) DeleteRoadmap(ctx context.Context, roadmapID string) error {
 	}
 
 	// Batch delete in groups of 25
-	for i := 0; i < len(out.Items); i += 25 {
-		end := i + 25
+	for i := 0; i < len(out.Items); i += model.BatchWriteMaxItems {
+		end := i + model.BatchWriteMaxItems
 		if end > len(out.Items) {
 			end = len(out.Items)
 		}
@@ -194,7 +197,7 @@ func (d *DynamoDB) GetMyRoadmaps(ctx context.Context, userID string, limit int32
 		IndexName:              aws.String("GSI1"),
 		KeyConditionExpression: aws.String("GSI1PK = :pk"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: "USER#" + userID},
+			":pk": &types.AttributeValueMemberS{Value: model.PKPrefixUser + userID},
 		},
 		ScanIndexForward: aws.Bool(false),
 		Limit:            &limit,
@@ -232,7 +235,7 @@ func (d *DynamoDB) GetMyRoadmaps(ctx context.Context, userID string, limit int32
 
 // ExploreRoadmaps queries GSI2 for public roadmaps.
 func (d *DynamoDB) ExploreRoadmaps(ctx context.Context, category string, limit int32, cursor string) ([]model.RoadmapMeta, string, error) {
-	gsi2pk := "PUBLIC"
+	gsi2pk := model.GSI2Public
 	if category != "" {
 		gsi2pk = "CAT#" + category
 	}

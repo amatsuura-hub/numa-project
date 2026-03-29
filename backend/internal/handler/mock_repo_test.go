@@ -9,30 +9,30 @@ import (
 
 // mockRepo implements repository.Repository for testing.
 type mockRepo struct {
-	users    map[string]*model.User
-	roadmaps map[string]*model.RoadmapMeta
-	details  map[string]*model.RoadmapDetail
-	nodes    map[string]*model.Node
-	edges    map[string]*model.Edge
-	likes    map[string]bool
+	users     map[string]*model.User
+	roadmaps  map[string]*model.RoadmapMeta
+	details   map[string]*model.RoadmapDetail
+	nodes     map[string]*model.Node
+	edges     map[string]*model.Edge
+	likes     map[string]bool
 	bookmarks map[string]bool
 
 	// Error injection
 	err error
 
 	// Track calls
-	putRoadmapCalled       bool
+	putRoadmapCalled        bool
 	updateRoadmapMetaCalled bool
-	deleteRoadmapCalled    bool
-	putNodeCalled          bool
-	deleteNodeCalled       bool
-	batchPutNodesCalled    bool
-	putEdgeCalled          bool
-	deleteEdgeCalled       bool
-	likeRoadmapCalled      bool
-	unlikeRoadmapCalled    bool
-	bookmarkCalled         bool
-	unbookmarkCalled       bool
+	deleteRoadmapCalled     bool
+	putNodeCalled           bool
+	deleteNodeCalled        bool
+	batchPutNodesCalled     bool
+	putEdgeCalled           bool
+	deleteEdgeCalled        bool
+	likeRoadmapCalled       bool
+	unlikeRoadmapCalled     bool
+	bookmarkCalled          bool
+	unbookmarkCalled        bool
 }
 
 func newMockRepo() *mockRepo {

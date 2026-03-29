@@ -46,7 +46,14 @@ function LikeButton({ roadmapId, initialLiked, initialCount }: LikeButtonProps) 
           : "border-gray-300 text-gray-500 hover:border-red-300 hover:text-red-500"
       } disabled:cursor-not-allowed disabled:opacity-50`}
     >
-      <span>{isLiked ? "♥" : "♡"}</span>
+      {isLoading ? (
+        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+      ) : (
+        <span>{isLiked ? "♥" : "♡"}</span>
+      )}
       <span>{count}</span>
     </button>
   );

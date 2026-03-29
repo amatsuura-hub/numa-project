@@ -43,7 +43,7 @@ describe("authStore", () => {
 
   it("initializes with user when valid session exists", async () => {
     const mockCognitoUser = {
-      getSession: vi.fn((cb: Function) => {
+      getSession: vi.fn((cb: (...args: unknown[]) => void) => {
         const session = {
           isValid: () => true,
           getIdToken: () => ({
@@ -91,7 +91,7 @@ describe("authStore", () => {
 
   it("signup calls cognito signUp", async () => {
     mockSignUp.mockImplementation(
-      (_email: string, _pw: string, _attrs: unknown[], _validation: unknown[], cb: Function) => {
+      (_email: string, _pw: string, _attrs: unknown[], _validation: unknown[], cb: (...args: unknown[]) => void) => {
         cb(null, { user: {} });
       },
     );
@@ -104,7 +104,7 @@ describe("authStore", () => {
 
   it("signup sets error on failure", async () => {
     mockSignUp.mockImplementation(
-      (_email: string, _pw: string, _attrs: unknown[], _validation: unknown[], cb: Function) => {
+      (_email: string, _pw: string, _attrs: unknown[], _validation: unknown[], cb: (...args: unknown[]) => void) => {
         cb(new Error("User already exists"));
       },
     );

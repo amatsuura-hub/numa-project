@@ -8,14 +8,16 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/numa-project/backend/internal/model"
 )
 
+// IsLiked checks if a user has liked a roadmap.
 func (d *DynamoDB) IsLiked(ctx context.Context, roadmapID, userID string) (bool, error) {
 	out, err := d.Client.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: &d.TableName,
 		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
-			"SK": &types.AttributeValueMemberS{Value: "LIKE#" + userID},
+			"PK": &types.AttributeValueMemberS{Value: model.PKPrefixRoadmap + roadmapID},
+			"SK": &types.AttributeValueMemberS{Value: model.SKPrefixLike + userID},
 		},
 		ProjectionExpression: aws.String("PK"),
 	})
@@ -35,8 +37,8 @@ func (d *DynamoDB) LikeRoadmap(ctx context.Context, roadmapID, userID string) er
 				Put: &types.Put{
 					TableName: &d.TableName,
 					Item: map[string]types.AttributeValue{
-						"PK":        &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
-						"SK":        &types.AttributeValueMemberS{Value: "LIKE#" + userID},
+						"PK":        &types.AttributeValueMemberS{Value: model.PKPrefixRoadmap + roadmapID},
+						"SK":        &types.AttributeValueMemberS{Value: model.SKPrefixLike + userID},
 						"createdAt": &types.AttributeValueMemberS{Value: now},
 					},
 					ConditionExpression: aws.String("attribute_not_exists(PK)"),
@@ -46,8 +48,8 @@ func (d *DynamoDB) LikeRoadmap(ctx context.Context, roadmapID, userID string) er
 				Update: &types.Update{
 					TableName: &d.TableName,
 					Key: map[string]types.AttributeValue{
-						"PK": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
-						"SK": &types.AttributeValueMemberS{Value: "META"},
+						"PK": &types.AttributeValueMemberS{Value: model.PKPrefixRoadmap + roadmapID},
+						"SK": &types.AttributeValueMemberS{Value: model.SKMeta},
 					},
 					UpdateExpression: aws.String("ADD likeCount :one"),
 					ExpressionAttributeValues: map[string]types.AttributeValue{
@@ -68,8 +70,8 @@ func (d *DynamoDB) UnlikeRoadmap(ctx context.Context, roadmapID, userID string) 
 				Delete: &types.Delete{
 					TableName: &d.TableName,
 					Key: map[string]types.AttributeValue{
-						"PK": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
-						"SK": &types.AttributeValueMemberS{Value: "LIKE#" + userID},
+						"PK": &types.AttributeValueMemberS{Value: model.PKPrefixRoadmap + roadmapID},
+						"SK": &types.AttributeValueMemberS{Value: model.SKPrefixLike + userID},
 					},
 					ConditionExpression: aws.String("attribute_exists(PK)"),
 				},
@@ -78,8 +80,8 @@ func (d *DynamoDB) UnlikeRoadmap(ctx context.Context, roadmapID, userID string) 
 				Update: &types.Update{
 					TableName: &d.TableName,
 					Key: map[string]types.AttributeValue{
-						"PK": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
-						"SK": &types.AttributeValueMemberS{Value: "META"},
+						"PK": &types.AttributeValueMemberS{Value: model.PKPrefixRoadmap + roadmapID},
+						"SK": &types.AttributeValueMemberS{Value: model.SKMeta},
 					},
 					UpdateExpression: aws.String("ADD likeCount :neg"),
 					ExpressionAttributeValues: map[string]types.AttributeValue{

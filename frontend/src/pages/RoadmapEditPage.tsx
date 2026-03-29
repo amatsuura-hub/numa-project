@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { useEditorStore } from "../stores/editorStore";
 import { CATEGORIES } from "../types";
 import RoadmapEditor from "../components/editor/RoadmapEditor";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 function useUnsavedChangesWarning(isDirty: boolean) {
   const handleBeforeUnload = useCallback(
@@ -31,6 +32,7 @@ function RoadmapEditPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
+  const [errors, setErrors] = useState<{ title?: string; category?: string }>({});
 
   useEffect(() => {
     if (id) {
@@ -47,7 +49,18 @@ function RoadmapEditPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title) return;
+    const newErrors: { title?: string; category?: string } = {};
+    if (!title.trim()) {
+      newErrors.title = "タイトルを入力してください";
+    }
+    if (!category) {
+      newErrors.category = "カテゴリを選択してください";
+    }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
 
     try {
       const newId = await createRoadmap({
@@ -80,12 +93,24 @@ function RoadmapEditPage() {
               id="new-title"
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (errors.title) setErrors((prev) => ({ ...prev, title: undefined }));
+              }}
               maxLength={100}
               placeholder="例: Go言語マスターへの道"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-numa-500 focus:outline-none focus:ring-1 focus:ring-numa-500"
+              className={`w-full rounded-md border px-3 py-2 focus:outline-none focus:ring-1 ${
+                errors.title
+                  ? "border-red-400 focus:border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:border-numa-500 focus:ring-numa-500"
+              }`}
             />
+            <div className="mt-1 flex justify-between">
+              <span className="text-sm text-red-600">{errors.title ?? "\u00A0"}</span>
+              <span className={`text-sm ${title.length >= 100 ? "text-red-600" : "text-gray-400"}`}>
+                {title.length} / 100
+              </span>
+            </div>
           </div>
 
           <div>
@@ -110,8 +135,15 @@ function RoadmapEditPage() {
             <select
               id="new-category"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-numa-500 focus:outline-none"
+              onChange={(e) => {
+                setCategory(e.target.value);
+                if (errors.category) setErrors((prev) => ({ ...prev, category: undefined }));
+              }}
+              className={`w-full rounded-md border px-3 py-2 focus:outline-none ${
+                errors.category
+                  ? "border-red-400 focus:border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:border-numa-500"
+              }`}
             >
               <option value="">選択してください</option>
               {Object.entries(CATEGORIES).map(([id, name]) => (
@@ -120,6 +152,9 @@ function RoadmapEditPage() {
                 </option>
               ))}
             </select>
+            {errors.category && (
+              <p className="mt-1 text-sm text-red-600">{errors.category}</p>
+            )}
           </div>
 
           <button
@@ -134,11 +169,7 @@ function RoadmapEditPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-numa-600 border-t-transparent" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return <RoadmapEditor />;

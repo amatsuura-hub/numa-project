@@ -11,12 +11,13 @@ import (
 	"github.com/numa-project/backend/internal/model"
 )
 
+// GetUser returns a user by ID, or nil if not found.
 func (d *DynamoDB) GetUser(ctx context.Context, userID string) (*model.User, error) {
 	out, err := d.Client.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: &d.TableName,
 		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: "USER#" + userID},
-			"SK": &types.AttributeValueMemberS{Value: "PROFILE"},
+			"PK": &types.AttributeValueMemberS{Value: model.PKPrefixUser + userID},
+			"SK": &types.AttributeValueMemberS{Value: model.SKProfile},
 		},
 	})
 	if err != nil {
@@ -33,6 +34,7 @@ func (d *DynamoDB) GetUser(ctx context.Context, userID string) (*model.User, err
 	return &user, nil
 }
 
+// PutUser creates or overwrites a user record.
 func (d *DynamoDB) PutUser(ctx context.Context, user *model.User) error {
 	item, err := attributevalue.MarshalMap(user)
 	if err != nil {
@@ -49,16 +51,17 @@ func (d *DynamoDB) PutUser(ctx context.Context, user *model.User) error {
 	return nil
 }
 
+// UpdateUser updates a user's profile fields and returns the updated user.
 func (d *DynamoDB) UpdateUser(ctx context.Context, userID string, displayName, bio, xHandle string) (*model.User, error) {
 	out, err := d.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
 		TableName: &d.TableName,
 		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: "USER#" + userID},
-			"SK": &types.AttributeValueMemberS{Value: "PROFILE"},
+			"PK": &types.AttributeValueMemberS{Value: model.PKPrefixUser + userID},
+			"SK": &types.AttributeValueMemberS{Value: model.SKProfile},
 		},
 		UpdateExpression: aws.String("SET displayName = :dn, bio = :bio, xHandle = :xh"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":dn": &types.AttributeValueMemberS{Value: displayName},
+			":dn":  &types.AttributeValueMemberS{Value: displayName},
 			":bio": &types.AttributeValueMemberS{Value: bio},
 			":xh":  &types.AttributeValueMemberS{Value: xHandle},
 		},

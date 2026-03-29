@@ -21,3 +21,9 @@ variable "domain_name" {
   type        = string
   default     = ""
 }
+
+variable "cloudfront_waf_rate_limit" {
+  description = "CloudFront WAF rate limit per IP (5-minute window)"
+  type        = number
+  default     = 5000
+}

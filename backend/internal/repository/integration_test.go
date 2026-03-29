@@ -102,7 +102,8 @@ func setupTestDB(t *testing.T) *DynamoDB {
 	}
 
 	t.Cleanup(func() {
-		_, _ = client.DeleteTable(ctx, &dynamodb.DeleteTableInput{
+		//nolint:errcheck // best-effort cleanup of test table
+		client.DeleteTable(ctx, &dynamodb.DeleteTableInput{
 			TableName: &tableName,
 		})
 	})

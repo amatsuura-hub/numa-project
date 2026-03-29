@@ -1,3 +1,5 @@
+# Lambda: API handler and Cognito post-confirmation trigger with DynamoDB/SQS/X-Ray permissions.
+
 data "aws_iam_policy_document" "lambda_assume" {
   statement {
     actions = ["sts:AssumeRole"]

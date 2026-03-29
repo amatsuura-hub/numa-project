@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { userApi } from "../api/user";
 import { useAuthStore } from "../stores/authStore";
 import PageHead from "../components/common/PageHead";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 function ProfilePage() {
   const { user } = useAuthStore();
@@ -50,11 +51,7 @@ function ProfilePage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-numa-600 border-t-transparent" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

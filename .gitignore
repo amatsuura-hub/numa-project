@@ -21,19 +21,31 @@ infra/**/*.tfvars
 !infra/environments/prod/terraform.tfvars.example
 infra/.terraform/
 infra/**/.terraform/
+.terraform.lock.hcl
 *.tfstate
 *.tfstate.backup
 *.tfplan
-infra/.terraform.lock.hcl
 infra/**/placeholder.zip
 
 # IDE
 .idea/
 .vscode/
+.claude/
 *.swp
 *.swo
 *~
+
+# OS
 .DS_Store
+Thumbs.db
+._*
+
+# Secrets
+*.pem
+*.key
+
+# TypeScript build cache
+frontend/tsconfig.tsbuildinfo
 
 # Go
 *.exe
@@ -45,14 +57,23 @@ infra/**/placeholder.zip
 *.out
 coverage.out
 
+# Build artifacts
+*.zip
+!infra/**/placeholder.zip
+
 # Logs
 *.log
 npm-debug.log*
+*.tmp
+*.bak
 
-# OS
-Thumbs.db
+# Coverage
+coverage/
 
 # Project docs (not for GitHub)
 TODO.md
 numa-spec.md
-CLAUDE.md
+numa-implementation-guide.md
+numa-mockups.html
+docs/internal/
+*.draft.md

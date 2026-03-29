@@ -7,6 +7,7 @@ import (
 	"github.com/numa-project/backend/internal/model"
 )
 
+// CreateNodeRequest is the JSON body for creating a node.
 type CreateNodeRequest struct {
 	Label       string  `json:"label"`
 	Description string  `json:"description"`
@@ -17,10 +18,12 @@ type CreateNodeRequest struct {
 	Order       int     `json:"order"`
 }
 
+// BatchUpdateNodesRequest is the JSON body for batch updating nodes.
 type BatchUpdateNodesRequest struct {
 	Nodes []UpdateNodeBatchItem `json:"nodes"`
 }
 
+// UpdateNodeBatchItem represents a single node in a batch update request.
 type UpdateNodeBatchItem struct {
 	NodeID      string  `json:"nodeId"`
 	Label       string  `json:"label"`
@@ -32,9 +35,10 @@ type UpdateNodeBatchItem struct {
 	Order       int     `json:"order"`
 }
 
+// checkRoadmapOwnership verifies the user owns the given roadmap.
 func (h *Handler) checkRoadmapOwnership(ctx context.Context, userID, roadmapID string) error {
-	if userID == "" {
-		return NewAPIError(ErrUnauthorized, "Authentication required")
+	if err := requireAuth(userID); err != nil {
+		return err
 	}
 
 	meta, err := h.repo.GetRoadmapMeta(ctx, roadmapID)
@@ -50,6 +54,7 @@ func (h *Handler) checkRoadmapOwnership(ctx context.Context, userID, roadmapID s
 	return nil
 }
 
+// CreateNode adds a new node to a roadmap.
 func (h *Handler) CreateNode(ctx context.Context, userID string, roadmapID string, body string) (interface{}, error) {
 	if err := h.checkRoadmapOwnership(ctx, userID, roadmapID); err != nil {
 		return nil, err
@@ -60,19 +65,18 @@ func (h *Handler) CreateNode(ctx context.Context, userID string, roadmapID strin
 		return nil, err
 	}
 
-	// Check node count limit
 	detail, err := h.repo.GetRoadmapDetail(ctx, roadmapID)
 	if err != nil {
 		return nil, NewAPIError(ErrInternal, "Failed to check node count")
 	}
-	if detail != nil && len(detail.Nodes) >= 100 {
+	if detail != nil && len(detail.Nodes) >= model.MaxNodesPerRoadmap {
 		return nil, NewAPIError(ErrBadRequest, "maximum 100 nodes per roadmap")
 	}
 
 	nodeID := uuid.New().String()
 	node := &model.Node{
-		PK:          "ROADMAP#" + roadmapID,
-		SK:          "NODE#" + nodeID,
+		PK:          model.PKPrefixRoadmap + roadmapID,
+		SK:          model.SKPrefixNode + nodeID,
 		NodeID:      nodeID,
 		Label:       req.Label,
 		Description: req.Description,
@@ -90,20 +94,20 @@ func (h *Handler) CreateNode(ctx context.Context, userID string, roadmapID strin
 	return node, nil
 }
 
+// UpdateNode updates an existing node in a roadmap.
 func (h *Handler) UpdateNode(ctx context.Context, userID string, roadmapID string, nodeID string, body string) (interface{}, error) {
 	if err := h.checkRoadmapOwnership(ctx, userID, roadmapID); err != nil {
 		return nil, err
 	}
 
-	// Reuse CreateNodeRequest for validation (same fields)
 	var cnReq CreateNodeRequest
 	if err := validateCreateNodeBody(body, &cnReq); err != nil {
 		return nil, err
 	}
 
 	node := &model.Node{
-		PK:          "ROADMAP#" + roadmapID,
-		SK:          "NODE#" + nodeID,
+		PK:          model.PKPrefixRoadmap + roadmapID,
+		SK:          model.SKPrefixNode + nodeID,
 		NodeID:      nodeID,
 		Label:       cnReq.Label,
 		Description: cnReq.Description,
@@ -121,6 +125,7 @@ func (h *Handler) UpdateNode(ctx context.Context, userID string, roadmapID strin
 	return node, nil
 }
 
+// DeleteNode removes a node from a roadmap.
 func (h *Handler) DeleteNode(ctx context.Context, userID string, roadmapID string, nodeID string) error {
 	if err := h.checkRoadmapOwnership(ctx, userID, roadmapID); err != nil {
 		return err
@@ -132,6 +137,7 @@ func (h *Handler) DeleteNode(ctx context.Context, userID string, roadmapID strin
 	return nil
 }
 
+// BatchUpdateNodes updates multiple nodes in a roadmap at once.
 func (h *Handler) BatchUpdateNodes(ctx context.Context, userID string, roadmapID string, body string) (interface{}, error) {
 	if err := h.checkRoadmapOwnership(ctx, userID, roadmapID); err != nil {
 		return nil, err
@@ -145,8 +151,8 @@ func (h *Handler) BatchUpdateNodes(ctx context.Context, userID string, roadmapID
 	var nodes []model.Node
 	for _, n := range req.Nodes {
 		nodes = append(nodes, model.Node{
-			PK:          "ROADMAP#" + roadmapID,
-			SK:          "NODE#" + n.NodeID,
+			PK:          model.PKPrefixRoadmap + roadmapID,
+			SK:          model.SKPrefixNode + n.NodeID,
 			NodeID:      n.NodeID,
 			Label:       n.Label,
 			Description: n.Description,

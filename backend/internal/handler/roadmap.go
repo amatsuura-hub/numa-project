@@ -9,6 +9,7 @@ import (
 	"github.com/numa-project/backend/internal/model"
 )
 
+// CreateRoadmapRequest is the JSON body for creating a roadmap.
 type CreateRoadmapRequest struct {
 	Title       string   `json:"title"`
 	Description string   `json:"description"`
@@ -17,6 +18,7 @@ type CreateRoadmapRequest struct {
 	IsPublic    bool     `json:"isPublic"`
 }
 
+// UpdateRoadmapRequest is the JSON body for updating a roadmap.
 type UpdateRoadmapRequest struct {
 	Title       string   `json:"title"`
 	Description string   `json:"description"`
@@ -25,9 +27,19 @@ type UpdateRoadmapRequest struct {
 	IsPublic    bool     `json:"isPublic"`
 }
 
+// RoadmapResponse is the JSON response for a roadmap detail.
+type RoadmapResponse struct {
+	Meta         model.RoadmapMeta `json:"meta"`
+	Nodes        []model.Node      `json:"nodes"`
+	Edges        []model.Edge      `json:"edges"`
+	IsLiked      bool              `json:"isLiked"`
+	IsBookmarked bool              `json:"isBookmarked"`
+}
+
+// CreateRoadmap creates a new roadmap for the authenticated user.
 func (h *Handler) CreateRoadmap(ctx context.Context, userID string, body string) (interface{}, error) {
-	if userID == "" {
-		return nil, NewAPIError(ErrUnauthorized, "Authentication required")
+	if err := requireAuth(userID); err != nil {
+		return nil, err
 	}
 
 	var req CreateRoadmapRequest
@@ -35,12 +47,11 @@ func (h *Handler) CreateRoadmap(ctx context.Context, userID string, body string)
 		return nil, err
 	}
 
-	// Check user roadmap count limit
-	existingRoadmaps, _, err := h.repo.GetMyRoadmaps(ctx, userID, 50, "")
+	existingRoadmaps, _, err := h.repo.GetMyRoadmaps(ctx, userID, model.MaxRoadmapsPerUser, "")
 	if err != nil {
 		return nil, NewAPIError(ErrInternal, "Failed to check roadmap count")
 	}
-	if len(existingRoadmaps) >= 50 {
+	if len(existingRoadmaps) >= model.MaxRoadmapsPerUser {
 		return nil, NewAPIError(ErrBadRequest, "maximum 50 roadmaps per user")
 	}
 
@@ -48,8 +59,8 @@ func (h *Handler) CreateRoadmap(ctx context.Context, userID string, body string)
 	roadmapID := uuid.New().String()
 
 	meta := &model.RoadmapMeta{
-		PK:          "ROADMAP#" + roadmapID,
-		SK:          "META",
+		PK:          model.PKPrefixRoadmap + roadmapID,
+		SK:          model.SKMeta,
 		RoadmapID:   roadmapID,
 		Title:       req.Title,
 		Description: req.Description,
@@ -60,12 +71,12 @@ func (h *Handler) CreateRoadmap(ctx context.Context, userID string, body string)
 		LikeCount:   0,
 		CreatedAt:   now,
 		UpdatedAt:   now,
-		GSI1PK:      "USER#" + userID,
-		GSI1SK:      "ROADMAP#" + now,
+		GSI1PK:      model.PKPrefixUser + userID,
+		GSI1SK:      model.PKPrefixRoadmap + now,
 	}
 
 	if req.IsPublic {
-		meta.GSI2PK = "PUBLIC"
+		meta.GSI2PK = model.GSI2Public
 		meta.GSI2SK = now
 	}
 
@@ -76,14 +87,7 @@ func (h *Handler) CreateRoadmap(ctx context.Context, userID string, body string)
 	return meta, nil
 }
 
-type RoadmapResponse struct {
-	Meta       model.RoadmapMeta `json:"meta"`
-	Nodes      []model.Node      `json:"nodes"`
-	Edges      []model.Edge      `json:"edges"`
-	IsLiked    bool              `json:"isLiked"`
-	IsBookmarked bool            `json:"isBookmarked"`
-}
-
+// GetRoadmap returns a roadmap detail with like/bookmark status.
 func (h *Handler) GetRoadmap(ctx context.Context, userID string, roadmapID string) (interface{}, error) {
 	detail, err := h.repo.GetRoadmapDetail(ctx, roadmapID)
 	if err != nil {
@@ -93,7 +97,6 @@ func (h *Handler) GetRoadmap(ctx context.Context, userID string, roadmapID strin
 		return nil, NewAPIError(ErrNotFound, "Roadmap not found")
 	}
 
-	// Private roadmap: only owner can view
 	if !detail.Meta.IsPublic && detail.Meta.UserID != userID {
 		return nil, NewAPIError(ErrForbidden, "Access denied")
 	}
@@ -104,7 +107,6 @@ func (h *Handler) GetRoadmap(ctx context.Context, userID string, roadmapID strin
 		Edges: detail.Edges,
 	}
 
-	// Check like/bookmark status for authenticated users
 	if userID != "" {
 		liked, err := h.repo.IsLiked(ctx, roadmapID, userID)
 		if err != nil {
@@ -122,9 +124,10 @@ func (h *Handler) GetRoadmap(ctx context.Context, userID string, roadmapID strin
 	return resp, nil
 }
 
+// UpdateRoadmap updates a roadmap owned by the authenticated user.
 func (h *Handler) UpdateRoadmap(ctx context.Context, userID string, roadmapID string, body string) (interface{}, error) {
-	if userID == "" {
-		return nil, NewAPIError(ErrUnauthorized, "Authentication required")
+	if err := requireAuth(userID); err != nil {
+		return nil, err
 	}
 
 	meta, err := h.repo.GetRoadmapMeta(ctx, roadmapID)
@@ -153,7 +156,7 @@ func (h *Handler) UpdateRoadmap(ctx context.Context, userID string, roadmapID st
 
 	if req.IsPublic {
 		if meta.GSI2PK == "" {
-			meta.GSI2PK = "PUBLIC"
+			meta.GSI2PK = model.GSI2Public
 			meta.GSI2SK = meta.CreatedAt
 		}
 	} else {
@@ -168,9 +171,10 @@ func (h *Handler) UpdateRoadmap(ctx context.Context, userID string, roadmapID st
 	return meta, nil
 }
 
+// DeleteRoadmap deletes a roadmap owned by the authenticated user.
 func (h *Handler) DeleteRoadmap(ctx context.Context, userID string, roadmapID string) error {
-	if userID == "" {
-		return NewAPIError(ErrUnauthorized, "Authentication required")
+	if err := requireAuth(userID); err != nil {
+		return err
 	}
 
 	meta, err := h.repo.GetRoadmapMeta(ctx, roadmapID)
@@ -190,17 +194,13 @@ func (h *Handler) DeleteRoadmap(ctx context.Context, userID string, roadmapID st
 	return nil
 }
 
+// GetMyRoadmaps returns the authenticated user's roadmaps.
 func (h *Handler) GetMyRoadmaps(ctx context.Context, userID string, params map[string]string) (interface{}, error) {
-	if userID == "" {
-		return nil, NewAPIError(ErrUnauthorized, "Authentication required")
+	if err := requireAuth(userID); err != nil {
+		return nil, err
 	}
 
-	limit := int32(20)
-	if l, ok := params["limit"]; ok {
-		if v, err := strconv.Atoi(l); err == nil && v > 0 && v <= 50 {
-			limit = int32(v)
-		}
-	}
+	limit := parseLimit(params, model.DefaultPageLimit, model.MaxPageLimitDefault)
 
 	roadmaps, cursor, err := h.repo.GetMyRoadmaps(ctx, userID, limit, params["cursor"])
 	if err != nil {
@@ -220,13 +220,9 @@ func (h *Handler) GetMyRoadmaps(ctx context.Context, userID string, params map[s
 	return result, nil
 }
 
+// ExploreRoadmaps returns public roadmaps, optionally filtered by category.
 func (h *Handler) ExploreRoadmaps(ctx context.Context, params map[string]string) (interface{}, error) {
-	limit := int32(20)
-	if l, ok := params["limit"]; ok {
-		if v, err := strconv.Atoi(l); err == nil && v > 0 && v <= 100 {
-			limit = int32(v)
-		}
-	}
+	limit := parseLimit(params, model.DefaultPageLimit, model.MaxPageLimitExplore)
 
 	roadmaps, cursor, err := h.repo.ExploreRoadmaps(ctx, params["category"], limit, params["cursor"])
 	if err != nil {
@@ -244,4 +240,14 @@ func (h *Handler) ExploreRoadmaps(ctx context.Context, params map[string]string)
 		result["cursor"] = cursor
 	}
 	return result, nil
+}
+
+// parseLimit extracts "limit" from query params, clamped to [1, max].
+func parseLimit(params map[string]string, defaultVal, max int) int32 {
+	if l, ok := params["limit"]; ok {
+		if v, err := strconv.Atoi(l); err == nil && v > 0 && v <= max {
+			return int32(v)
+		}
+	}
+	return int32(defaultVal)
 }

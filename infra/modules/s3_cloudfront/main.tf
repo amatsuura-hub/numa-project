@@ -1,3 +1,5 @@
+# S3 + CloudFront: Frontend hosting with OAC, security headers, caching, and WAF integration.
+
 # Access log bucket for CloudFront and S3
 resource "aws_s3_bucket" "logs" {
   bucket = "${var.prefix}-logs"

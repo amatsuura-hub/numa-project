@@ -8,9 +8,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
+// LikeRoadmap adds a like to a roadmap for the authenticated user.
 func (h *Handler) LikeRoadmap(ctx context.Context, userID string, roadmapID string) error {
-	if userID == "" {
-		return NewAPIError(ErrUnauthorized, "Authentication required")
+	if err := requireAuth(userID); err != nil {
+		return err
 	}
 
 	err := h.repo.LikeRoadmap(ctx, roadmapID, userID)
@@ -29,9 +30,10 @@ func (h *Handler) LikeRoadmap(ctx context.Context, userID string, roadmapID stri
 	return nil
 }
 
+// UnlikeRoadmap removes a like from a roadmap for the authenticated user.
 func (h *Handler) UnlikeRoadmap(ctx context.Context, userID string, roadmapID string) error {
-	if userID == "" {
-		return NewAPIError(ErrUnauthorized, "Authentication required")
+	if err := requireAuth(userID); err != nil {
+		return err
 	}
 
 	err := h.repo.UnlikeRoadmap(ctx, roadmapID, userID)

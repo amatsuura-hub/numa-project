@@ -10,13 +10,16 @@ import (
 
 // encodeCursor encodes a DynamoDB LastEvaluatedKey to a base64 string.
 func encodeCursor(key map[string]types.AttributeValue) string {
-	m := make(map[string]string)
+	m := make(map[string]string, len(key))
 	for k, v := range key {
 		if s, ok := v.(*types.AttributeValueMemberS); ok {
 			m[k] = s.Value
 		}
 	}
-	b, _ := json.Marshal(m)
+	b, err := json.Marshal(m)
+	if err != nil {
+		return ""
+	}
 	return base64.URLEncoding.EncodeToString(b)
 }
 

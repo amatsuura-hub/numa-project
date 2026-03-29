@@ -12,13 +12,18 @@ import (
 	"github.com/numa-project/backend/internal/model"
 )
 
+func progressKey(userID, roadmapID string) map[string]types.AttributeValue {
+	return map[string]types.AttributeValue{
+		"PK": &types.AttributeValueMemberS{Value: model.PKPrefixUser + userID},
+		"SK": &types.AttributeValueMemberS{Value: model.SKPrefixProgress + roadmapID},
+	}
+}
+
+// GetProgress returns a user's progress on a roadmap, or nil if none exists.
 func (d *DynamoDB) GetProgress(ctx context.Context, userID, roadmapID string) (*model.Progress, error) {
 	out, err := d.Client.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: &d.TableName,
-		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: "USER#" + userID},
-			"SK": &types.AttributeValueMemberS{Value: "PROGRESS#" + roadmapID},
-		},
+		Key:       progressKey(userID, roadmapID),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("getting progress: %w", err)
@@ -34,6 +39,7 @@ func (d *DynamoDB) GetProgress(ctx context.Context, userID, roadmapID string) (*
 	return &p, nil
 }
 
+// PutProgress writes a progress record to DynamoDB.
 func (d *DynamoDB) PutProgress(ctx context.Context, p *model.Progress) error {
 	item, err := attributevalue.MarshalMap(p)
 	if err != nil {
@@ -47,13 +53,14 @@ func (d *DynamoDB) PutProgress(ctx context.Context, p *model.Progress) error {
 	return err
 }
 
+// GetMyProgress returns all progress records for a user.
 func (d *DynamoDB) GetMyProgress(ctx context.Context, userID string) ([]model.Progress, error) {
 	input := &dynamodb.QueryInput{
 		TableName:              &d.TableName,
 		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :prefix)"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk":     &types.AttributeValueMemberS{Value: "USER#" + userID},
-			":prefix": &types.AttributeValueMemberS{Value: "PROGRESS#"},
+			":pk":     &types.AttributeValueMemberS{Value: model.PKPrefixUser + userID},
+			":prefix": &types.AttributeValueMemberS{Value: model.SKPrefixProgress},
 		},
 		ScanIndexForward: aws.Bool(false),
 	}
@@ -74,16 +81,14 @@ func (d *DynamoDB) GetMyProgress(ctx context.Context, userID string) ([]model.Pr
 	return results, nil
 }
 
+// CompleteNode atomically adds a node to the user's completed set and recalculates the level.
 func (d *DynamoDB) CompleteNode(ctx context.Context, userID, roadmapID, nodeID string, totalNodes int) (*model.Progress, error) {
 	now := time.Now().UTC().Format(time.RFC3339)
+	key := progressKey(userID, roadmapID)
 
-	// Use UpdateItem with ADD for StringSet to atomically add the node
 	out, err := d.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
 		TableName: &d.TableName,
-		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: "USER#" + userID},
-			"SK": &types.AttributeValueMemberS{Value: "PROGRESS#" + roadmapID},
-		},
+		Key:       key,
 		UpdateExpression: aws.String(
 			"ADD completedNodes :nodeId " +
 				"SET roadmapId = :rid, totalNodes = :total, updatedAt = :now, " +
@@ -100,43 +105,17 @@ func (d *DynamoDB) CompleteNode(ctx context.Context, userID, roadmapID, nodeID s
 		return nil, fmt.Errorf("completing node: %w", err)
 	}
 
-	var p model.Progress
-	if err := attributevalue.UnmarshalMap(out.Attributes, &p); err != nil {
-		return nil, fmt.Errorf("unmarshaling progress: %w", err)
-	}
-
-	// Calculate and update numa level
-	level := model.CalcNumaLevel(len(p.CompletedNodes), totalNodes)
-	if level != p.NumaLevel {
-		p.NumaLevel = level
-		_, err = d.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
-			TableName: &d.TableName,
-			Key: map[string]types.AttributeValue{
-				"PK": &types.AttributeValueMemberS{Value: "USER#" + userID},
-				"SK": &types.AttributeValueMemberS{Value: "PROGRESS#" + roadmapID},
-			},
-			UpdateExpression: aws.String("SET numaLevel = :level"),
-			ExpressionAttributeValues: map[string]types.AttributeValue{
-				":level": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", level)},
-			},
-		})
-		if err != nil {
-			return nil, fmt.Errorf("updating numa level: %w", err)
-		}
-	}
-
-	return &p, nil
+	return d.syncNumaLevel(ctx, key, out.Attributes, totalNodes)
 }
 
+// UncompleteNode atomically removes a node from the user's completed set and recalculates the level.
 func (d *DynamoDB) UncompleteNode(ctx context.Context, userID, roadmapID, nodeID string, totalNodes int) (*model.Progress, error) {
 	now := time.Now().UTC().Format(time.RFC3339)
+	key := progressKey(userID, roadmapID)
 
 	out, err := d.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
 		TableName: &d.TableName,
-		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: "USER#" + userID},
-			"SK": &types.AttributeValueMemberS{Value: "PROGRESS#" + roadmapID},
-		},
+		Key:       key,
 		UpdateExpression: aws.String(
 			"DELETE completedNodes :nodeId " +
 				"SET updatedAt = :now"),
@@ -150,21 +129,23 @@ func (d *DynamoDB) UncompleteNode(ctx context.Context, userID, roadmapID, nodeID
 		return nil, fmt.Errorf("uncompleting node: %w", err)
 	}
 
+	return d.syncNumaLevel(ctx, key, out.Attributes, totalNodes)
+}
+
+// syncNumaLevel recalculates the numa level from the returned attributes
+// and updates it in DynamoDB if changed.
+func (d *DynamoDB) syncNumaLevel(ctx context.Context, key map[string]types.AttributeValue, attrs map[string]types.AttributeValue, totalNodes int) (*model.Progress, error) {
 	var p model.Progress
-	if err := attributevalue.UnmarshalMap(out.Attributes, &p); err != nil {
+	if err := attributevalue.UnmarshalMap(attrs, &p); err != nil {
 		return nil, fmt.Errorf("unmarshaling progress: %w", err)
 	}
 
-	// Recalculate numa level
 	level := model.CalcNumaLevel(len(p.CompletedNodes), totalNodes)
 	if level != p.NumaLevel {
 		p.NumaLevel = level
-		_, err = d.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
-			TableName: &d.TableName,
-			Key: map[string]types.AttributeValue{
-				"PK": &types.AttributeValueMemberS{Value: "USER#" + userID},
-				"SK": &types.AttributeValueMemberS{Value: "PROGRESS#" + roadmapID},
-			},
+		_, err := d.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
+			TableName:        &d.TableName,
+			Key:              key,
 			UpdateExpression: aws.String("SET numaLevel = :level"),
 			ExpressionAttributeValues: map[string]types.AttributeValue{
 				":level": &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", level)},

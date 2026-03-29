@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   ReactFlow,
@@ -9,16 +9,15 @@ import {
   type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import toast from "react-hot-toast";
-import { roadmapApi } from "../api/roadmap";
-import { useAuthStore } from "../stores/authStore";
 import RoadmapNode from "../components/editor/RoadmapNode";
 import LikeButton from "../components/common/LikeButton";
 import BookmarkButton from "../components/common/BookmarkButton";
 import ShareButton from "../components/common/ShareButton";
-import type { RoadmapDetail, Progress } from "../types";
-import { CATEGORIES, NUMA_LEVELS, type Category } from "../types";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 import PageHead from "../components/common/PageHead";
+import { useRoadmapDetail } from "../hooks/useRoadmapDetail";
+import type { Progress } from "../types";
+import { CATEGORIES, NUMA_LEVELS, type Category } from "../types";
 
 function ProgressDashboard({
   progress,
@@ -35,7 +34,6 @@ function ProgressDashboard({
     <div className="mt-6 rounded-lg border border-numa-200 bg-white p-4 sm:p-6">
       <h3 className="mb-4 text-lg font-bold text-gray-900">進捗状況</h3>
 
-      {/* Metric cards */}
       <div className="mb-4 grid grid-cols-3 gap-3">
         <div className="rounded-lg bg-numa-50 p-3 text-center">
           <div className="text-2xl font-bold text-numa-700">
@@ -55,18 +53,13 @@ function ProgressDashboard({
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="mb-2 h-3 w-full overflow-hidden rounded-full bg-gray-100">
         <div
           className="h-full rounded-full transition-all duration-500"
-          style={{
-            width: `${rate}%`,
-            backgroundColor: levelInfo.color,
-          }}
+          style={{ width: `${rate}%`, backgroundColor: levelInfo.color }}
         />
       </div>
 
-      {/* Level indicators */}
       <div className="flex justify-between">
         {NUMA_LEVELS.map((l) => (
           <div
@@ -84,77 +77,13 @@ function ProgressDashboard({
 
 function RoadmapDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuthStore();
-  const [detail, setDetail] = useState<RoadmapDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState<Progress | null>(null);
+  const { detail, isLoading, error, progress, user, handleToggleComplete, retry } =
+    useRoadmapDetail(id);
 
   const nodeTypes = useMemo(() => ({ roadmapNode: RoadmapNode }), []);
 
-  useEffect(() => {
-    if (!id) return;
-    loadRoadmap(id);
-  }, [id]);
-
-  // Load progress when user and detail are available
-  useEffect(() => {
-    if (!user || !id || !detail) return;
-    loadProgress(id);
-  }, [user, id, detail]);
-
-  const loadRoadmap = async (roadmapId: string) => {
-    try {
-      const { data } = await roadmapApi.get(roadmapId);
-      setDetail(data);
-    } catch (e) {
-      const msg = (e as Error).message;
-      setError(msg);
-      toast.error(msg || "ロードマップの読み込みに失敗しました");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadProgress = async (roadmapId: string) => {
-    try {
-      const { data } = await roadmapApi.getProgress(roadmapId);
-      setProgress(data);
-    } catch {
-      // non-critical — user may not have started this roadmap
-    }
-  };
-
-  const handleToggleComplete = useCallback(
-    async (nodeId: string) => {
-      if (!user || !id) {
-        toast.error("ログインが必要です");
-        return;
-      }
-
-      const isCompleted = progress?.completedNodes.includes(nodeId) ?? false;
-
-      try {
-        if (isCompleted) {
-          const { data } = await roadmapApi.uncompleteNode(id, nodeId);
-          setProgress(data);
-        } else {
-          const { data } = await roadmapApi.completeNode(id, nodeId);
-          setProgress(data);
-        }
-      } catch {
-        toast.error("進捗の更新に失敗しました");
-      }
-    },
-    [user, id, progress],
-  );
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-numa-600 border-t-transparent" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error || !detail) {
@@ -164,20 +93,13 @@ function RoadmapDetailPage() {
         <div className="mt-4 flex items-center justify-center gap-4">
           {error && id && (
             <button
-              onClick={() => {
-                setError(null);
-                setIsLoading(true);
-                loadRoadmap(id);
-              }}
+              onClick={retry}
               className="rounded-md bg-numa-600 px-4 py-2 text-sm font-medium text-white hover:bg-numa-700"
             >
               再試行
             </button>
           )}
-          <Link
-            to="/explore"
-            className="text-sm text-numa-600 hover:underline"
-          >
+          <Link to="/explore" className="text-sm text-numa-600 hover:underline">
             ロードマップを探す
           </Link>
         </div>
@@ -231,13 +153,10 @@ function RoadmapDetailPage() {
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-400 sm:gap-3">
             {detail.meta.category && (
               <span className="rounded-full bg-numa-50 px-2 py-0.5 text-xs text-numa-600">
-                {CATEGORIES[detail.meta.category as Category] ||
-                  detail.meta.category}
+                {CATEGORIES[detail.meta.category as Category] || detail.meta.category}
               </span>
             )}
-            <span>
-              {new Date(detail.meta.createdAt).toLocaleDateString("ja-JP")}
-            </span>
+            <span>{new Date(detail.meta.createdAt).toLocaleDateString("ja-JP")}</span>
           </div>
         </div>
 
@@ -251,10 +170,7 @@ function RoadmapDetailPage() {
             roadmapId={detail.meta.roadmapId}
             initialBookmarked={detail.isBookmarked}
           />
-          <ShareButton
-            title={detail.meta.title}
-            roadmapId={detail.meta.roadmapId}
-          />
+          <ShareButton title={detail.meta.title} roadmapId={detail.meta.roadmapId} />
           {isOwner && (
             <Link
               to={`/roadmaps/${id}/edit`}
@@ -293,12 +209,8 @@ function RoadmapDetailPage() {
         </ReactFlow>
       </div>
 
-      {/* Progress Dashboard */}
       {user && progress && progress.completedNodes.length > 0 && (
-        <ProgressDashboard
-          progress={progress}
-          totalNodes={detail.nodes.length}
-        />
+        <ProgressDashboard progress={progress} totalNodes={detail.nodes.length} />
       )}
     </div>
   );

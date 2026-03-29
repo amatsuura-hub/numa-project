@@ -1,3 +1,5 @@
+# DNS: Route 53 hosted zone, ACM certificates, and custom domain for CloudFront + API Gateway.
+
 terraform {
   required_providers {
     aws = {

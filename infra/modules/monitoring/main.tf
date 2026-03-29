@@ -1,3 +1,5 @@
+# Monitoring: CloudWatch alarms (Lambda errors, DynamoDB throttle, API 5xx) with SNS notifications.
+
 # SNS Topic for alarm notifications
 resource "aws_sns_topic" "alarms" {
   name = "${var.prefix}-alarms"

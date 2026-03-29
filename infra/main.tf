@@ -76,7 +76,7 @@ resource "aws_wafv2_web_acl" "cloudfront" {
 
     statement {
       rate_based_statement {
-        limit              = 5000
+        limit              = var.cloudfront_waf_rate_limit
         aggregate_key_type = "IP"
       }
     }

@@ -7,12 +7,14 @@ import (
 	"github.com/numa-project/backend/internal/model"
 )
 
+// CreateEdgeRequest is the JSON body for creating an edge.
 type CreateEdgeRequest struct {
 	SourceNodeID string `json:"sourceNodeId"`
 	TargetNodeID string `json:"targetNodeId"`
 	Label        string `json:"label"`
 }
 
+// CreateEdge adds a new edge between two nodes in a roadmap.
 func (h *Handler) CreateEdge(ctx context.Context, userID string, roadmapID string, body string) (interface{}, error) {
 	if err := h.checkRoadmapOwnership(ctx, userID, roadmapID); err != nil {
 		return nil, err
@@ -23,19 +25,18 @@ func (h *Handler) CreateEdge(ctx context.Context, userID string, roadmapID strin
 		return nil, err
 	}
 
-	// Check edge count limit
 	detail, err := h.repo.GetRoadmapDetail(ctx, roadmapID)
 	if err != nil {
 		return nil, NewAPIError(ErrInternal, "Failed to check edge count")
 	}
-	if detail != nil && len(detail.Edges) >= 200 {
+	if detail != nil && len(detail.Edges) >= model.MaxEdgesPerRoadmap {
 		return nil, NewAPIError(ErrBadRequest, "maximum 200 edges per roadmap")
 	}
 
 	edgeID := uuid.New().String()
 	edge := &model.Edge{
-		PK:           "ROADMAP#" + roadmapID,
-		SK:           "EDGE#" + edgeID,
+		PK:           model.PKPrefixRoadmap + roadmapID,
+		SK:           model.SKPrefixEdge + edgeID,
 		EdgeID:       edgeID,
 		SourceNodeID: req.SourceNodeID,
 		TargetNodeID: req.TargetNodeID,
@@ -49,6 +50,7 @@ func (h *Handler) CreateEdge(ctx context.Context, userID string, roadmapID strin
 	return edge, nil
 }
 
+// DeleteEdge removes an edge from a roadmap.
 func (h *Handler) DeleteEdge(ctx context.Context, userID string, roadmapID string, edgeID string) error {
 	if err := h.checkRoadmapOwnership(ctx, userID, roadmapID); err != nil {
 		return err

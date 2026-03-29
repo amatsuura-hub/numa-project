@@ -6,6 +6,7 @@ import type { RoadmapMeta, Category } from "../types";
 import { CATEGORIES, CATEGORY_ICONS } from "../types";
 import RoadmapCard from "../components/common/RoadmapCard";
 import PageHead from "../components/common/PageHead";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 /** Sample node preview for hero section (DTM theme) */
 function HeroNodePreview() {
@@ -185,9 +186,7 @@ function TopPage() {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-numa-600 border-t-transparent" />
-          </div>
+          <LoadingSpinner />
         ) : popularRoadmaps.length === 0 ? (
           <div className="rounded-lg border border-numa-200 bg-numa-50/50 p-8 text-center">
             <p className="text-gray-500">

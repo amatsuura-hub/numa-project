@@ -29,3 +29,11 @@ output "api_gateway_url" {
 output "lambda_function_name" {
   value = module.lambda.function_name
 }
+
+output "cognito_user_pool_arn" {
+  value = module.cognito.user_pool_arn
+}
+
+output "monitoring_sns_topic_arn" {
+  value = module.monitoring.sns_topic_arn
+}

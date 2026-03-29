@@ -1,3 +1,5 @@
+# Cognito: User pool with email auth, optional MFA, and post-confirmation Lambda trigger.
+
 resource "aws_cognito_user_pool" "main" {
   name = "${var.prefix}-user-pool"
 

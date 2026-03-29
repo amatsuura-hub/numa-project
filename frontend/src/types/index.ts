@@ -115,6 +115,12 @@ export const CATEGORY_ICONS: Record<Category, string> = {
   hobby: "🌱",
 };
 
+export interface BookmarkItem {
+  roadmapId: string;
+  createdAt: string;
+  roadmap?: RoadmapMeta;
+}
+
 // Progress tracking types
 export interface Progress {
   roadmapId: string;

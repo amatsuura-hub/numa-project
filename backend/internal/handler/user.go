@@ -3,20 +3,28 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"strconv"
 
 	"github.com/numa-project/backend/internal/model"
 )
 
+// UpdateProfileRequest is the JSON body for updating a user profile.
 type UpdateProfileRequest struct {
 	DisplayName string `json:"displayName"`
 	Bio         string `json:"bio"`
 	XHandle     string `json:"xHandle"`
 }
 
+// Profile field limits.
+const (
+	maxDisplayNameLen = 50
+	maxBioLen         = 500
+	maxXHandleLen     = 30
+)
+
+// GetMyProfile returns the authenticated user's profile.
 func (h *Handler) GetMyProfile(ctx context.Context, userID string) (interface{}, error) {
-	if userID == "" {
-		return nil, NewAPIError(ErrUnauthorized, "Authentication required")
+	if err := requireAuth(userID); err != nil {
+		return nil, err
 	}
 
 	user, err := h.repo.GetUser(ctx, userID)
@@ -29,9 +37,10 @@ func (h *Handler) GetMyProfile(ctx context.Context, userID string) (interface{},
 	return user, nil
 }
 
+// UpdateMyProfile updates the authenticated user's profile.
 func (h *Handler) UpdateMyProfile(ctx context.Context, userID string, body string) (interface{}, error) {
-	if userID == "" {
-		return nil, NewAPIError(ErrUnauthorized, "Authentication required")
+	if err := requireAuth(userID); err != nil {
+		return nil, err
 	}
 
 	var req UpdateProfileRequest
@@ -42,13 +51,13 @@ func (h *Handler) UpdateMyProfile(ctx context.Context, userID string, body strin
 	if req.DisplayName == "" {
 		return nil, NewAPIError(ErrBadRequest, "displayName is required")
 	}
-	if len(req.DisplayName) > 50 {
+	if len(req.DisplayName) > maxDisplayNameLen {
 		return nil, NewAPIError(ErrBadRequest, "displayName must be 50 characters or less")
 	}
-	if len(req.Bio) > 500 {
+	if len(req.Bio) > maxBioLen {
 		return nil, NewAPIError(ErrBadRequest, "bio must be 500 characters or less")
 	}
-	if len(req.XHandle) > 30 {
+	if len(req.XHandle) > maxXHandleLen {
 		return nil, NewAPIError(ErrBadRequest, "xHandle must be 30 characters or less")
 	}
 
@@ -59,6 +68,7 @@ func (h *Handler) UpdateMyProfile(ctx context.Context, userID string, body strin
 	return user, nil
 }
 
+// GetUserProfile returns a public user profile by ID.
 func (h *Handler) GetUserProfile(ctx context.Context, targetUserID string) (interface{}, error) {
 	user, err := h.repo.GetUser(ctx, targetUserID)
 	if err != nil {
@@ -70,20 +80,15 @@ func (h *Handler) GetUserProfile(ctx context.Context, targetUserID string) (inte
 	return user, nil
 }
 
+// GetUserPublicRoadmaps returns a user's public roadmaps.
 func (h *Handler) GetUserPublicRoadmaps(ctx context.Context, targetUserID string, params map[string]string) (interface{}, error) {
-	limit := int32(20)
-	if l, ok := params["limit"]; ok {
-		if v, err := strconv.Atoi(l); err == nil && v > 0 && v <= 50 {
-			limit = int32(v)
-		}
-	}
+	limit := parseLimit(params, model.DefaultPageLimit, model.MaxPageLimitDefault)
 
 	roadmaps, cursor, err := h.repo.GetMyRoadmaps(ctx, targetUserID, limit, params["cursor"])
 	if err != nil {
 		return nil, NewAPIError(ErrInternal, "Failed to get roadmaps")
 	}
 
-	// Filter to only public roadmaps
 	var publicRoadmaps []model.RoadmapMeta
 	for _, r := range roadmaps {
 		if r.IsPublic {

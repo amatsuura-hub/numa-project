@@ -57,10 +57,10 @@ func TestEncodeCursor(t *testing.T) {
 
 func TestDecodeCursor(t *testing.T) {
 	tests := []struct {
-		name      string
-		cursor    string
-		wantErr   bool
-		wantKeys  map[string]string
+		name     string
+		cursor   string
+		wantErr  bool
+		wantKeys map[string]string
 	}{
 		{
 			name:     "valid cursor",

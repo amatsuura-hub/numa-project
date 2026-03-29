@@ -7,6 +7,7 @@ import SignupPage from "./pages/SignupPage";
 import ExplorePage from "./pages/ExplorePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import AuthGuard from "./components/common/AuthGuard";
+import LoadingSpinner from "./components/common/LoadingSpinner";
 
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const RoadmapDetailPage = lazy(() => import("./pages/RoadmapDetailPage"));
@@ -14,17 +15,9 @@ const RoadmapEditPage = lazy(() => import("./pages/RoadmapEditPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const UserPage = lazy(() => import("./pages/UserPage"));
 
-function LazyFallback() {
-  return (
-    <div className="flex items-center justify-center py-20">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-numa-600 border-t-transparent" />
-    </div>
-  );
-}
-
 function App() {
   return (
-    <Suspense fallback={<LazyFallback />}>
+    <Suspense fallback={<LoadingSpinner />}>
       <Routes>
         <Route element={<Layout />}>
           {/* Public routes */}

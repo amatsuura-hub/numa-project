@@ -10,6 +10,7 @@ import (
 	"github.com/numa-project/backend/internal/model"
 )
 
+// PutNode creates or overwrites a node record.
 func (d *DynamoDB) PutNode(ctx context.Context, node *model.Node) error {
 	item, err := attributevalue.MarshalMap(node)
 	if err != nil {
@@ -26,12 +27,13 @@ func (d *DynamoDB) PutNode(ctx context.Context, node *model.Node) error {
 	return nil
 }
 
+// DeleteNode removes a node from DynamoDB.
 func (d *DynamoDB) DeleteNode(ctx context.Context, roadmapID, nodeID string) error {
 	_, err := d.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
 		TableName: &d.TableName,
 		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: "ROADMAP#" + roadmapID},
-			"SK": &types.AttributeValueMemberS{Value: "NODE#" + nodeID},
+			"PK": &types.AttributeValueMemberS{Value: model.PKPrefixRoadmap + roadmapID},
+			"SK": &types.AttributeValueMemberS{Value: model.SKPrefixNode + nodeID},
 		},
 	})
 	if err != nil {
@@ -40,9 +42,10 @@ func (d *DynamoDB) DeleteNode(ctx context.Context, roadmapID, nodeID string) err
 	return nil
 }
 
+// BatchPutNodes writes multiple nodes in batches of 25.
 func (d *DynamoDB) BatchPutNodes(ctx context.Context, nodes []model.Node) error {
-	for i := 0; i < len(nodes); i += 25 {
-		end := i + 25
+	for i := 0; i < len(nodes); i += model.BatchWriteMaxItems {
+		end := i + model.BatchWriteMaxItems
 		if end > len(nodes) {
 			end = len(nodes)
 		}

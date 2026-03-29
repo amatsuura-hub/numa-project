@@ -12,12 +12,13 @@ import (
 	"github.com/numa-project/backend/internal/model"
 )
 
+// IsBookmarked checks if a user has bookmarked a roadmap.
 func (d *DynamoDB) IsBookmarked(ctx context.Context, userID, roadmapID string) (bool, error) {
 	out, err := d.Client.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: &d.TableName,
 		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: "USER#" + userID},
-			"SK": &types.AttributeValueMemberS{Value: "BOOKMARK#" + roadmapID},
+			"PK": &types.AttributeValueMemberS{Value: model.PKPrefixUser + userID},
+			"SK": &types.AttributeValueMemberS{Value: model.SKPrefixBookmark + roadmapID},
 		},
 		ProjectionExpression: aws.String("PK"),
 	})
@@ -27,15 +28,16 @@ func (d *DynamoDB) IsBookmarked(ctx context.Context, userID, roadmapID string) (
 	return out.Item != nil, nil
 }
 
+// BookmarkRoadmap creates a bookmark for a user on a roadmap.
 func (d *DynamoDB) BookmarkRoadmap(ctx context.Context, userID, roadmapID string) error {
 	now := time.Now().UTC().Format(time.RFC3339)
 
 	bookmark := model.Bookmark{
-		PK:        "USER#" + userID,
-		SK:        "BOOKMARK#" + roadmapID,
+		PK:        model.PKPrefixUser + userID,
+		SK:        model.SKPrefixBookmark + roadmapID,
 		CreatedAt: now,
-		GSI3PK:    "ROADMAP#" + roadmapID,
-		GSI3SK:    "BOOKMARK#" + userID,
+		GSI3PK:    model.PKPrefixRoadmap + roadmapID,
+		GSI3SK:    model.SKPrefixBookmark + userID,
 	}
 
 	item, err := attributevalue.MarshalMap(bookmark)
@@ -51,24 +53,26 @@ func (d *DynamoDB) BookmarkRoadmap(ctx context.Context, userID, roadmapID string
 	return err
 }
 
+// UnbookmarkRoadmap removes a bookmark.
 func (d *DynamoDB) UnbookmarkRoadmap(ctx context.Context, userID, roadmapID string) error {
 	_, err := d.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{
 		TableName: &d.TableName,
 		Key: map[string]types.AttributeValue{
-			"PK": &types.AttributeValueMemberS{Value: "USER#" + userID},
-			"SK": &types.AttributeValueMemberS{Value: "BOOKMARK#" + roadmapID},
+			"PK": &types.AttributeValueMemberS{Value: model.PKPrefixUser + userID},
+			"SK": &types.AttributeValueMemberS{Value: model.SKPrefixBookmark + roadmapID},
 		},
 	})
 	return err
 }
 
+// GetMyBookmarks returns a user's bookmarks with pagination.
 func (d *DynamoDB) GetMyBookmarks(ctx context.Context, userID string, limit int32, cursor string) ([]model.Bookmark, string, error) {
 	input := &dynamodb.QueryInput{
 		TableName:              &d.TableName,
 		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :prefix)"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk":     &types.AttributeValueMemberS{Value: "USER#" + userID},
-			":prefix": &types.AttributeValueMemberS{Value: "BOOKMARK#"},
+			":pk":     &types.AttributeValueMemberS{Value: model.PKPrefixUser + userID},
+			":prefix": &types.AttributeValueMemberS{Value: model.SKPrefixBookmark},
 		},
 		ScanIndexForward: aws.Bool(false),
 		Limit:            &limit,

@@ -1,3 +1,5 @@
+# API Gateway: REST API with Cognito auth, CORS, WAF rate limiting, and CloudWatch logging.
+
 resource "aws_api_gateway_rest_api" "main" {
   name        = "${var.prefix}-api"
   description = "Numa API"
@@ -133,7 +135,7 @@ resource "aws_api_gateway_stage" "main" {
 # CloudWatch Log Group for API Gateway access logs
 resource "aws_cloudwatch_log_group" "api_gateway" {
   name              = "/aws/apigateway/${var.prefix}-api"
-  retention_in_days = 30
+  retention_in_days = var.log_retention_days
 }
 
 # API Gateway method settings — throttling + metrics
@@ -146,8 +148,8 @@ resource "aws_api_gateway_method_settings" "all" {
     metrics_enabled        = true
     logging_level          = "ERROR"
     data_trace_enabled     = false
-    throttling_burst_limit = 50
-    throttling_rate_limit  = 100
+    throttling_burst_limit = var.throttling_burst_limit
+    throttling_rate_limit  = var.throttling_rate_limit
   }
 }
 
@@ -198,7 +200,7 @@ resource "aws_wafv2_web_acl" "api" {
 
     statement {
       rate_based_statement {
-        limit              = 2000
+        limit              = var.waf_rate_limit
         aggregate_key_type = "IP"
       }
     }

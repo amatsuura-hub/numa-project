@@ -5,39 +5,36 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
+// DynamoDB implements Repository using AWS DynamoDB.
 type DynamoDB struct {
 	Client    *dynamodb.Client
 	TableName string
 }
 
+// NewDynamoDB creates a new DynamoDB repository client.
 func NewDynamoDB(ctx context.Context, tableName string) (*DynamoDB, error) {
 	var opts []func(*config.LoadOptions) error
 	opts = append(opts, config.WithRegion("ap-northeast-1"))
-
-	// Support DynamoDB Local
-	endpoint := os.Getenv("DYNAMODB_ENDPOINT")
-	if endpoint != "" {
-		opts = append(opts, config.WithEndpointResolverWithOptions(
-			aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-				if service == dynamodb.ServiceID {
-					return aws.Endpoint{URL: endpoint}, nil
-				}
-				return aws.Endpoint{}, fmt.Errorf("unknown endpoint requested for %s", service)
-			}),
-		))
-	}
 
 	cfg, err := config.LoadDefaultConfig(ctx, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("loading AWS config: %w", err)
 	}
 
-	client := dynamodb.NewFromConfig(cfg)
+	// Support DynamoDB Local
+	var ddbOpts []func(*dynamodb.Options)
+	endpoint := os.Getenv("DYNAMODB_ENDPOINT")
+	if endpoint != "" {
+		ddbOpts = append(ddbOpts, func(o *dynamodb.Options) {
+			o.BaseEndpoint = &endpoint
+		})
+	}
+
+	client := dynamodb.NewFromConfig(cfg, ddbOpts...)
 
 	return &DynamoDB{
 		Client:    client,

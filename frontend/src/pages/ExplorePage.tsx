@@ -5,6 +5,7 @@ import type { RoadmapMeta } from "../types";
 import { CATEGORIES } from "../types";
 import RoadmapCard from "../components/common/RoadmapCard";
 import PageHead from "../components/common/PageHead";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 function ExplorePage() {
   const [roadmaps, setRoadmaps] = useState<RoadmapMeta[]>([]);
@@ -90,9 +91,7 @@ function ExplorePage() {
 
       {/* Loading */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-numa-600 border-t-transparent" />
-        </div>
+        <LoadingSpinner />
       ) : roadmaps.length === 0 ? (
         <div className="rounded-lg border border-numa-100 bg-numa-50/30 p-8 text-center">
           <p className="text-gray-500">

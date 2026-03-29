@@ -2,17 +2,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
-import type { RoadmapMeta, ProgressWithRoadmap } from "../types";
+import type { RoadmapMeta, BookmarkItem, ProgressWithRoadmap } from "../types";
 import { CATEGORIES, NUMA_LEVELS, type Category } from "../types";
 import PageHead from "../components/common/PageHead";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 type Tab = "my" | "bookmarks" | "progress";
-
-interface BookmarkItem {
-  roadmapId: string;
-  createdAt: string;
-  roadmap?: RoadmapMeta;
-}
 
 function DashboardPage() {
   const [tab, setTab] = useState<Tab>("my");
@@ -144,9 +139,7 @@ function DashboardPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-numa-600 border-t-transparent" />
-        </div>
+        <LoadingSpinner />
       ) : tab === "my" ? (
         // My roadmaps
         roadmaps.length === 0 ? (

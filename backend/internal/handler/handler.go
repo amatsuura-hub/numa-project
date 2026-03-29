@@ -9,13 +9,20 @@ import (
 	"github.com/numa-project/backend/internal/repository"
 )
 
+// Handler holds application dependencies for HTTP handlers.
 type Handler struct {
 	repo repository.Repository
 }
 
+// New creates a new Handler with the given repository.
 func New(repo repository.Repository) *Handler {
 	return &Handler{repo: repo}
 }
+
+// Common error messages.
+const (
+	msgAuthRequired = "Authentication required"
+)
 
 // API error types
 var (
@@ -53,6 +60,15 @@ func (e *apiError) Unwrap() error {
 	return e.code
 }
 
+// requireAuth returns an UNAUTHORIZED error if userID is empty.
+func requireAuth(userID string) error {
+	if userID == "" {
+		return NewAPIError(ErrUnauthorized, msgAuthRequired)
+	}
+	return nil
+}
+
+// ErrorResponse converts an error to an API Gateway response with the appropriate status code.
 func ErrorResponse(err error, headers map[string]string) events.APIGatewayProxyResponse {
 	statusCode := http.StatusInternalServerError
 	code := "INTERNAL_ERROR"
@@ -80,7 +96,10 @@ func ErrorResponse(err error, headers map[string]string) events.APIGatewayProxyR
 		}
 	}
 
-	body, _ := json.Marshal(ErrorBody{Error: APIError{Code: code, Message: message}})
+	body, err := json.Marshal(ErrorBody{Error: APIError{Code: code, Message: message}})
+	if err != nil {
+		body = []byte(`{"error":{"code":"INTERNAL_ERROR","message":"Internal server error"}}`)
+	}
 	return events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Headers:    headers,

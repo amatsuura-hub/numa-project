@@ -1,3 +1,5 @@
+# DynamoDB: Single-table design with 3 GSIs for flexible access patterns.
+
 resource "aws_dynamodb_table" "main" {
   name         = "${var.prefix}-main"
   billing_mode = "PAY_PER_REQUEST"

@@ -4,6 +4,7 @@ import type {
   RoadmapDetail,
   RoadmapNode,
   RoadmapEdge,
+  BookmarkItem,
   Progress,
   ProgressWithRoadmap,
 } from "../types";
@@ -97,11 +98,7 @@ export const roadmapApi = {
     if (params?.cursor) query.set("cursor", params.cursor);
     const qs = query.toString();
     return api.get<{
-      bookmarks: Array<{
-        roadmapId: string;
-        createdAt: string;
-        roadmap?: RoadmapMeta;
-      }>;
+      bookmarks: BookmarkItem[];
       cursor?: string;
     }>(`/api/bookmarks${qs ? `?${qs}` : ""}`);
   },

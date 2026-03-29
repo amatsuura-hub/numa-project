@@ -2,6 +2,12 @@
 
 熟練者が初心者向けにマインドマップ形式のロードマップを作成・公開・共有するWebアプリケーション。沼の深さ（色の濃さ）で学習の深度を表現する、緑基調の沼テーマデザイン。
 
+## スクリーンショット
+
+| トップページ | ロードマップ編集 |
+|:---:|:---:|
+| ![トップページ](docs/screenshots/home.png) | ![エディタ](docs/screenshots/editor.png) |
+
 ## 技術スタック
 
 - **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS + React Flow
@@ -18,7 +24,8 @@
 - 自動保存（2秒 debounce）
 - ロードマップの公開・非公開設定
 - いいね・ブックマーク機能
-- カテゴリ別探索・カーソルベースページネーション
+- 進捗トラッキング（沼レベル 0〜5 で完了率を可視化）
+- カテゴリ別探索（16種）・カーソルベースページネーション
 - ユーザープロフィール管理
 - X (Twitter) 共有
 - レスポンシブデザイン・SEO/OGP 対応
@@ -118,6 +125,11 @@ cd frontend && npm run test
 | POST/DELETE | `/api/roadmaps/:id/like` | いいね |
 | POST/DELETE | `/api/roadmaps/:id/bookmark` | ブックマーク |
 | GET | `/api/bookmarks` | 自分のブックマーク一覧 |
+| GET | `/api/roadmaps/:id/progress` | ロードマップの進捗取得 |
+| PUT | `/api/roadmaps/:id/progress/nodes/:nodeId` | ノード完了 |
+| DELETE | `/api/roadmaps/:id/progress/nodes/:nodeId` | ノード未完了に戻す |
+| GET | `/api/progress` | 自分の全進捗一覧 |
+| GET | `/api/ogp/:id` | OGP メタタグ HTML（認証不要） |
 
 ## デプロイ
 
