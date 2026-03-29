@@ -31,7 +31,7 @@ function Header() {
         </button>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-5 sm:flex text-[13px] text-numa-text-muted">
+        <nav className="hidden items-center gap-5 sm:flex text-[13px] text-[#6a6050]">
           <Link to="/explore" className="hover:text-numa-brown">
             探す
           </Link>
