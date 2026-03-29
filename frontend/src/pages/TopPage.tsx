@@ -3,69 +3,104 @@ import { Link } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { roadmapApi } from "../api/roadmap";
 import type { RoadmapMeta, Category } from "../types";
-import { CATEGORIES, CATEGORY_ICONS } from "../types";
-import RoadmapCard from "../components/common/RoadmapCard";
+import { CATEGORIES } from "../types";
 import PageHead from "../components/common/PageHead";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import { Heron, Crocodile, Frog, Turtle, Owl } from "../components/creatures";
 
-/** Sample node preview for hero section (DTM theme) */
-function HeroNodePreview() {
+/* ── Depth bar (5-stop swamp gradient) ── */
+function DepthBar() {
+  const stops = [
+    "bg-[#e0d8c4]",
+    "bg-[#c8dab8]",
+    "bg-[#8aba82]",
+    "bg-[#5a9a52]",
+    "bg-[#2d5a32]",
+  ];
   return (
-    <div className="mx-auto mt-8 max-w-md">
-      <svg viewBox="0 0 400 260" className="w-full" aria-hidden="true">
-        {/* Edges */}
-        <line x1="200" y1="45" x2="120" y2="105" stroke="#86efac" strokeWidth="2" />
-        <line x1="200" y1="45" x2="280" y2="105" stroke="#86efac" strokeWidth="2" />
-        <line x1="120" y1="135" x2="80" y2="195" stroke="#86efac" strokeWidth="2" />
-        <line x1="120" y1="135" x2="160" y2="195" stroke="#86efac" strokeWidth="2" />
-        <line x1="280" y1="135" x2="280" y2="195" stroke="#86efac" strokeWidth="2" />
-
-        {/* Root node */}
-        <rect x="140" y="15" width="120" height="35" rx="8" fill="#16a34a" />
-        <text x="200" y="38" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold">DTM入門</text>
-
-        {/* Level 2 nodes */}
-        <rect x="60" y="105" width="120" height="30" rx="6" fill="#22c55e" />
-        <text x="120" y="125" textAnchor="middle" fill="white" fontSize="11">DAWの選び方</text>
-
-        <rect x="220" y="105" width="120" height="30" rx="6" fill="#22c55e" />
-        <text x="280" y="125" textAnchor="middle" fill="white" fontSize="11">音楽理論の基礎</text>
-
-        {/* Level 3 nodes */}
-        <rect x="20" y="195" width="120" height="30" rx="6" fill="#4ade80" />
-        <text x="80" y="215" textAnchor="middle" fill="#14532d" fontSize="10">ミックス基礎</text>
-
-        <rect x="100" y="195" width="120" height="30" rx="6" fill="#4ade80" />
-        <text x="160" y="215" textAnchor="middle" fill="#14532d" fontSize="10">シンセサイザー</text>
-
-        <rect x="220" y="195" width="120" height="30" rx="6" fill="#4ade80" />
-        <text x="280" y="215" textAnchor="middle" fill="#14532d" fontSize="10">コード進行</text>
-      </svg>
+    <div className="flex gap-0.5 mt-2.5">
+      {stops.map((color, i) => (
+        <div key={i} className={`h-[3px] flex-1 rounded-sm ${color}`} />
+      ))}
     </div>
   );
 }
 
-/** Depth bar visualization for roadmap cards */
-function DepthBar({ depth }: { depth: number }) {
-  const colors = [
-    "bg-numa-100",
-    "bg-numa-200",
-    "bg-numa-300",
-    "bg-numa-400",
-    "bg-numa-500",
-    "bg-numa-600",
-    "bg-numa-700",
-    "bg-numa-800",
-  ];
+/* ── Hero node preview (matches mockup) ── */
+function HeroNodePreview() {
   return (
-    <div className="flex gap-0.5">
-      {colors.slice(0, depth).map((cls, i) => (
-        <div key={i} className={`h-1.5 w-3 rounded-sm ${cls}`} />
-      ))}
-      {Array.from({ length: 8 - depth }).map((_, i) => (
-        <div key={`empty-${i}`} className="h-1.5 w-3 rounded-sm bg-gray-100" />
-      ))}
+    <div className="relative w-full max-w-[340px] min-h-[280px] z-[1]">
+      <svg
+        className="absolute inset-0 pointer-events-none"
+        viewBox="0 0 340 280"
+        aria-hidden="true"
+      >
+        <line x1="170" y1="30" x2="60" y2="76" stroke="rgba(45,90,50,.15)" strokeWidth="1" />
+        <line x1="170" y1="30" x2="280" y2="76" stroke="rgba(45,90,50,.15)" strokeWidth="1" />
+        <line x1="50" y1="100" x2="50" y2="146" stroke="rgba(45,90,50,.12)" strokeWidth="1" />
+        <line x1="290" y1="100" x2="290" y2="146" stroke="rgba(45,90,50,.12)" strokeWidth="1" />
+        <line x1="50" y1="172" x2="170" y2="248" stroke="rgba(45,90,50,.1)" strokeWidth="1" />
+        <line x1="290" y1="172" x2="170" y2="248" stroke="rgba(45,90,50,.1)" strokeWidth="1" />
+      </svg>
+      {/* Nodes with left-border style */}
+      <div className="absolute left-1/2 top-0 -translate-x-1/2 rounded px-4 py-2.5 text-xs font-semibold bg-numa-bg-warm border-l-[3px] border-l-[#b8976a] text-[#7a6840]">
+        DTM入門
+      </div>
+      <div className="absolute left-0 top-[70px] rounded px-4 py-2.5 text-xs font-semibold bg-swamp-50 border-l-[3px] border-l-swamp-400 text-swamp-600">
+        DAWの選び方
+      </div>
+      <div className="absolute right-0 top-[70px] rounded px-4 py-2.5 text-xs font-semibold bg-swamp-50 border-l-[3px] border-l-swamp-400 text-swamp-600">
+        音楽理論の基礎
+      </div>
+      <div className="absolute left-[10px] top-[140px] rounded px-4 py-2.5 text-xs font-semibold bg-swamp-100 border-l-[3px] border-l-[#43A047] text-[#2d6a28]">
+        最初の1曲
+      </div>
+      <div className="absolute right-[10px] top-[140px] rounded px-4 py-2.5 text-xs font-semibold bg-[#c0dab4] border-l-[3px] border-l-swamp-700 text-swamp-800">
+        ミキシング
+      </div>
+      <div className="absolute left-1/2 bottom-0 -translate-x-1/2 rounded px-4 py-2.5 text-xs font-bold bg-swamp-200 border-l-[3px] border-l-swamp-900 text-swamp-900">
+        自作曲を公開する
+      </div>
     </div>
+  );
+}
+
+/* ── Roadmap card (new design) ── */
+function PopularCard({ roadmap }: { roadmap: RoadmapMeta }) {
+  return (
+    <Link
+      to={`/roadmaps/${roadmap.roadmapId}`}
+      className="block border border-[rgba(90,70,40,.08)] rounded-md overflow-hidden bg-white transition hover:border-swamp-600/25 hover:-translate-y-0.5"
+    >
+      {/* Depth gradient image bar */}
+      <div className="h-16 flex">
+        {["#f0ead8", "#e8f0e4", "#d4e8c8", "#b8d4a8", "#8aba82"].map((c, i) => (
+          <span key={i} className="flex-1" style={{ background: c }} />
+        ))}
+      </div>
+      <div className="p-3.5">
+        {roadmap.category && (
+          <div className="text-[10px] font-semibold text-numa-gold tracking-[1px] uppercase mb-1.5">
+            {CATEGORIES[roadmap.category as Category] || roadmap.category}
+          </div>
+        )}
+        <div className="font-serif text-[15px] font-bold text-numa-text leading-snug mb-1">
+          {roadmap.title}
+        </div>
+        {roadmap.userId && (
+          <div className="text-xs text-numa-text-hint mb-2.5">
+            by {roadmap.userId.slice(0, 8)}...
+          </div>
+        )}
+        <div className="flex justify-between items-center text-[11px]">
+          <span className="text-numa-text-hint">
+            {new Date(roadmap.createdAt).toLocaleDateString("ja-JP")}
+          </span>
+          <span className="text-numa-gold font-semibold">{roadmap.likeCount}</span>
+        </div>
+        <DepthBar />
+      </div>
+    </Link>
   );
 }
 
@@ -95,186 +130,178 @@ function TopPage() {
     <div>
       <PageHead />
 
-      {/* ─── Hero Section ─── */}
-      <div className="numa-ripple-bg relative overflow-hidden px-4 py-12 text-center sm:py-20">
-        {/* Decorative creatures */}
-        <div className="numa-creature-frog numa-bubble-slow" style={{ top: 10, left: "8%" }} />
-        <div className="numa-creature-fish numa-bubble-delay" style={{ bottom: 20, right: "12%" }} />
-        <div className="numa-creature-turtle numa-bubble" style={{ top: 30, right: "5%" }} />
+      {/* ─── Hero (2-col asymmetric) ─── */}
+      <div className="grid md:grid-cols-2 min-h-[420px] relative overflow-hidden">
+        {/* Left: text + CTA */}
+        <div className="relative flex flex-col justify-center px-8 py-12 md:py-16 md:pr-10">
+          <Heron className="absolute top-4 right-0 w-28 text-swamp-700 opacity-[0.05] pointer-events-none" />
 
-        {/* Decorative bubbles */}
-        <div className="pointer-events-none absolute left-[15%] top-[20%] h-3 w-3 rounded-full bg-numa-300/20 numa-bubble" />
-        <div className="pointer-events-none absolute left-[70%] top-[60%] h-2 w-2 rounded-full bg-numa-400/15 numa-bubble-delay" />
-        <div className="pointer-events-none absolute left-[45%] top-[75%] h-4 w-4 rounded-full bg-numa-200/20 numa-bubble-slow" />
-
-        <h1 className="relative mb-4 text-4xl font-bold text-gray-900 sm:text-5xl">
-          <span className="text-numa-600">Numa</span>
-        </h1>
-        <p className="relative mb-2 text-lg text-gray-600 sm:text-xl">
-          あなたの知識を、ロードマップに。
-        </p>
-        <p className="relative mb-8 text-sm text-gray-500 sm:text-base">
-          熟練者が作る学習ロードマップで、新しい「沼」に飛び込もう。
-        </p>
-
-        <div className="relative flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-          <Link
-            to="/explore"
-            className="rounded-md border border-numa-600 px-6 py-3 font-medium text-numa-600 hover:bg-numa-50"
-          >
-            ロードマップを探す
-          </Link>
-          {user ? (
+          <span className="font-serif text-[11px] tracking-[3px] text-numa-gold uppercase mb-4">
+            roadmap sharing
+          </span>
+          <h1 className="font-serif text-3xl font-black text-numa-text leading-[1.4] mb-3.5">
+            好きなこと、<br />
+            <span className="numa-em-underline">沼</span>のように深く。
+          </h1>
+          <p className="text-sm text-numa-text-muted leading-relaxed max-w-[360px] mb-7">
+            熟練者が作ったロードマップで、新しい世界に飛び込もう。
+            ノードをクリアするたびに、沼は深くなる。
+            気づいたら、あなたも沼の住人。
+          </p>
+          <div className="flex gap-3">
             <Link
-              to="/roadmaps/new"
-              className="rounded-md bg-numa-600 px-6 py-3 font-medium text-white hover:bg-numa-700"
+              to="/explore"
+              className="bg-swamp-700 text-green-50 rounded px-6 py-3 text-sm font-bold hover:bg-swamp-800 transition"
             >
-              ロードマップを作成
+              沼を探しに行く
             </Link>
-          ) : (
-            <Link
-              to="/signup"
-              className="rounded-md bg-numa-600 px-6 py-3 font-medium text-white hover:bg-numa-700"
-            >
-              無料で始める
-            </Link>
-          )}
-        </div>
-
-        {/* Sample Roadmap Node Preview */}
-        <HeroNodePreview />
-
-        {/* Depth indicator */}
-        <div className="relative mx-auto mt-8 flex max-w-xs items-center gap-1">
-          <span className="text-xs text-gray-400">浅い</span>
-          <div className="flex flex-1 gap-0.5">
-            {["bg-numa-100", "bg-numa-200", "bg-numa-300", "bg-numa-400", "bg-numa-500", "bg-numa-600", "bg-numa-700", "bg-numa-800"].map((cls, i) => (
-              <div key={i} className={`h-2 flex-1 ${i === 0 ? "rounded-l-full" : ""} ${i === 7 ? "rounded-r-full" : ""} ${cls}`} />
-            ))}
+            {user ? (
+              <Link
+                to="/roadmaps/new"
+                className="bg-transparent text-numa-brown border border-[rgba(90,70,40,.2)] rounded px-6 py-3 text-sm font-semibold hover:border-[rgba(90,70,40,.4)] transition"
+              >
+                ロードマップを作る
+              </Link>
+            ) : (
+              <Link
+                to="/signup"
+                className="bg-transparent text-numa-brown border border-[rgba(90,70,40,.2)] rounded px-6 py-3 text-sm font-semibold hover:border-[rgba(90,70,40,.4)] transition"
+              >
+                ロードマップを作る
+              </Link>
+            )}
           </div>
-          <span className="text-xs text-gray-400">深い</span>
         </div>
-        <p className="relative mt-1 text-xs text-gray-400">
-          沼の深さ = あなたの成長
-        </p>
+
+        {/* Right: warm bg + stripe pattern + node preview */}
+        <div className="relative bg-numa-bg-warm flex items-center justify-center p-8 overflow-hidden">
+          <div className="absolute inset-0 numa-stripe-pattern" />
+          <Crocodile className="absolute bottom-5 left-3 w-20 text-swamp-700 opacity-[0.04] pointer-events-none" />
+          <HeroNodePreview />
+        </div>
       </div>
 
-      {/* ─── Category Grid ─── */}
-      <div className="py-10">
-        <h2 className="mb-6 text-xl font-bold text-gray-900">カテゴリから探す</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-4">
+      <hr className="border-t border-[rgba(90,70,40,.08)]" />
+
+      {/* ─── Categories (horizontal scroll pills) ─── */}
+      <div className="relative px-8 py-10 overflow-hidden">
+        <Turtle className="absolute bottom-2 right-6 w-24 text-swamp-700 opacity-[0.04] pointer-events-none" />
+
+        <div className="flex justify-between items-baseline mb-5">
+          <h2 className="font-serif text-xl font-bold text-numa-text">カテゴリから沼を探す</h2>
+          <Link to="/explore" className="text-sm text-numa-gold hover:underline">
+            すべて見る
+          </Link>
+        </div>
+
+        <div className="flex gap-2.5 overflow-x-auto pb-1">
           {categoryEntries.map(([key, name]) => (
             <Link
               key={key}
               to={`/explore?category=${key}`}
-              className="flex items-center gap-3 rounded-lg border border-numa-100 bg-white p-4 transition-all hover:border-numa-300 hover:shadow-md"
+              className="flex-shrink-0 border border-[rgba(90,70,40,.1)] bg-white rounded px-4 py-2.5 text-sm text-[#5a4e3a] whitespace-nowrap transition hover:border-swamp-600/30 hover:text-swamp-700"
             >
-              <span className="text-2xl">{CATEGORY_ICONS[key]}</span>
-              <span className="text-sm font-medium text-gray-700">{name}</span>
+              {name}
             </Link>
           ))}
         </div>
       </div>
 
-      {/* ─── Popular Roadmaps ─── */}
-      <div className="py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">人気のロードマップ</h2>
-          <Link to="/explore" className="text-sm text-numa-600 hover:underline">
-            もっと見る →
+      {/* ─── Popular Roadmaps (1.2fr 1fr 1fr grid) ─── */}
+      <div className="relative px-8 pb-10 overflow-hidden">
+        <Owl className="absolute top-0 right-10 w-16 text-swamp-700 opacity-[0.04] pointer-events-none" />
+
+        <div className="flex justify-between items-baseline mb-5">
+          <h2 className="font-serif text-xl font-bold text-numa-text">いま熱い沼</h2>
+          <Link to="/explore" className="text-sm text-numa-gold hover:underline">
+            もっと見る
           </Link>
         </div>
 
         {isLoading ? (
           <LoadingSpinner />
         ) : popularRoadmaps.length === 0 ? (
-          <div className="rounded-lg border border-numa-200 bg-numa-50/50 p-8 text-center">
-            <p className="text-gray-500">
+          <div className="rounded-md border border-[rgba(90,70,40,.08)] bg-white p-8 text-center">
+            <p className="text-numa-text-muted">
               まだロードマップがありません。最初のロードマップを作成しましょう！
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {popularRoadmaps.map((roadmap) => (
-              <div key={roadmap.roadmapId} className="flex flex-col">
-                <RoadmapCard roadmap={roadmap} />
-                <div className="mt-2 px-1">
-                  <DepthBar depth={Math.min(8, Math.max(1, Math.ceil(roadmap.likeCount / 3) + 2))} />
-                </div>
-              </div>
+          <div className="grid gap-3.5 md:grid-cols-[1.2fr_1fr_1fr]">
+            {popularRoadmaps.slice(0, 3).map((roadmap) => (
+              <PopularCard key={roadmap.roadmapId} roadmap={roadmap} />
             ))}
           </div>
         )}
       </div>
 
-      {/* ─── How It Works ─── */}
-      <div className="py-10">
-        <h2 className="mb-8 text-center text-xl font-bold text-gray-900">
-          Numaの使い方
-        </h2>
-        <div className="grid gap-6 sm:grid-cols-3">
+      {/* ─── How It Works (warm bg, left-border steps) ─── */}
+      <div className="relative bg-numa-bg-warm border-t border-b border-[rgba(90,70,40,.06)] px-8 py-10 overflow-hidden">
+        <Owl className="absolute top-5 right-8 w-[70px] text-swamp-700 opacity-[0.05] pointer-events-none" />
+
+        <h2 className="font-serif text-xl font-bold text-numa-text mb-5">Numaの使い方</h2>
+        <div className="grid gap-6 md:grid-cols-3">
           {[
             {
-              step: "1",
+              num: "01",
               title: "沼を見つける",
               desc: "カテゴリや検索から、興味のあるロードマップを探しましょう。",
-              icon: "🔍",
             },
             {
-              step: "2",
+              num: "02",
               title: "沼にハマる",
               desc: "ノードをひとつずつクリアして、沼の深みへ進みましょう。",
-              icon: "🐸",
             },
             {
-              step: "3",
+              num: "03",
               title: "沼を共有する",
               desc: "あなたの知識をロードマップにして、次の人に共有しましょう。",
-              icon: "🌿",
             },
-          ].map((item) => (
+          ].map((step) => (
             <div
-              key={item.step}
-              className="flex flex-col items-center rounded-lg border border-numa-100 bg-white p-6 text-center"
+              key={step.num}
+              className="border-l-2 border-[rgba(90,70,40,.12)] pl-5"
             >
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-numa-50 text-2xl">
-                {item.icon}
+              <div className="font-serif text-3xl font-black text-[rgba(90,70,40,.12)] leading-none mb-2">
+                {step.num}
               </div>
-              <div className="mb-1 text-xs font-bold text-numa-400">
-                STEP {item.step}
-              </div>
-              <h3 className="mb-2 text-lg font-bold text-gray-900">
-                {item.title}
-              </h3>
-              <p className="text-sm text-gray-500">{item.desc}</p>
+              <div className="text-sm font-bold text-numa-text mb-1">{step.title}</div>
+              <div className="text-xs text-numa-text-muted leading-relaxed">{step.desc}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* ─── Footer CTA ─── */}
-      <div className="rounded-lg bg-numa-50 p-8 text-center sm:p-12">
-        <h2 className="mb-3 text-2xl font-bold text-gray-900">
-          あなたも沼を作りませんか？
+      <div className="relative text-center px-8 py-12 overflow-hidden">
+        <Frog className="absolute top-4 left-14 w-12 text-swamp-700 opacity-[0.04] -rotate-[10deg] pointer-events-none" />
+
+        <h2 className="font-serif text-[22px] font-black text-numa-text mb-2 relative z-[1]">
+          さあ、あなたの沼を共有しよう。
         </h2>
-        <p className="mb-6 text-sm text-gray-500">
-          熟練者の知識を、マインドマップ形式のロードマップにして共有しましょう。
+        <p className="text-sm text-numa-text-muted mb-6 relative z-[1]">
+          好きなことに詳しいあなたの知識が、誰かの道しるべになる。
         </p>
         {user ? (
           <Link
             to="/roadmaps/new"
-            className="inline-block rounded-md bg-numa-600 px-8 py-3 font-medium text-white hover:bg-numa-700"
+            className="relative z-[1] inline-block bg-swamp-700 text-green-50 rounded px-9 py-3.5 text-[15px] font-bold hover:bg-swamp-800 transition"
           >
             ロードマップを作成する
           </Link>
         ) : (
           <Link
             to="/signup"
-            className="inline-block rounded-md bg-numa-600 px-8 py-3 font-medium text-white hover:bg-numa-700"
+            className="relative z-[1] inline-block bg-swamp-700 text-green-50 rounded px-9 py-3.5 text-[15px] font-bold hover:bg-swamp-800 transition"
           >
-            無料で始める
+            無料ではじめる
           </Link>
         )}
+      </div>
+
+      {/* ─── Footer ─── */}
+      <div className="text-center py-5 text-[11px] text-numa-text-hint border-t border-[rgba(90,70,40,.06)]">
+        Numa - ロードマップ作成＆共有プラットフォーム
       </div>
     </div>
   );

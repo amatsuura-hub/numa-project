@@ -7,16 +7,16 @@ function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="border-b border-numa-100 bg-white">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <Link to="/" className="text-2xl font-bold text-numa-700">
+    <header className="border-b border-[rgba(90,70,40,.1)] bg-numa-bg">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-3.5">
+        <Link to="/" className="font-serif text-2xl font-black text-numa-brown tracking-[1px]">
           Numa
         </Link>
 
         {/* Mobile menu button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:text-gray-700 sm:hidden"
+          className="inline-flex items-center justify-center rounded-md p-2 text-numa-text-muted hover:text-numa-text sm:hidden"
           aria-label="メニュー"
         >
           {menuOpen ? (
@@ -31,54 +31,42 @@ function Header() {
         </button>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-4 sm:flex">
-          <Link
-            to="/explore"
-            className="text-gray-600 hover:text-gray-900"
-          >
+        <nav className="hidden items-center gap-5 sm:flex text-[13px] text-numa-text-muted">
+          <Link to="/explore" className="hover:text-numa-brown">
             探す
           </Link>
 
           {user ? (
             <>
-              <Link
-                to="/dashboard"
-                className="text-gray-600 hover:text-gray-900"
-              >
+              <Link to="/dashboard" className="hover:text-numa-brown">
                 ダッシュボード
               </Link>
-              <Link
-                to="/profile"
-                className="text-gray-600 hover:text-gray-900"
-              >
+              <Link to="/profile" className="hover:text-numa-brown">
                 プロフィール
               </Link>
               <Link
                 to="/roadmaps/new"
-                className="rounded-md bg-numa-600 px-4 py-2 text-sm font-medium text-white hover:bg-numa-700"
+                className="bg-swamp-700 text-green-50 rounded px-5 py-1.5 text-sm font-semibold hover:bg-swamp-800 transition"
               >
                 作成
               </Link>
               <button
                 onClick={logout}
-                className="text-sm text-gray-500 hover:text-gray-700"
+                className="text-numa-text-hint hover:text-numa-brown"
               >
                 ログアウト
               </button>
             </>
           ) : (
             <>
-              <Link
-                to="/login"
-                className="text-gray-600 hover:text-gray-900"
-              >
+              <Link to="/login" className="hover:text-numa-brown">
                 ログイン
               </Link>
               <Link
                 to="/signup"
-                className="rounded-md bg-numa-600 px-4 py-2 text-sm font-medium text-white hover:bg-numa-700"
+                className="bg-swamp-700 text-green-50 rounded px-5 py-1.5 text-sm font-semibold hover:bg-swamp-800 transition"
               >
-                サインアップ
+                はじめる
               </Link>
             </>
           )}
@@ -87,64 +75,45 @@ function Header() {
 
       {/* Mobile nav */}
       {menuOpen && (
-        <nav className="border-t border-gray-100 px-4 pb-4 pt-2 sm:hidden">
-          <div className="flex flex-col gap-3">
-            <Link
-              to="/explore"
-              onClick={() => setMenuOpen(false)}
-              className="text-gray-600 hover:text-gray-900"
-            >
+        <nav className="border-t border-[rgba(90,70,40,.08)] px-8 pb-4 pt-2 sm:hidden">
+          <div className="flex flex-col gap-3 text-[13px] text-numa-text-muted">
+            <Link to="/explore" onClick={() => setMenuOpen(false)} className="hover:text-numa-brown">
               探す
             </Link>
 
             {user ? (
               <>
-                <Link
-                  to="/dashboard"
-                  onClick={() => setMenuOpen(false)}
-                  className="text-gray-600 hover:text-gray-900"
-                >
+                <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="hover:text-numa-brown">
                   ダッシュボード
                 </Link>
-                <Link
-                  to="/profile"
-                  onClick={() => setMenuOpen(false)}
-                  className="text-gray-600 hover:text-gray-900"
-                >
+                <Link to="/profile" onClick={() => setMenuOpen(false)} className="hover:text-numa-brown">
                   プロフィール
                 </Link>
                 <Link
                   to="/roadmaps/new"
                   onClick={() => setMenuOpen(false)}
-                  className="rounded-md bg-numa-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-numa-700"
+                  className="bg-swamp-700 text-green-50 rounded px-5 py-1.5 text-center text-sm font-semibold hover:bg-swamp-800 transition"
                 >
                   作成
                 </Link>
                 <button
-                  onClick={() => {
-                    logout();
-                    setMenuOpen(false);
-                  }}
-                  className="text-left text-sm text-gray-500 hover:text-gray-700"
+                  onClick={() => { logout(); setMenuOpen(false); }}
+                  className="text-left text-numa-text-hint hover:text-numa-brown"
                 >
                   ログアウト
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  to="/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="text-gray-600 hover:text-gray-900"
-                >
+                <Link to="/login" onClick={() => setMenuOpen(false)} className="hover:text-numa-brown">
                   ログイン
                 </Link>
                 <Link
                   to="/signup"
                   onClick={() => setMenuOpen(false)}
-                  className="rounded-md bg-numa-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-numa-700"
+                  className="bg-swamp-700 text-green-50 rounded px-5 py-1.5 text-center text-sm font-semibold hover:bg-swamp-800 transition"
                 >
-                  サインアップ
+                  はじめる
                 </Link>
               </>
             )}
