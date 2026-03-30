@@ -2,8 +2,10 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"regexp"
+	"unicode/utf8"
 )
 
 func validateTags(tags []string) error {
@@ -15,8 +17,8 @@ func validateTags(tags []string) error {
 		if tag == "" {
 			return NewAPIError(ErrBadRequest, "tags cannot be empty")
 		}
-		if len(tag) > 30 {
-			return NewAPIError(ErrBadRequest, "each tag must be 30 characters or less")
+		if utf8.RuneCountInString(tag) > 30 {
+			return NewAPIError(ErrBadRequest, fmt.Sprintf("each tag must be 30 characters or less (got %d)", utf8.RuneCountInString(tag)))
 		}
 		if seen[tag] {
 			return NewAPIError(ErrBadRequest, "duplicate tags are not allowed")
@@ -31,14 +33,14 @@ func validateRoadmapFields(title string, description string, category string, ta
 	if title == "" {
 		return NewAPIError(ErrBadRequest, "title is required")
 	}
-	if len(title) > 100 {
-		return NewAPIError(ErrBadRequest, "title must be 100 characters or less")
+	if utf8.RuneCountInString(title) > 100 {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("title must be 100 characters or less (got %d)", utf8.RuneCountInString(title)))
 	}
-	if len(description) > 1000 {
-		return NewAPIError(ErrBadRequest, "description must be 1000 characters or less")
+	if utf8.RuneCountInString(description) > 1000 {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("description must be 1000 characters or less (got %d)", utf8.RuneCountInString(description)))
 	}
-	if len(category) > 50 {
-		return NewAPIError(ErrBadRequest, "category must be 50 characters or less")
+	if utf8.RuneCountInString(category) > 50 {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("category must be 50 characters or less (got %d)", utf8.RuneCountInString(category)))
 	}
 	if err := validateTags(tags); err != nil {
 		return err
@@ -67,11 +69,11 @@ func validateNodeFields(label, description, color, rawURL string) error {
 	if label == "" {
 		return NewAPIError(ErrBadRequest, "label is required")
 	}
-	if len(label) > 50 {
-		return NewAPIError(ErrBadRequest, "label must be 50 characters or less")
+	if utf8.RuneCountInString(label) > 50 {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("node label must be 50 characters or less (got %d)", utf8.RuneCountInString(label)))
 	}
-	if len(description) > 500 {
-		return NewAPIError(ErrBadRequest, "description must be 500 characters or less")
+	if utf8.RuneCountInString(description) > 500 {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("node description must be 500 characters or less (got %d)", utf8.RuneCountInString(description)))
 	}
 	if color != "" && !hexColorRegex.MatchString(color) {
 		return NewAPIError(ErrBadRequest, "color must be a valid hex color (e.g. #4c6ef5)")

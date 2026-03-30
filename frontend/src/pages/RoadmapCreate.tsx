@@ -118,20 +118,36 @@ function SortableNode({ node, index, total, onUpdate, onRemove }: SortableNodePr
 
       {/* Fields */}
       <div className="flex-1 space-y-2">
-        <input
-          type="text"
-          value={node.label}
-          onChange={(e) => onUpdate(node.id, "label", e.target.value)}
-          placeholder="ステップ名"
-          className="w-full rounded border border-[rgba(90,70,40,.1)] bg-transparent px-2 py-1 text-sm text-numa-text placeholder:text-numa-text-muted/50 focus:border-swamp-600 focus:outline-none"
-        />
-        <input
-          type="text"
-          value={node.description}
-          onChange={(e) => onUpdate(node.id, "description", e.target.value)}
-          placeholder="説明（任意）"
-          className="w-full rounded border border-[rgba(90,70,40,.06)] bg-transparent px-2 py-1 text-xs text-numa-text-muted placeholder:text-numa-text-muted/40 focus:border-swamp-600 focus:outline-none"
-        />
+        <div>
+          <input
+            type="text"
+            value={node.label}
+            onChange={(e) => onUpdate(node.id, "label", e.target.value)}
+            maxLength={50}
+            placeholder="ステップ名"
+            className={`w-full rounded border bg-transparent px-2 py-1 text-sm text-numa-text placeholder:text-numa-text-muted/50 focus:border-swamp-600 focus:outline-none ${
+              node.label.length >= 50 ? "border-red-400" : "border-[rgba(90,70,40,.1)]"
+            }`}
+          />
+          <div className="text-right text-[10px] text-numa-text-hint mt-0.5">
+            {node.label.length} / 50
+          </div>
+        </div>
+        <div>
+          <input
+            type="text"
+            value={node.description}
+            onChange={(e) => onUpdate(node.id, "description", e.target.value)}
+            maxLength={500}
+            placeholder="説明（任意）"
+            className="w-full rounded border border-[rgba(90,70,40,.06)] bg-transparent px-2 py-1 text-xs text-numa-text-muted placeholder:text-numa-text-muted/40 focus:border-swamp-600 focus:outline-none"
+          />
+          {node.description.length > 0 && (
+            <div className="text-right text-[10px] text-numa-text-hint mt-0.5">
+              {node.description.length} / 500
+            </div>
+          )}
+        </div>
         <input
           type="url"
           value={node.url}
@@ -445,8 +461,10 @@ function RoadmapCreate() {
 
       toast.success("ロードマップを作成しました");
       navigate(`/roadmaps/${roadmapId}/edit`, { replace: true });
-    } catch {
-      toast.error("作成に失敗しました");
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { error?: { message?: string } } } };
+      const msg = err?.response?.data?.error?.message || "作成に失敗しました";
+      toast.error(msg);
     } finally {
       setIsSaving(false);
     }

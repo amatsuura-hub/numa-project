@@ -87,7 +87,7 @@ func TestUpdateMyProfile(t *testing.T) {
 			name:    "display name too long",
 			userID:  "user-1",
 			body:    `{"displayName":"` + strings.Repeat("a", 51) + `"}`,
-			wantErr: "displayName must be 50 characters or less",
+			wantErr: "displayName must be 50 characters or less (got 51)",
 		},
 		{
 			name:   "success",

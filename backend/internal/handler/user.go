@@ -3,6 +3,8 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"unicode/utf8"
 
 	"github.com/numa-project/backend/internal/model"
 )
@@ -51,14 +53,14 @@ func (h *Handler) UpdateMyProfile(ctx context.Context, userID string, body strin
 	if req.DisplayName == "" {
 		return nil, NewAPIError(ErrBadRequest, "displayName is required")
 	}
-	if len(req.DisplayName) > maxDisplayNameLen {
-		return nil, NewAPIError(ErrBadRequest, "displayName must be 50 characters or less")
+	if utf8.RuneCountInString(req.DisplayName) > maxDisplayNameLen {
+		return nil, NewAPIError(ErrBadRequest, fmt.Sprintf("displayName must be %d characters or less (got %d)", maxDisplayNameLen, utf8.RuneCountInString(req.DisplayName)))
 	}
-	if len(req.Bio) > maxBioLen {
-		return nil, NewAPIError(ErrBadRequest, "bio must be 500 characters or less")
+	if utf8.RuneCountInString(req.Bio) > maxBioLen {
+		return nil, NewAPIError(ErrBadRequest, fmt.Sprintf("bio must be %d characters or less (got %d)", maxBioLen, utf8.RuneCountInString(req.Bio)))
 	}
-	if len(req.XHandle) > maxXHandleLen {
-		return nil, NewAPIError(ErrBadRequest, "xHandle must be 30 characters or less")
+	if utf8.RuneCountInString(req.XHandle) > maxXHandleLen {
+		return nil, NewAPIError(ErrBadRequest, fmt.Sprintf("xHandle must be %d characters or less (got %d)", maxXHandleLen, utf8.RuneCountInString(req.XHandle)))
 	}
 
 	user, err := h.repo.UpdateUser(ctx, userID, req.DisplayName, req.Bio, req.XHandle)
