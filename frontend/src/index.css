@@ -3,19 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --numa-bg: #f2ede3;
-  --numa-bg-warm: #e8dfcc;
-  --numa-text: #3a3428;
-  --numa-text-muted: #8a7e6e;
-  --numa-gold: #8a7248;
-  --numa-brown: #5a4628;
-  --numa-border: rgba(90, 70, 40, 0.08);
-  --numa-border-hover: rgba(90, 70, 40, 0.2);
+  --numa-bg: #ede6d8;
+  --numa-bg-warm: #e4dbc8;
+  --numa-text: #252018;
+  --numa-text-muted: #6a6050;
+  --numa-text-hint: #9a9080;
+  --numa-gold: #6a5230;
+  --numa-brown: #3a2e18;
+  --numa-border: rgba(80, 60, 30, 0.15);
+  --numa-border-hover: rgba(80, 60, 30, 0.25);
 }
 
 body {
   margin: 0;
-  font-family: "Zen Kaku Gothic New", system-ui, sans-serif;
+  font-family: "M PLUS Rounded 1c", system-ui, sans-serif;
   background: var(--numa-bg);
   color: var(--numa-text);
   -webkit-font-smoothing: antialiased;

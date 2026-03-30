@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 function NotFoundPage() {
   return (
     <div className="flex flex-col items-center justify-center py-20">
-      {/* Frog silhouette — playful 404 */}
+      {/* Playful 404 */}
       <div className="mb-4 text-numa-200">
         <svg width="80" height="80" viewBox="0 0 100 100" fill="currentColor">
           <path d="M30 70c0-20 10-35 20-40 10 5 20 20 20 40-5 5-15 8-20 8s-15-3-20-8zm-8-38c-5-5-3-15 3-18s15 0 15 8c0 5-3 8-8 8-4 0-8-1-10 2zm56 0c5-5 3-15-3-18s-15 0-15 8c0 5 3 8 8 8 4 0 8-1 10 2z" />

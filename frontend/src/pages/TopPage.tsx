@@ -7,7 +7,6 @@ import { CATEGORIES } from "../types";
 import PageHead from "../components/common/PageHead";
 import RoadmapCard from "../components/common/RoadmapCard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
-import { Heron, Crocodile } from "../components/creatures";
 
 /* ── Fallback roadmaps (shown when API returns empty) ── */
 const FALLBACK_ROADMAPS: RoadmapMeta[] = [
@@ -123,13 +122,11 @@ function TopPage() {
       {/* ─── Hero (2-col asymmetric) ─── */}
       <div className="grid md:grid-cols-2 min-h-[380px] relative overflow-hidden">
         {/* Left: text + CTA */}
-        <div className="relative flex flex-col justify-center px-8 py-6 md:py-8 md:pr-10">
-          <Heron className="absolute -top-2 right-4 w-32 text-swamp-700 opacity-[0.08] pointer-events-none" />
-
-          <span className="font-serif text-[11px] tracking-[3px] text-[#7a6238] uppercase mb-2">
+        <div className="flex flex-col justify-center px-8 py-6 md:py-8 md:pr-10">
+          <span className="text-[11px] tracking-[3px] text-numa-gold uppercase mb-2">
             roadmap sharing
           </span>
-          <h1 className="font-serif text-4xl md:text-5xl font-black text-[#2a2418] leading-tight mb-3.5">
+          <h1 className="text-4xl md:text-5xl font-black text-numa-text leading-tight mb-3.5">
             好きなこと、<br />
             <span className="numa-em-underline">沼</span>のように深く。
           </h1>
@@ -147,7 +144,7 @@ function TopPage() {
             </Link>
             <Link
               to={user ? "/roadmaps/new" : "/signup"}
-              className="bg-transparent text-numa-brown border border-[rgba(90,70,40,.2)] rounded px-6 py-3 text-sm font-semibold hover:border-[rgba(90,70,40,.4)] transition"
+              className="bg-transparent text-numa-brown border border-numa-border-hover rounded px-6 py-3 text-sm font-semibold hover:border-numa-brown/40 transition"
             >
               ロードマップを作る
             </Link>
@@ -157,17 +154,16 @@ function TopPage() {
         {/* Right: warm bg + stripe pattern + node preview */}
         <div className="relative bg-numa-bg-warm flex items-center justify-center p-8 overflow-hidden">
           <div className="absolute inset-0 numa-stripe-pattern" />
-          <Crocodile className="absolute -bottom-2 left-4 w-40 text-swamp-700 opacity-[0.14] pointer-events-none" />
           <HeroNodePreview />
         </div>
       </div>
 
-      <hr className="border-t border-[rgba(90,70,40,.08)] my-0" />
+      <hr className="border-t border-numa-border my-0" />
 
       {/* ─── Categories (horizontal scroll pills) ─── */}
       <div className="px-8 py-6">
         <div className="flex justify-between items-baseline mb-3">
-          <h2 className="font-serif text-xl font-bold text-[#2a2418]">カテゴリから沼を探す</h2>
+          <h2 className="text-xl font-bold text-numa-text">カテゴリから沼を探す</h2>
           <Link to="/explore" className="text-sm text-numa-gold hover:underline">
             すべて見る
           </Link>
@@ -178,7 +174,7 @@ function TopPage() {
             <Link
               key={key}
               to={`/explore?category=${key}`}
-              className="flex-shrink-0 border border-[rgba(90,70,40,.1)] bg-white rounded px-4 py-2.5 text-sm text-[#5a4e3a] whitespace-nowrap transition hover:border-swamp-600/30 hover:text-swamp-700"
+              className="flex-shrink-0 border border-numa-border bg-white rounded px-4 py-2.5 text-sm text-numa-text-muted whitespace-nowrap transition hover:border-swamp-600/30 hover:text-swamp-700"
             >
               {name}
             </Link>
@@ -189,7 +185,7 @@ function TopPage() {
       {/* ─── Popular Roadmaps ─── */}
       <div className="px-8 pb-6">
         <div className="flex justify-between items-baseline mb-3">
-          <h2 className="font-serif text-xl font-bold text-[#2a2418]">いま熱い沼</h2>
+          <h2 className="text-xl font-bold text-numa-text">いま熱い沼</h2>
           <Link to="/explore" className="text-sm text-numa-gold hover:underline">
             もっと見る
           </Link>
@@ -211,8 +207,8 @@ function TopPage() {
       </div>
 
       {/* ─── How It Works ─── */}
-      <div className="bg-[#e8dfcc] border-t border-b border-[rgba(90,70,40,.06)] px-8 py-6">
-        <h2 className="font-serif text-xl font-bold text-[#2a2418] mb-3">Numaの使い方</h2>
+      <div className="bg-numa-bg-warm border-t border-b border-numa-border px-8 py-6">
+        <h2 className="text-xl font-bold text-numa-text mb-3">Numaの使い方</h2>
         <div className="grid gap-6 md:grid-cols-3">
           {[
             {
@@ -233,12 +229,12 @@ function TopPage() {
           ].map((step) => (
             <div
               key={step.num}
-              className="border-l-2 border-[rgba(90,70,40,.12)] pl-5"
+              className="border-l-2 border-numa-border pl-5"
             >
-              <div className="font-serif text-3xl font-black text-[rgba(90,70,40,.12)] leading-none mb-2">
+              <div className="text-3xl font-black text-numa-border leading-none mb-2">
                 {step.num}
               </div>
-              <div className="text-sm font-bold text-[#2a2418] mb-1">{step.title}</div>
+              <div className="text-sm font-bold text-numa-text mb-1">{step.title}</div>
               <div className="text-xs text-numa-text-muted leading-relaxed">{step.desc}</div>
             </div>
           ))}
@@ -246,25 +242,23 @@ function TopPage() {
       </div>
 
       {/* ─── Footer CTA ─── */}
-      <div className="relative text-center px-8 py-8 overflow-hidden">
-        <Crocodile className="absolute bottom-4 left-8 w-36 text-swamp-700 opacity-[0.12] pointer-events-none -scale-x-100" />
-
-        <h2 className="font-serif text-[22px] font-black text-[#2a2418] mb-2 relative z-[1]">
+      <div className="text-center px-8 py-8">
+        <h2 className="text-[22px] font-black text-numa-text mb-2">
           さあ、あなたの沼を共有しよう。
         </h2>
-        <p className="text-sm text-numa-text-muted mb-6 relative z-[1]">
+        <p className="text-sm text-numa-text-muted mb-6">
           好きなことに詳しいあなたの知識が、誰かの道しるべになる。
         </p>
         <Link
           to={user ? "/roadmaps/new" : "/signup"}
-          className="relative z-[1] inline-block bg-swamp-700 text-green-50 rounded px-9 py-3.5 text-[15px] font-bold hover:bg-swamp-800 transition"
+          className="inline-block bg-swamp-700 text-green-50 rounded px-9 py-3.5 text-[15px] font-bold hover:bg-swamp-800 transition"
         >
           {user ? "ロードマップを作成する" : "無料ではじめる"}
         </Link>
       </div>
 
       {/* ─── Footer ─── */}
-      <div className="text-center py-5 text-[11px] text-numa-text-hint border-t border-[rgba(90,70,40,.06)]">
+      <div className="text-center py-5 text-[11px] text-numa-text-hint border-t border-numa-border">
         Numa - ロードマップ作成＆共有プラットフォーム
       </div>
     </div>

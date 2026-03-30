@@ -198,7 +198,7 @@ function PreviewModal({ nodes, edges, onClose }: PreviewModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="font-serif text-lg font-bold text-numa-text">プレビュー</h3>
+          <h3 className="text-lg font-bold text-numa-text">プレビュー</h3>
           <button onClick={onClose} className="text-numa-text-muted hover:text-numa-brown">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -468,7 +468,7 @@ function RoadmapCreate() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="font-serif text-xl font-bold text-numa-text">新規ロードマップ</h1>
+          <h1 className="text-xl font-bold text-numa-text">新規ロードマップ</h1>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -563,7 +563,7 @@ function RoadmapCreate() {
       {/* Nodes */}
       <section className="mb-8">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-serif text-sm font-bold text-numa-text">ステップ</h2>
+          <h2 className="text-sm font-bold text-numa-text">ステップ</h2>
           <span className="text-xs text-numa-text-muted">{nodes.length} 個</span>
         </div>
 
@@ -598,7 +598,7 @@ function RoadmapCreate() {
       {/* Edges */}
       <section className="mb-8">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-serif text-sm font-bold text-numa-text">つながり</h2>
+          <h2 className="text-sm font-bold text-numa-text">つながり</h2>
           <button
             onClick={autoConnect}
             className="text-xs text-swamp-700 hover:text-swamp-800 font-medium"

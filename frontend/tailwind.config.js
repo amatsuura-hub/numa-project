@@ -4,20 +4,19 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['"Zen Old Mincho"', "serif"],
-        sans: ['"Zen Kaku Gothic New"', "system-ui", "sans-serif"],
+        sans: ['"M PLUS Rounded 1c"', "system-ui", "sans-serif"],
       },
       colors: {
         numa: {
-          bg: "#f2ede3",
-          "bg-warm": "#e8dfcc",
-          text: "#3a3428",
-          "text-muted": "#8a7e6e",
-          "text-hint": "#aaa28e",
-          gold: "#8a7248",
-          brown: "#5a4628",
-          border: "rgba(90,70,40,.08)",
-          "border-hover": "rgba(90,70,40,.2)",
+          bg: "#ede6d8",
+          "bg-warm": "#e4dbc8",
+          text: "#252018",
+          "text-muted": "#6a6050",
+          "text-hint": "#9a9080",
+          gold: "#6a5230",
+          brown: "#3a2e18",
+          border: "rgba(80,60,30,.15)",
+          "border-hover": "rgba(80,60,30,.25)",
           // Legacy green (used by editor, dashboard, etc.)
           50: "#f0fdf4",
           100: "#dcfce7",
