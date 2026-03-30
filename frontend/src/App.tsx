@@ -12,6 +12,7 @@ import LoadingSpinner from "./components/common/LoadingSpinner";
 const DashboardPage = lazy(() => import("./pages/DashboardPage"));
 const RoadmapDetailPage = lazy(() => import("./pages/RoadmapDetailPage"));
 const RoadmapEditPage = lazy(() => import("./pages/RoadmapEditPage"));
+const RoadmapCreate = lazy(() => import("./pages/RoadmapCreate"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const UserPage = lazy(() => import("./pages/UserPage"));
 
@@ -31,7 +32,7 @@ function App() {
           {/* Protected routes */}
           <Route element={<AuthGuard />}>
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/roadmaps/new" element={<RoadmapEditPage />} />
+            <Route path="/roadmaps/new" element={<RoadmapCreate />} />
             <Route path="/roadmaps/:id/edit" element={<RoadmapEditPage />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>

@@ -5,12 +5,13 @@ import { CATEGORIES } from "../../types";
 
 interface RoadmapCardProps {
   roadmap: RoadmapMeta;
+  linkTo?: string;
 }
 
-const RoadmapCard = memo(function RoadmapCard({ roadmap }: RoadmapCardProps) {
+const RoadmapCard = memo(function RoadmapCard({ roadmap, linkTo }: RoadmapCardProps) {
   return (
     <Link
-      to={`/roadmaps/${roadmap.roadmapId}`}
+      to={linkTo ?? `/roadmaps/${roadmap.roadmapId}`}
       className="block rounded-md border border-[rgba(90,70,40,.08)] bg-white p-4 transition hover:border-swamp-600/25 hover:-translate-y-0.5"
     >
       <h3 className="font-serif text-[15px] font-bold text-numa-text leading-snug">

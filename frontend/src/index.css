@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --numa-bg: #f8f5ef;
-  --numa-bg-warm: #f0ead8;
+  --numa-bg: #f2ede3;
+  --numa-bg-warm: #e8dfcc;
   --numa-text: #3a3428;
   --numa-text-muted: #8a7e6e;
   --numa-gold: #8a7248;

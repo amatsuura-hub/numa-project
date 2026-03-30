@@ -9,8 +9,8 @@ export default {
       },
       colors: {
         numa: {
-          bg: "#f8f5ef",
-          "bg-warm": "#f0ead8",
+          bg: "#f2ede3",
+          "bg-warm": "#e8dfcc",
           text: "#3a3428",
           "text-muted": "#8a7e6e",
           "text-hint": "#aaa28e",

@@ -3,14 +3,14 @@ package model
 // Progress tracks a user's progress on a roadmap.
 // PK: USER#<userId>, SK: PROGRESS#<roadmapId>
 type Progress struct {
-	PK             string   `dynamodbav:"PK"`
-	SK             string   `dynamodbav:"SK"`
-	RoadmapID      string   `dynamodbav:"roadmapId"`
-	CompletedNodes []string `dynamodbav:"completedNodes,stringset,omitempty"`
-	TotalNodes     int      `dynamodbav:"totalNodes"`
-	NumaLevel      int      `dynamodbav:"numaLevel"`
-	StartedAt      string   `dynamodbav:"startedAt"`
-	UpdatedAt      string   `dynamodbav:"updatedAt"`
+	PK             string   `dynamodbav:"PK" json:"-"`
+	SK             string   `dynamodbav:"SK" json:"-"`
+	RoadmapID      string   `dynamodbav:"roadmapId" json:"roadmapId"`
+	CompletedNodes []string `dynamodbav:"completedNodes,stringset,omitempty" json:"completedNodes"`
+	TotalNodes     int      `dynamodbav:"totalNodes" json:"totalNodes"`
+	NumaLevel      int      `dynamodbav:"numaLevel" json:"numaLevel"`
+	StartedAt      string   `dynamodbav:"startedAt" json:"startedAt"`
+	UpdatedAt      string   `dynamodbav:"updatedAt" json:"updatedAt"`
 }
 
 // CalcNumaLevel returns the numa level (0-5) based on completed / total nodes.

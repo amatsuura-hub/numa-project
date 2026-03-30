@@ -1,22 +1,22 @@
 package model
 
 type RoadmapMeta struct {
-	PK          string   `dynamodbav:"PK"`
-	SK          string   `dynamodbav:"SK"`
-	RoadmapID   string   `dynamodbav:"roadmapId"`
-	Title       string   `dynamodbav:"title"`
-	Description string   `dynamodbav:"description"`
-	UserID      string   `dynamodbav:"userId"`
-	Category    string   `dynamodbav:"category"`
-	Tags        []string `dynamodbav:"tags"`
-	IsPublic    bool     `dynamodbav:"isPublic"`
-	LikeCount   int      `dynamodbav:"likeCount"`
-	CreatedAt   string   `dynamodbav:"createdAt"`
-	UpdatedAt   string   `dynamodbav:"updatedAt"`
-	GSI1PK      string   `dynamodbav:"GSI1PK,omitempty"`
-	GSI1SK      string   `dynamodbav:"GSI1SK,omitempty"`
-	GSI2PK      string   `dynamodbav:"GSI2PK,omitempty"`
-	GSI2SK      string   `dynamodbav:"GSI2SK,omitempty"`
+	PK          string   `dynamodbav:"PK" json:"-"`
+	SK          string   `dynamodbav:"SK" json:"-"`
+	RoadmapID   string   `dynamodbav:"roadmapId" json:"roadmapId"`
+	Title       string   `dynamodbav:"title" json:"title"`
+	Description string   `dynamodbav:"description" json:"description"`
+	UserID      string   `dynamodbav:"userId" json:"userId"`
+	Category    string   `dynamodbav:"category" json:"category"`
+	Tags        []string `dynamodbav:"tags" json:"tags"`
+	IsPublic    bool     `dynamodbav:"isPublic" json:"isPublic"`
+	LikeCount   int      `dynamodbav:"likeCount" json:"likeCount"`
+	CreatedAt   string   `dynamodbav:"createdAt" json:"createdAt"`
+	UpdatedAt   string   `dynamodbav:"updatedAt" json:"updatedAt"`
+	GSI1PK      string   `dynamodbav:"GSI1PK,omitempty" json:"-"`
+	GSI1SK      string   `dynamodbav:"GSI1SK,omitempty" json:"-"`
+	GSI2PK      string   `dynamodbav:"GSI2PK,omitempty" json:"-"`
+	GSI2SK      string   `dynamodbav:"GSI2SK,omitempty" json:"-"`
 }
 
 type RoadmapDetail struct {
