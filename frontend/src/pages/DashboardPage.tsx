@@ -63,10 +63,18 @@ function DashboardPage() {
     }
   };
 
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+
   const handleDelete = async (id: string) => {
     setConfirmDeleteId(null);
+
+    // Prevent duplicate deletes
+    if (deletingIds.has(id)) return;
+
     const target = roadmaps.find((r) => r.roadmapId === id);
     if (!target) return;
+
+    setDeletingIds((prev) => new Set(prev).add(id));
 
     // Optimistically remove from UI
     setRoadmaps((prev) => prev.filter((r) => r.roadmapId !== id));
@@ -81,6 +89,11 @@ function DashboardPage() {
             onClick={() => {
               cancelled = true;
               toast.dismiss(t.id);
+              setDeletingIds((prev) => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+              });
               setRoadmaps((prev) => [...prev, target]);
             }}
             className="rounded bg-gray-200 px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-300"
@@ -100,6 +113,12 @@ function DashboardPage() {
       } catch {
         toast.error("削除に失敗しました");
         setRoadmaps((prev) => [...prev, target]);
+      } finally {
+        setDeletingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
       }
     }, 4500);
   };
