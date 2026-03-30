@@ -75,13 +75,13 @@ function SortableNode({ node, index, total, onUpdate, onRemove }: SortableNodePr
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-start gap-3 rounded-md border border-[rgba(90,70,40,.08)] bg-white p-3"
+      className="flex items-start gap-3 rounded-md border border-[rgba(80,60,30,0.08)] bg-[#faf8f4] p-4"
     >
       {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
-        className="mt-1 cursor-grab touch-none text-numa-text-muted hover:text-numa-brown"
+        className="mt-1 cursor-grab touch-none text-[#c0b8a8] hover:text-numa-text-muted"
         aria-label="並べ替え"
       >
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -89,9 +89,9 @@ function SortableNode({ node, index, total, onUpdate, onRemove }: SortableNodePr
         </svg>
       </button>
 
-      {/* Depth indicator */}
+      {/* Depth indicator — round badge */}
       <div
-        className={`mt-1.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-[10px] font-bold ${
+        className={`mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold ${
           deep ? "text-white" : "text-numa-text"
         }`}
         style={{ backgroundColor: bg }}
@@ -108,9 +108,7 @@ function SortableNode({ node, index, total, onUpdate, onRemove }: SortableNodePr
             onChange={(e) => onUpdate(node.id, "label", e.target.value)}
             maxLength={50}
             placeholder="ステップ名"
-            className={`w-full rounded border bg-transparent px-2 py-1 text-sm text-numa-text placeholder:text-numa-text-muted/50 focus:border-swamp-600 focus:outline-none ${
-              node.label.length >= 50 ? "border-red-400" : "border-[rgba(90,70,40,.1)]"
-            }`}
+            className="w-full border-none bg-transparent text-sm font-semibold text-numa-text placeholder:text-[#c0b8a8] focus:outline-none"
           />
           <div className="text-right text-[10px] text-numa-text-hint mt-0.5">
             {node.label.length} / 50
@@ -123,7 +121,7 @@ function SortableNode({ node, index, total, onUpdate, onRemove }: SortableNodePr
             onChange={(e) => onUpdate(node.id, "description", e.target.value)}
             maxLength={500}
             placeholder="説明（任意）"
-            className="w-full rounded border border-[rgba(90,70,40,.06)] bg-transparent px-2 py-1 text-xs text-numa-text-muted placeholder:text-numa-text-muted/40 focus:border-swamp-600 focus:outline-none"
+            className="w-full border-none bg-transparent text-xs text-numa-text-muted placeholder:text-[#c0b8a8]/60 focus:outline-none"
           />
           {node.description.length > 0 && (
             <div className="text-right text-[10px] text-numa-text-hint mt-0.5">
@@ -136,14 +134,14 @@ function SortableNode({ node, index, total, onUpdate, onRemove }: SortableNodePr
           value={node.url}
           onChange={(e) => onUpdate(node.id, "url", e.target.value)}
           placeholder="参考URL（任意）"
-          className="w-full rounded border border-[rgba(90,70,40,.06)] bg-transparent px-2 py-1 text-xs text-numa-text-muted placeholder:text-numa-text-muted/40 focus:border-swamp-600 focus:outline-none"
+          className="w-full border-none bg-transparent text-xs text-numa-text-muted placeholder:text-[#c0b8a8]/60 focus:outline-none"
         />
       </div>
 
       {/* Remove */}
       <button
         onClick={() => onRemove(node.id)}
-        className="mt-1 text-numa-text-muted hover:text-red-500"
+        className="mt-1 text-[#c0b8a8] hover:text-[#b08080]"
         aria-label="削除"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -198,7 +196,7 @@ function PreviewModal({ nodes, edges, onClose }: PreviewModalProps) {
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold text-numa-text">プレビュー</h3>
-          <button onClick={onClose} className="text-numa-text-muted hover:text-numa-brown">
+          <button onClick={onClose} className="text-numa-text-hint hover:text-numa-text-muted">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -247,7 +245,7 @@ function PreviewModal({ nodes, edges, onClose }: PreviewModalProps) {
                   height={50}
                   rx={6}
                   fill={bg}
-                  stroke="rgba(90,70,40,.12)"
+                  stroke="rgba(80,60,30,.12)"
                 />
                 <text
                   x={n.x + 90}
@@ -255,7 +253,7 @@ function PreviewModal({ nodes, edges, onClose }: PreviewModalProps) {
                   textAnchor="middle"
                   fontSize={12}
                   fontWeight={600}
-                  fill={deep ? "#fff" : "#3a3428"}
+                  fill={deep ? "#fff" : "#252018"}
                 >
                   {n.label || `ステップ ${i + 1}`}
                 </text>
@@ -451,16 +449,23 @@ function RoadmapCreate() {
     }
   };
 
+  /* ---- Shared input styles ---- */
+
+  const inputClass =
+    "w-full rounded border px-3 py-2.5 text-sm bg-white text-numa-text placeholder:text-[#c0b8a8] focus:outline-none focus:ring-1 focus:ring-swamp-700/20";
+  const inputBorder = "border-[rgba(80,60,30,0.15)] focus:border-swamp-700";
+  const inputError = "border-red-400 focus:border-red-500 focus:ring-red-500/20";
+
   /* ---- Render ---- */
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto max-w-2xl px-4 py-6">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="text-numa-text-muted hover:text-numa-brown"
+            className="text-numa-text-muted hover:text-numa-text"
             aria-label="戻る"
           >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -472,98 +477,92 @@ function RoadmapCreate() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => nodes.filter((n) => n.label.trim()).length > 0 && setShowPreview(true)}
-            className="rounded border border-[rgba(90,70,40,.15)] px-4 py-1.5 text-sm text-numa-text-muted hover:border-swamp-600/30 hover:text-numa-brown transition"
+            className="rounded border border-[rgba(80,60,30,0.2)] px-4 py-2 text-sm text-numa-text-muted hover:border-[rgba(80,60,30,0.35)] hover:text-numa-text transition"
           >
             プレビュー
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="rounded bg-swamp-700 px-5 py-1.5 text-sm font-semibold text-green-50 hover:bg-swamp-800 transition disabled:opacity-50"
+            className="rounded bg-swamp-700 px-6 py-2 text-sm font-bold text-white hover:bg-swamp-800 transition disabled:opacity-50"
           >
             {isSaving ? "保存中..." : "作成"}
           </button>
         </div>
       </div>
 
-      {/* Meta form */}
-      <section className="mb-8 space-y-4 rounded-md border border-[rgba(90,70,40,.08)] bg-white p-5">
-        <div>
-          <label htmlFor="create-title" className="mb-1 block text-sm font-medium text-numa-text">
-            タイトル
-          </label>
-          <input
-            id="create-title"
-            type="text"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              if (errors.title) setErrors((prev) => ({ ...prev, title: undefined }));
-            }}
-            maxLength={100}
-            placeholder="例: Go言語マスターへの道"
-            className={`w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
-              errors.title
-                ? "border-red-400 focus:border-red-500 focus:ring-red-500"
-                : "border-[rgba(90,70,40,.12)] focus:border-swamp-600 focus:ring-swamp-600"
-            }`}
-          />
-          <div className="mt-1 flex justify-between">
-            <span className="text-xs text-red-600">{errors.title ?? "\u00A0"}</span>
-            <span className={`text-xs ${title.length >= 100 ? "text-red-600" : "text-numa-text-muted/60"}`}>
-              {title.length} / 100
-            </span>
+      {/* Meta form — white card */}
+      <section className="mb-6 rounded-lg border border-[rgba(80,60,30,0.1)] bg-white p-6">
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="create-title" className="mb-1 block text-sm font-semibold text-numa-text-muted">
+              タイトル
+            </label>
+            <input
+              id="create-title"
+              type="text"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (errors.title) setErrors((prev) => ({ ...prev, title: undefined }));
+              }}
+              maxLength={100}
+              placeholder="例: Go言語マスターへの道"
+              className={`${inputClass} ${errors.title ? inputError : inputBorder}`}
+            />
+            <div className="mt-1 flex justify-between">
+              <span className="text-xs text-red-600">{errors.title ?? "\u00A0"}</span>
+              <span className={`text-xs ${title.length >= 100 ? "text-red-600" : "text-numa-text-hint"}`}>
+                {title.length} / 100
+              </span>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <label htmlFor="create-desc" className="mb-1 block text-sm font-medium text-numa-text">
-            説明
-          </label>
-          <textarea
-            id="create-desc"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={1000}
-            rows={3}
-            placeholder="ロードマップの概要を入力..."
-            className="w-full rounded border border-[rgba(90,70,40,.12)] px-3 py-2 text-sm focus:border-swamp-600 focus:outline-none focus:ring-1 focus:ring-swamp-600"
-          />
-        </div>
+          <div>
+            <label htmlFor="create-desc" className="mb-1 block text-sm font-semibold text-numa-text-muted">
+              説明
+            </label>
+            <textarea
+              id="create-desc"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              maxLength={1000}
+              rows={3}
+              placeholder="ロードマップの概要を入力..."
+              className={`${inputClass} ${inputBorder}`}
+            />
+          </div>
 
-        <div>
-          <label htmlFor="create-category" className="mb-1 block text-sm font-medium text-numa-text">
-            カテゴリ
-          </label>
-          <select
-            id="create-category"
-            value={category}
-            onChange={(e) => {
-              setCategory(e.target.value);
-              if (errors.category) setErrors((prev) => ({ ...prev, category: undefined }));
-            }}
-            className={`w-full rounded border px-3 py-2 text-sm focus:outline-none ${
-              errors.category
-                ? "border-red-400 focus:border-red-500 focus:ring-red-500"
-                : "border-[rgba(90,70,40,.12)] focus:border-swamp-600"
-            }`}
-          >
-            <option value="">選択してください</option>
-            {Object.entries(CATEGORIES).map(([id, name]) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
-            ))}
-          </select>
-          {errors.category && <p className="mt-1 text-xs text-red-600">{errors.category}</p>}
+          <div>
+            <label htmlFor="create-category" className="mb-1 block text-sm font-semibold text-numa-text-muted">
+              カテゴリ
+            </label>
+            <select
+              id="create-category"
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                if (errors.category) setErrors((prev) => ({ ...prev, category: undefined }));
+              }}
+              className={`${inputClass} ${errors.category ? inputError : inputBorder}`}
+            >
+              <option value="">選択してください</option>
+              {Object.entries(CATEGORIES).map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name}
+                </option>
+              ))}
+            </select>
+            {errors.category && <p className="mt-1 text-xs text-red-600">{errors.category}</p>}
+          </div>
         </div>
       </section>
 
-      {/* Nodes */}
-      <section className="mb-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-numa-text">ステップ</h2>
-          <span className="text-xs text-numa-text-muted">{nodes.length} 個</span>
+      {/* Nodes — white card */}
+      <section className="mb-6 rounded-lg border border-[rgba(80,60,30,0.1)] bg-white p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-numa-text">ステップ</h2>
+          <span className="text-sm text-numa-text-hint">{nodes.length} 個</span>
         </div>
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -585,7 +584,7 @@ function RoadmapCreate() {
 
         <button
           onClick={addNode}
-          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-[rgba(90,70,40,.15)] py-2.5 text-sm text-numa-text-muted hover:border-swamp-600/30 hover:text-swamp-700 transition"
+          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-[rgba(80,60,30,0.2)] py-3 text-sm text-numa-text-muted hover:border-swamp-700/30 hover:text-swamp-700 transition"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -594,13 +593,13 @@ function RoadmapCreate() {
         </button>
       </section>
 
-      {/* Edges */}
-      <section className="mb-8">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-numa-text">つながり</h2>
+      {/* Edges — white card */}
+      <section className="mb-6 rounded-lg border border-[rgba(80,60,30,0.1)] bg-white p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-numa-text">つながり</h2>
           <button
             onClick={autoConnect}
-            className="text-xs text-swamp-700 hover:text-swamp-800 font-medium"
+            className="text-sm font-semibold text-swamp-700 hover:text-swamp-800"
           >
             順番に自動接続
           </button>
@@ -608,21 +607,21 @@ function RoadmapCreate() {
 
         {/* Existing edges */}
         {edges.length > 0 && (
-          <div className="mb-3 space-y-1.5">
+          <div className="mb-4 space-y-1.5">
             {edges.map((e) => {
               const src = nodes.find((n) => n.id === e.sourceId);
               const tgt = nodes.find((n) => n.id === e.targetId);
               return (
                 <div
                   key={e.id}
-                  className="flex items-center justify-between rounded border border-[rgba(90,70,40,.06)] bg-white px-3 py-1.5 text-xs"
+                  className="flex items-center justify-between rounded border border-[rgba(80,60,30,0.08)] bg-[#faf8f4] px-3 py-1.5 text-xs"
                 >
                   <span className="text-numa-text-muted">
                     {src?.label || "（未入力）"} → {tgt?.label || "（未入力）"}
                   </span>
                   <button
                     onClick={() => removeEdge(e.id)}
-                    className="text-numa-text-muted hover:text-red-500"
+                    className="text-[#c0b8a8] hover:text-[#b08080]"
                     aria-label="接続を削除"
                   >
                     <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -640,7 +639,7 @@ function RoadmapCreate() {
           <select
             value={edgeSource}
             onChange={(e) => setEdgeSource(e.target.value)}
-            className="flex-1 rounded border border-[rgba(90,70,40,.12)] px-2 py-1.5 text-xs focus:border-swamp-600 focus:outline-none"
+            className={`flex-1 rounded border px-2 py-1.5 text-xs ${inputBorder} bg-white text-numa-text focus:outline-none`}
           >
             <option value="">From...</option>
             {nodes.map((n, i) => (
@@ -649,11 +648,11 @@ function RoadmapCreate() {
               </option>
             ))}
           </select>
-          <span className="text-numa-text-muted text-xs">→</span>
+          <span className="text-numa-text-hint text-xs">→</span>
           <select
             value={edgeTarget}
             onChange={(e) => setEdgeTarget(e.target.value)}
-            className="flex-1 rounded border border-[rgba(90,70,40,.12)] px-2 py-1.5 text-xs focus:border-swamp-600 focus:outline-none"
+            className={`flex-1 rounded border px-2 py-1.5 text-xs ${inputBorder} bg-white text-numa-text focus:outline-none`}
           >
             <option value="">To...</option>
             {nodes.map((n, i) => (
@@ -665,7 +664,7 @@ function RoadmapCreate() {
           <button
             onClick={addEdge}
             disabled={!edgeSource || !edgeTarget || edgeSource === edgeTarget}
-            className="rounded bg-swamp-700 px-3 py-1.5 text-xs font-semibold text-green-50 hover:bg-swamp-800 transition disabled:opacity-40"
+            className="rounded bg-swamp-700/80 px-4 py-2 text-sm text-white hover:bg-swamp-700 transition disabled:opacity-40"
           >
             追加
           </button>

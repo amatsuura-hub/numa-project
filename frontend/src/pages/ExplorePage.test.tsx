@@ -76,7 +76,7 @@ describe("ExplorePage", () => {
     );
     await waitFor(() => {
       expect(
-        screen.getByText("公開されているロードマップはまだありません。"),
+        screen.getByText("まだ公開ロードマップがありません"),
       ).toBeInTheDocument();
     });
   });

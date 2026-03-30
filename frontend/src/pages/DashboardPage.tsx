@@ -133,25 +133,25 @@ function DashboardPage() {
     <div>
       <PageHead title="ダッシュボード" />
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">ダッシュボード</h1>
+        <h1 className="text-2xl font-bold text-numa-text">ダッシュボード</h1>
         <Link
           to="/roadmaps/new"
-          className="rounded-md bg-numa-600 px-4 py-2 text-sm font-medium text-white hover:bg-numa-700"
+          className="rounded bg-swamp-700 px-5 py-2 text-sm font-bold text-white hover:bg-swamp-800 transition"
         >
           新規作成
         </Link>
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex border-b border-gray-200">
+      <div className="mb-6 flex border-b border-[rgba(80,60,30,0.08)]">
         {tabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`px-4 py-2 text-sm font-medium ${
+            className={`px-4 py-2 text-sm transition ${
               tab === t.key
-                ? "border-b-2 border-numa-600 text-numa-600"
-                : "text-gray-500 hover:text-gray-700"
+                ? "border-b-2 border-swamp-700 font-bold text-swamp-700"
+                : "text-numa-text-hint hover:text-numa-text-muted"
             }`}
           >
             {t.label}
@@ -164,15 +164,18 @@ function DashboardPage() {
       ) : tab === "my" ? (
         // My roadmaps
         roadmaps.length === 0 ? (
-          <div className="rounded-lg border border-numa-100 bg-numa-50/30 p-8 text-center">
-            <p className="text-gray-500">
-              まだロードマップがありません。最初のロードマップを作成しましょう！
+          <div className="py-20 text-center">
+            <p className="mb-3 text-lg text-numa-text-muted">
+              まだロードマップがありません
+            </p>
+            <p className="mb-6 text-sm text-numa-text-hint">
+              あなたの知識をロードマップにして共有しましょう
             </p>
             <Link
               to="/roadmaps/new"
-              className="mt-4 inline-block rounded-md bg-numa-600 px-6 py-2 text-sm font-medium text-white hover:bg-numa-700"
+              className="inline-block rounded bg-swamp-700 px-6 py-3 font-bold text-white hover:bg-swamp-800 transition"
             >
-              ロードマップを作成
+              最初のロードマップを作る
             </Link>
           </div>
         ) : (
@@ -180,20 +183,20 @@ function DashboardPage() {
             {roadmaps.map((roadmap) => (
               <div
                 key={roadmap.roadmapId}
-                className="rounded-lg border border-numa-100 bg-white p-4"
+                className="rounded-md border border-[rgba(80,60,30,0.12)] bg-white p-4 transition hover:border-[rgba(45,90,50,0.25)] hover:-translate-y-0.5"
               >
                 <div className="mb-2 flex items-start justify-between">
                   <Link
                     to={`/roadmaps/${roadmap.roadmapId}`}
-                    className="text-lg font-semibold text-gray-900 hover:text-numa-600"
+                    className="text-base font-bold text-numa-text hover:text-swamp-700"
                   >
                     {roadmap.title}
                   </Link>
                   <span
-                    className={`ml-2 shrink-0 rounded-full px-2 py-0.5 text-xs ${
+                    className={`ml-2 shrink-0 rounded px-2 py-0.5 text-xs ${
                       roadmap.isPublic
-                        ? "bg-numa-100 text-numa-700"
-                        : "bg-gray-100 text-gray-600"
+                        ? "bg-swamp-50 text-swamp-700"
+                        : "bg-[#f0ead8] text-numa-text-hint"
                     }`}
                   >
                     {roadmap.isPublic ? "公開" : "非公開"}
@@ -201,18 +204,18 @@ function DashboardPage() {
                 </div>
 
                 {roadmap.description && (
-                  <p className="mb-2 line-clamp-2 text-sm text-gray-500">
+                  <p className="mb-2 line-clamp-2 text-sm text-numa-text-muted">
                     {roadmap.description}
                   </p>
                 )}
 
                 {roadmap.category && (
-                  <span className="mb-2 inline-block rounded-full bg-numa-50 px-2 py-0.5 text-xs text-numa-600">
+                  <span className="mb-2 inline-block rounded bg-swamp-50 px-2 py-0.5 text-xs text-swamp-700">
                     {CATEGORIES[roadmap.category as Category] || roadmap.category}
                   </span>
                 )}
 
-                <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
+                <div className="mt-3 flex items-center gap-2 text-xs text-numa-text-hint">
                   <span>♡ {roadmap.likeCount}</span>
                   <span>·</span>
                   <span>
@@ -223,7 +226,7 @@ function DashboardPage() {
                 <div className="mt-3 flex gap-2">
                   <Link
                     to={`/roadmaps/${roadmap.roadmapId}/edit`}
-                    className="rounded-md border border-numa-300 px-3 py-1 text-xs text-numa-600 hover:bg-numa-50"
+                    className="rounded border border-[rgba(80,60,30,0.15)] px-3 py-1 text-xs text-numa-text-muted hover:bg-[#f5f0e8] transition"
                   >
                     編集
                   </Link>
@@ -231,13 +234,13 @@ function DashboardPage() {
                     <>
                       <button
                         onClick={() => handleDelete(roadmap.roadmapId)}
-                        className="rounded-md bg-red-600 px-3 py-1 text-xs font-bold text-white hover:bg-red-700"
+                        className="rounded bg-red-600 px-3 py-1 text-xs font-bold text-white hover:bg-red-700 transition"
                       >
                         削除する
                       </button>
                       <button
                         onClick={() => setConfirmDeleteId(null)}
-                        className="rounded-md border border-gray-300 px-3 py-1 text-xs text-gray-600 hover:bg-gray-50"
+                        className="rounded border border-[rgba(80,60,30,0.15)] px-3 py-1 text-xs text-numa-text-muted hover:bg-[#f5f0e8] transition"
                       >
                         キャンセル
                       </button>
@@ -245,7 +248,7 @@ function DashboardPage() {
                   ) : (
                     <button
                       onClick={() => setConfirmDeleteId(roadmap.roadmapId)}
-                      className="rounded-md border border-red-300 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
+                      className="rounded border border-[rgba(180,100,100,0.2)] px-3 py-1 text-xs text-[#b08080] hover:bg-red-50 transition"
                     >
                       削除
                     </button>
@@ -258,13 +261,16 @@ function DashboardPage() {
       ) : tab === "bookmarks" ? (
         // Bookmarks
         bookmarks.length === 0 ? (
-          <div className="rounded-lg border border-numa-100 bg-numa-50/30 p-8 text-center">
-            <p className="text-gray-500">
-              ブックマークしたロードマップはまだありません。
+          <div className="py-20 text-center">
+            <p className="mb-3 text-lg text-numa-text-muted">
+              ブックマークしたロードマップはまだありません
+            </p>
+            <p className="mb-6 text-sm text-numa-text-hint">
+              気になるロードマップを保存しておきましょう
             </p>
             <Link
               to="/explore"
-              className="mt-4 inline-block rounded-md bg-numa-600 px-6 py-2 text-sm font-medium text-white hover:bg-numa-700"
+              className="inline-block rounded bg-swamp-700 px-6 py-3 font-bold text-white hover:bg-swamp-800 transition"
             >
               ロードマップを探す
             </Link>
@@ -276,17 +282,17 @@ function DashboardPage() {
                 <Link
                   key={item.roadmapId}
                   to={`/roadmaps/${item.roadmapId}`}
-                  className="block rounded-lg border border-numa-100 bg-white p-4 transition-all hover:border-numa-200 hover:shadow-md"
+                  className="block rounded-md border border-[rgba(80,60,30,0.12)] bg-white p-4 transition hover:border-[rgba(45,90,50,0.25)] hover:-translate-y-0.5"
                 >
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-base font-bold text-numa-text">
                     {item.roadmap.title}
                   </h3>
                   {item.roadmap.description && (
-                    <p className="mt-1 line-clamp-2 text-sm text-gray-500">
+                    <p className="mt-1 line-clamp-2 text-sm text-numa-text-muted">
                       {item.roadmap.description}
                     </p>
                   )}
-                  <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
+                  <div className="mt-3 flex items-center gap-2 text-xs text-numa-text-hint">
                     <span>♡ {item.roadmap.likeCount}</span>
                     <span>·</span>
                     <span>
@@ -302,13 +308,16 @@ function DashboardPage() {
       ) : (
         // Progress tab
         progressList.length === 0 ? (
-          <div className="rounded-lg border border-numa-100 bg-numa-50/30 p-8 text-center">
-            <p className="text-gray-500">
-              進捗中のロードマップはまだありません。
+          <div className="py-20 text-center">
+            <p className="mb-3 text-lg text-numa-text-muted">
+              進捗中のロードマップはまだありません
+            </p>
+            <p className="mb-6 text-sm text-numa-text-hint">
+              ロードマップのノードをクリックして学習を始めましょう
             </p>
             <Link
               to="/explore"
-              className="mt-4 inline-block rounded-md bg-numa-600 px-6 py-2 text-sm font-medium text-white hover:bg-numa-700"
+              className="inline-block rounded bg-swamp-700 px-6 py-3 font-bold text-white hover:bg-swamp-800 transition"
             >
               ロードマップを探す
             </Link>
@@ -328,10 +337,10 @@ function DashboardPage() {
                 <Link
                   key={p.roadmapId}
                   to={`/roadmaps/${p.roadmapId}`}
-                  className="block rounded-lg border border-numa-100 bg-white p-4 transition-all hover:border-numa-200 hover:shadow-md"
+                  className="block rounded-md border border-[rgba(80,60,30,0.12)] bg-white p-4 transition hover:border-[rgba(45,90,50,0.25)] hover:-translate-y-0.5"
                 >
                   <div className="mb-2 flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-base font-bold text-numa-text">
                       {p.roadmap?.title || p.roadmapId}
                     </h3>
                     <span
@@ -346,7 +355,7 @@ function DashboardPage() {
                   </div>
 
                   {/* Progress bar */}
-                  <div className="mb-1 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                  <div className="mb-1 h-2 w-full overflow-hidden rounded-full bg-[#f0ead8]">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
@@ -356,7 +365,7 @@ function DashboardPage() {
                     />
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-gray-400">
+                  <div className="flex items-center justify-between text-xs text-numa-text-hint">
                     <span>
                       {p.completedNodes.length}/{p.totalNodes} ノード完了
                     </span>

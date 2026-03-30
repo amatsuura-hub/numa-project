@@ -79,9 +79,7 @@ describe("DashboardPage", () => {
     );
     await waitFor(() => {
       expect(
-        screen.getByText(
-          "まだロードマップがありません。最初のロードマップを作成しましょう！",
-        ),
+        screen.getByText("まだロードマップがありません"),
       ).toBeInTheDocument();
     });
   });

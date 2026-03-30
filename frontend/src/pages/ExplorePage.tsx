@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
 import type { RoadmapMeta } from "../types";
@@ -57,20 +58,26 @@ function ExplorePage() {
     setCursor(undefined);
   };
 
+  const catButtonBase =
+    "flex-shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition";
+  const catActive = "bg-swamp-700 text-white";
+  const catInactive =
+    "bg-white border border-[rgba(80,60,30,0.12)] text-numa-text-muted hover:border-swamp-700/30 hover:text-swamp-700";
+
   return (
     <div>
       <PageHead title="探す" description="公開されているロードマップを探しましょう" />
-      <h1 className="mb-6 text-2xl font-bold">ロードマップを探す</h1>
+      <h1 className="mb-6 text-2xl font-bold text-numa-text">ロードマップを探す</h1>
 
-      {/* Category filter */}
-      <div className="mb-6 flex flex-wrap gap-2">
+      {/* Category filter — horizontal scroll */}
+      <div
+        className="mb-6 flex gap-2 overflow-x-auto pb-2"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
+        <style>{`.cat-scroll::-webkit-scrollbar { display: none; }`}</style>
         <button
           onClick={() => handleCategoryClick("")}
-          className={`rounded-full px-4 py-1.5 text-sm ${
-            activeCategory === ""
-              ? "bg-numa-600 text-white"
-              : "border border-gray-300 text-gray-600 hover:border-numa-400 hover:text-numa-600"
-          }`}
+          className={`${catButtonBase} ${activeCategory === "" ? catActive : catInactive}`}
         >
           すべて
         </button>
@@ -78,11 +85,7 @@ function ExplorePage() {
           <button
             key={id}
             onClick={() => handleCategoryClick(id)}
-            className={`rounded-full px-4 py-1.5 text-sm ${
-              activeCategory === id
-                ? "bg-numa-600 text-white"
-                : "border border-gray-300 text-gray-600 hover:border-numa-400 hover:text-numa-600"
-            }`}
+            className={`${catButtonBase} ${activeCategory === id ? catActive : catInactive}`}
           >
             {name}
           </button>
@@ -93,12 +96,21 @@ function ExplorePage() {
       {isLoading ? (
         <LoadingSpinner />
       ) : roadmaps.length === 0 ? (
-        <div className="rounded-lg border border-numa-100 bg-numa-50/30 p-8 text-center">
-          <p className="text-gray-500">
+        <div className="mt-6 rounded-md border border-[rgba(80,60,30,0.08)] bg-white py-20 text-center">
+          <p className="mb-2 text-lg text-numa-text-muted">
             {activeCategory
-              ? "このカテゴリにはまだロードマップがありません。"
-              : "公開されているロードマップはまだありません。"}
+              ? "このカテゴリにはまだロードマップがありません"
+              : "まだ公開ロードマップがありません"}
           </p>
+          <p className="mb-6 text-sm text-numa-text-hint">
+            最初の沼の住人になりませんか？
+          </p>
+          <Link
+            to="/roadmaps/new"
+            className="inline-block rounded bg-swamp-700 px-6 py-3 font-bold text-white hover:bg-swamp-800 transition"
+          >
+            ロードマップを作る
+          </Link>
         </div>
       ) : (
         <>
@@ -114,7 +126,7 @@ function ExplorePage() {
               <button
                 onClick={() => fetchRoadmaps(activeCategory, true)}
                 disabled={isLoadingMore}
-                className="rounded-md border border-gray-300 px-6 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                className="rounded border border-[rgba(80,60,30,0.15)] px-6 py-2 text-sm text-numa-text-muted hover:bg-[#f5f0e8] transition disabled:opacity-50"
               >
                 {isLoadingMore ? "読み込み中..." : "もっと見る"}
               </button>
