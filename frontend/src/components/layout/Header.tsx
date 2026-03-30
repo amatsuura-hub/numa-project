@@ -9,8 +9,9 @@ function Header() {
   return (
     <header className="border-b border-[rgba(90,70,40,.1)] bg-numa-bg">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-3.5">
-        <Link to="/" className="font-serif text-2xl font-black text-numa-brown tracking-[1px]">
+        <Link to="/" className="relative font-serif text-3xl font-black text-[#3a3020] tracking-tight">
           Numa
+          <span className="absolute bottom-0 left-0 w-full h-[2px] bg-swamp-700/30" />
         </Link>
 
         {/* Mobile menu button */}

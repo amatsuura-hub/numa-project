@@ -15,7 +15,7 @@
 
 body {
   margin: 0;
-  font-family: "Noto Sans JP", system-ui, sans-serif;
+  font-family: "Zen Kaku Gothic New", system-ui, sans-serif;
   background: var(--numa-bg);
   color: var(--numa-text);
   -webkit-font-smoothing: antialiased;

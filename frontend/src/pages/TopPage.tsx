@@ -124,7 +124,7 @@ function TopPage() {
       <div className="grid md:grid-cols-2 min-h-[380px] relative overflow-hidden">
         {/* Left: text + CTA */}
         <div className="relative flex flex-col justify-center px-8 py-6 md:py-8 md:pr-10">
-          <Heron className="absolute top-4 right-0 w-36 text-swamp-700 opacity-[0.08] pointer-events-none" />
+          <Heron className="absolute -top-2 right-4 w-32 text-swamp-700 opacity-[0.08] pointer-events-none" />
 
           <span className="font-serif text-[11px] tracking-[3px] text-[#7a6238] uppercase mb-2">
             roadmap sharing
@@ -157,7 +157,7 @@ function TopPage() {
         {/* Right: warm bg + stripe pattern + node preview */}
         <div className="relative bg-numa-bg-warm flex items-center justify-center p-8 overflow-hidden">
           <div className="absolute inset-0 numa-stripe-pattern" />
-          <Crocodile className="absolute bottom-4 left-3 w-28 text-swamp-700 opacity-[0.14] pointer-events-none" />
+          <Crocodile className="absolute -bottom-2 left-4 w-40 text-swamp-700 opacity-[0.14] pointer-events-none" />
           <HeroNodePreview />
         </div>
       </div>
@@ -247,7 +247,7 @@ function TopPage() {
 
       {/* ─── Footer CTA ─── */}
       <div className="relative text-center px-8 py-8 overflow-hidden">
-        <Crocodile className="absolute bottom-3 left-10 w-28 text-swamp-700 opacity-[0.14] pointer-events-none" />
+        <Crocodile className="absolute bottom-4 left-8 w-36 text-swamp-700 opacity-[0.12] pointer-events-none -scale-x-100" />
 
         <h2 className="font-serif text-[22px] font-black text-[#2a2418] mb-2 relative z-[1]">
           さあ、あなたの沼を共有しよう。

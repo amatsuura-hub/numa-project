@@ -4,8 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['"Noto Serif JP"', "serif"],
-        sans: ['"Noto Sans JP"', "system-ui", "sans-serif"],
+        serif: ['"Zen Old Mincho"', "serif"],
+        sans: ['"Zen Kaku Gothic New"', "system-ui", "sans-serif"],
       },
       colors: {
         numa: {
