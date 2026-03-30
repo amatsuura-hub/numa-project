@@ -140,6 +140,16 @@ func (m *mockRepo) ExploreRoadmaps(_ context.Context, _ string, _ int32, _ strin
 	return result, "", nil
 }
 
+func (m *mockRepo) CountNodes(_ context.Context, roadmapID string) (int, error) {
+	if m.err != nil {
+		return 0, m.err
+	}
+	if d, ok := m.details[roadmapID]; ok {
+		return len(d.Nodes), nil
+	}
+	return 0, nil
+}
+
 func (m *mockRepo) PutNode(_ context.Context, node *model.Node) error {
 	m.putNodeCalled = true
 	if m.err != nil {
@@ -163,6 +173,16 @@ func (m *mockRepo) BatchPutNodes(_ context.Context, nodes []model.Node) error {
 		m.nodes[nodes[i].NodeID] = &nodes[i]
 	}
 	return nil
+}
+
+func (m *mockRepo) CountEdges(_ context.Context, roadmapID string) (int, error) {
+	if m.err != nil {
+		return 0, m.err
+	}
+	if d, ok := m.details[roadmapID]; ok {
+		return len(d.Edges), nil
+	}
+	return 0, nil
 }
 
 func (m *mockRepo) PutEdge(_ context.Context, edge *model.Edge) error {

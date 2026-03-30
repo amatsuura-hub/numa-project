@@ -21,6 +21,8 @@ import dagre from "dagre";
 import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
 import { CATEGORIES } from "../types";
+import { depthColor } from "../constants/depth";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -38,25 +40,6 @@ interface DraftEdge {
   id: string;
   sourceId: string;
   targetId: string;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Depth colors (swamp palette)                                       */
-/* ------------------------------------------------------------------ */
-
-const DEPTH_COLORS = [
-  "#e8dfc8", // 0 — shallow
-  "#c8dab8", // 1
-  "#8aba82", // 2
-  "#5a9a52", // 3
-  "#2d5a32", // 4 — deep
-];
-
-function depthColor(index: number, total: number): string {
-  if (total <= 1) return DEPTH_COLORS[0];
-  const step = (DEPTH_COLORS.length - 1) / (total - 1);
-  const ci = Math.round(index * step);
-  return DEPTH_COLORS[ci];
 }
 
 function isDeepColor(hex: string): boolean {
@@ -462,9 +445,7 @@ function RoadmapCreate() {
       toast.success("ロードマップを作成しました");
       navigate(`/roadmaps/${roadmapId}/edit`, { replace: true });
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { error?: { message?: string } } } };
-      const msg = err?.response?.data?.error?.message || "作成に失敗しました";
-      toast.error(msg);
+      toast.error(getErrorMessage(e));
     } finally {
       setIsSaving(false);
     }

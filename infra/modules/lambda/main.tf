@@ -79,6 +79,17 @@ resource "aws_sqs_queue" "api_dlq" {
   message_retention_seconds = 1209600 # 14 days
 }
 
+# Explicit log groups with retention to prevent unbounded log storage costs.
+resource "aws_cloudwatch_log_group" "api" {
+  name              = "/aws/lambda/${var.prefix}-api"
+  retention_in_days = 30
+}
+
+resource "aws_cloudwatch_log_group" "post_confirmation" {
+  name              = "/aws/lambda/${var.prefix}-post-confirmation"
+  retention_in_days = 30
+}
+
 resource "aws_lambda_function" "api" {
   function_name                  = "${var.prefix}-api"
   role                           = aws_iam_role.lambda.arn
@@ -109,6 +120,8 @@ resource "aws_lambda_function" "api" {
     }
   }
 
+  depends_on = [aws_cloudwatch_log_group.api]
+
   lifecycle {
     ignore_changes = [filename, source_code_hash]
   }
@@ -135,6 +148,8 @@ resource "aws_lambda_function" "post_confirmation" {
       TABLE_NAME = var.dynamodb_table_name
     }
   }
+
+  depends_on = [aws_cloudwatch_log_group.post_confirmation]
 
   lifecycle {
     ignore_changes = [filename, source_code_hash]

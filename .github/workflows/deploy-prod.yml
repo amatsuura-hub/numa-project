@@ -55,6 +55,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Save current function versions (for rollback)
+        id: current_versions
+        run: |
+          API_VERSION=$(aws lambda get-function --function-name ${{ vars.API_LAMBDA_NAME }} --query 'Configuration.Version' --output text 2>/dev/null || echo "none")
+          PC_VERSION=$(aws lambda get-function --function-name ${{ vars.POST_CONFIRMATION_LAMBDA_NAME }} --query 'Configuration.Version' --output text 2>/dev/null || echo "none")
+          echo "api_version=$API_VERSION" >> "$GITHUB_OUTPUT"
+          echo "pc_version=$PC_VERSION" >> "$GITHUB_OUTPUT"
+          # Rollback: gh workflow run deploy-prod.yml --ref <previous-commit-sha>
+
       - name: Deploy API Lambda
         run: |
           aws lambda update-function-code \

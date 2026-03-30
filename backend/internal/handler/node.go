@@ -65,11 +65,11 @@ func (h *Handler) CreateNode(ctx context.Context, userID string, roadmapID strin
 		return nil, err
 	}
 
-	detail, err := h.repo.GetRoadmapDetail(ctx, roadmapID)
+	nodeCount, err := h.repo.CountNodes(ctx, roadmapID)
 	if err != nil {
 		return nil, NewAPIError(ErrInternal, "Failed to check node count")
 	}
-	if detail != nil && len(detail.Nodes) >= model.MaxNodesPerRoadmap {
+	if nodeCount >= model.MaxNodesPerRoadmap {
 		return nil, NewAPIError(ErrBadRequest, "maximum 100 nodes per roadmap")
 	}
 

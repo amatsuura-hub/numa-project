@@ -8,6 +8,7 @@ import {
   type Node,
   type Edge,
 } from "@xyflow/react";
+import { DEFAULT_NODE_COLOR } from "../constants/depth";
 import "@xyflow/react/dist/style.css";
 import RoadmapNode from "../components/editor/RoadmapNode";
 import LikeButton from "../components/common/LikeButton";
@@ -115,7 +116,7 @@ function RoadmapDetailPage() {
     data: {
       label: n.label,
       description: n.description || "",
-      color: n.color || "#16a34a",
+      color: n.color || DEFAULT_NODE_COLOR,
       url: n.url || "",
       isCompleted: completedSet.has(n.nodeId),
       onToggleComplete: user ? handleToggleComplete : undefined,
@@ -203,7 +204,7 @@ function RoadmapDetailPage() {
           <Background />
           <Controls showInteractive={false} />
           <MiniMap
-            nodeColor={(n) => (n.data?.color as string) || "#16a34a"}
+            nodeColor={(n) => (n.data?.color as string) || DEFAULT_NODE_COLOR}
             className="hidden sm:block"
           />
         </ReactFlow>

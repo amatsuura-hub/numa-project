@@ -51,13 +51,3 @@ body {
   border-radius: 2px;
   z-index: -1;
 }
-
-/* Depth gradient for node cards — deeper = darker (legacy, used in editor) */
-.numa-depth-1 { --numa-depth: #dcfce7; }
-.numa-depth-2 { --numa-depth: #bbf7d0; }
-.numa-depth-3 { --numa-depth: #86efac; }
-.numa-depth-4 { --numa-depth: #4ade80; }
-.numa-depth-5 { --numa-depth: #22c55e; }
-.numa-depth-6 { --numa-depth: #16a34a; }
-.numa-depth-7 { --numa-depth: #15803d; }
-.numa-depth-8 { --numa-depth: #166534; }

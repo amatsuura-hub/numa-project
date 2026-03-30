@@ -26,11 +26,11 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           working-directory: backend
-          version: latest
+          version: v1.64.8
 
       - name: Security scan
         run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.22.4
           gosec ./...
 
       - name: Test with coverage

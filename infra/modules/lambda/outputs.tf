@@ -13,3 +13,7 @@ output "invoke_arn" {
 output "post_confirmation_arn" {
   value = aws_lambda_function.post_confirmation.arn
 }
+
+output "dlq_name" {
+  value = aws_sqs_queue.api_dlq.name
+}

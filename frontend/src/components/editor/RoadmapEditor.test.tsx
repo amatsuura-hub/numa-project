@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import RoadmapEditor from "./RoadmapEditor";
+import { DEFAULT_NODE_COLOR } from "../../constants/depth";
 
 vi.mock("@xyflow/react", () => ({
   ReactFlow: ({ children }: { children: React.ReactNode }) => (
@@ -20,7 +21,7 @@ vi.mock("../../stores/editorStore", () => ({
       {
         id: "n1",
         position: { x: 0, y: 0 },
-        data: { label: "Step 1", description: "", color: "#16a34a", url: "" },
+        data: { label: "Step 1", description: "", color: DEFAULT_NODE_COLOR, url: "" },
         type: "roadmapNode",
       },
     ],

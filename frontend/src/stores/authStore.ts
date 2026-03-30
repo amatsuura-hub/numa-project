@@ -6,10 +6,11 @@ import {
   CognitoUserAttribute,
   CognitoUserSession,
 } from "amazon-cognito-identity-js";
+import { config } from "../config";
 
 const userPool = new CognitoUserPool({
-  UserPoolId: import.meta.env.VITE_COGNITO_USER_POOL_ID || "",
-  ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID || "",
+  UserPoolId: config.cognitoUserPoolId,
+  ClientId: config.cognitoClientId,
 });
 
 interface AuthUser {

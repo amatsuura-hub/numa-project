@@ -1,7 +1,8 @@
 import type { APIResponse, APIError } from "../types";
 import { useAuthStore } from "../stores/authStore";
+import { config } from "../config";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = config.apiUrl;
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 1000;
 

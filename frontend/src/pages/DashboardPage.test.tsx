@@ -127,7 +127,11 @@ describe("DashboardPage", () => {
       expect(screen.getByText("Test Roadmap")).toBeInTheDocument();
     });
 
+    // Click "削除" to show confirmation
     await userEvent.click(screen.getByText("削除"));
+
+    // Click "削除する" to confirm deletion
+    await userEvent.click(screen.getByText("削除する"));
 
     // Roadmap should be optimistically removed from the UI
     await waitFor(() => {

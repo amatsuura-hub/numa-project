@@ -4,6 +4,7 @@ import { applyNodeChanges, applyEdgeChanges, addEdge } from "@xyflow/react";
 import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
 import type { RoadmapMeta, RoadmapNode, RoadmapEdge } from "../types";
+import { DEFAULT_NODE_COLOR } from "../constants/depth";
 
 interface EditorState {
   roadmapId: string | null;
@@ -56,7 +57,7 @@ function toFlowNode(n: RoadmapNode): Node {
     data: {
       label: n.label,
       description: n.description || "",
-      color: n.color || "#16a34a",
+      color: n.color || DEFAULT_NODE_COLOR,
       url: n.url || "",
       order: n.order,
     },
@@ -82,7 +83,7 @@ function fromFlowNode(n: Node): RoadmapNode {
     description: (n.data.description as string) || "",
     posX: n.position.x,
     posY: n.position.y,
-    color: (n.data.color as string) || "#16a34a",
+    color: (n.data.color as string) || DEFAULT_NODE_COLOR,
     url: (n.data.url as string) || "",
     order: (n.data.order as number) || 0,
   };
@@ -174,7 +175,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       data: {
         label: `ステップ ${nodeCounter}`,
         description: "",
-        color: "#16a34a",
+        color: DEFAULT_NODE_COLOR,
         url: "",
         order: nodeCounter,
       },

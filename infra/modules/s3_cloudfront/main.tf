@@ -181,6 +181,8 @@ resource "aws_cloudfront_distribution" "frontend" {
   enabled             = true
   default_root_object = "index.html"
   comment             = "${var.prefix} frontend"
+  http_version        = "http2and3"
+  is_ipv6_enabled     = true
   web_acl_id          = var.waf_web_acl_arn != "" ? var.waf_web_acl_arn : null
 
   logging_config {

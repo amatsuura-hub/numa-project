@@ -22,3 +22,15 @@ variable "api_gateway_stage" {
   description = "API Gateway stage name for alarms"
   type        = string
 }
+
+variable "dlq_name" {
+  description = "SQS Dead Letter Queue name for alarms"
+  type        = string
+  default     = ""
+}
+
+variable "alert_email" {
+  description = "Email address for alarm notifications (leave empty to skip subscription)"
+  type        = string
+  default     = ""
+}

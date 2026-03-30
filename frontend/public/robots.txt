@@ -1,3 +1,4 @@
+# NOTE: ドメインは本番ドメイン取得後に変更すること
 User-agent: *
 Allow: /
 Disallow: /dashboard

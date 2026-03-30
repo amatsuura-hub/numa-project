@@ -26,7 +26,7 @@ func handler(ctx context.Context, event events.CognitoEventUserPoolsPostConfirma
 		tableName = "dev-numa-main"
 	}
 
-	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion("ap-northeast-1"))
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return event, fmt.Errorf("loading AWS config: %w", err)
 	}
@@ -51,8 +51,8 @@ func handler(ctx context.Context, event events.CognitoEventUserPoolsPostConfirma
 	displayName := parts[0]
 
 	user := model.User{
-		PK:          "USER#" + userID,
-		SK:          "PROFILE",
+		PK:          model.PKPrefixUser + userID,
+		SK:          model.SKProfile,
 		UserID:      userID,
 		DisplayName: displayName,
 		CreatedAt:   time.Now().UTC().Format(time.RFC3339),

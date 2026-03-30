@@ -13,6 +13,7 @@ import RoadmapNode from "./RoadmapNode";
 import NodeEditPanel from "./NodeEditPanel";
 import MetaEditPanel from "./MetaEditPanel";
 import EditorToolbar from "./EditorToolbar";
+import { DEFAULT_NODE_COLOR } from "../../constants/depth";
 
 function RoadmapEditor() {
   const {
@@ -77,7 +78,7 @@ function RoadmapEditor() {
         <Background />
         <Controls />
         <MiniMap
-          nodeColor={(n) => (n.data?.color as string) || "#16a34a"}
+          nodeColor={(n) => (n.data?.color as string) || DEFAULT_NODE_COLOR}
           className="!bottom-4 !right-4"
         />
       </ReactFlow>

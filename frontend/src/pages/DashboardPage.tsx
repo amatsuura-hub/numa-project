@@ -15,6 +15,7 @@ function DashboardPage() {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [progressList, setProgressList] = useState<ProgressWithRoadmap[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (tab === "my") {
@@ -63,6 +64,7 @@ function DashboardPage() {
   };
 
   const handleDelete = async (id: string) => {
+    setConfirmDeleteId(null);
     const target = roadmaps.find((r) => r.roadmapId === id);
     if (!target) return;
 
@@ -206,12 +208,29 @@ function DashboardPage() {
                   >
                     編集
                   </Link>
-                  <button
-                    onClick={() => handleDelete(roadmap.roadmapId)}
-                    className="rounded-md border border-red-300 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
-                  >
-                    削除
-                  </button>
+                  {confirmDeleteId === roadmap.roadmapId ? (
+                    <>
+                      <button
+                        onClick={() => handleDelete(roadmap.roadmapId)}
+                        className="rounded-md bg-red-600 px-3 py-1 text-xs font-bold text-white hover:bg-red-700"
+                      >
+                        削除する
+                      </button>
+                      <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="rounded-md border border-gray-300 px-3 py-1 text-xs text-gray-600 hover:bg-gray-50"
+                      >
+                        キャンセル
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDeleteId(roadmap.roadmapId)}
+                      className="rounded-md border border-red-300 px-3 py-1 text-xs text-red-600 hover:bg-red-50"
+                    >
+                      削除
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { userApi } from "../api/user";
 import type { User, RoadmapMeta } from "../types";
+import { getErrorMessage } from "../utils/getErrorMessage";
 import RoadmapCard from "../components/common/RoadmapCard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
@@ -26,9 +27,9 @@ function UserPage() {
       const { data } = await userApi.getUserRoadmaps(userId, { limit: 50 });
       setRoadmaps(data.roadmaps || []);
     } catch (e) {
-      const msg = (e as Error).message;
+      const msg = getErrorMessage(e);
       setError(msg);
-      toast.error(msg || "ユーザー情報の読み込みに失敗しました");
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }

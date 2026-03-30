@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
 import { useAuthStore } from "../stores/authStore";
 import type { RoadmapDetail, Progress } from "../types";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 export function useRoadmapDetail(id: string | undefined) {
   const { user } = useAuthStore();
@@ -18,9 +19,9 @@ export function useRoadmapDetail(id: string | undefined) {
       const { data } = await roadmapApi.get(roadmapId);
       setDetail(data);
     } catch (e) {
-      const msg = (e as Error).message;
+      const msg = getErrorMessage(e);
       setError(msg);
-      toast.error(msg || "ロードマップの読み込みに失敗しました");
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }

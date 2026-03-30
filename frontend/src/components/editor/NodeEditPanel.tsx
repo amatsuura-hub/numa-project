@@ -1,29 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Node } from "@xyflow/react";
 import { useEditorStore } from "../../stores/editorStore";
+import { NODE_COLORS, DEFAULT_NODE_COLOR } from "../../constants/depth";
 
 interface NodeEditPanelProps {
   node: Node | null;
   onClose: () => void;
 }
 
-// Swamp depth palette — shallow to deep
-const NODE_COLORS = [
-  "#bbf7d0", // 浅い (shallow)
-  "#86efac",
-  "#4ade80",
-  "#22c55e",
-  "#16a34a", // 中間 (mid)
-  "#15803d",
-  "#166534",
-  "#14532d", // 深い (deep)
-];
-
 function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
   const { updateNodeData, deleteNode } = useEditorStore();
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
-  const [color, setColor] = useState("#16a34a");
+  const [color, setColor] = useState(DEFAULT_NODE_COLOR);
   const [url, setUrl] = useState("");
   const panelRef = useRef<HTMLDivElement>(null);
   const labelInputRef = useRef<HTMLInputElement>(null);
@@ -32,7 +21,7 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
     if (node) {
       setLabel((node.data.label as string) || "");
       setDescription((node.data.description as string) || "");
-      setColor((node.data.color as string) || "#16a34a");
+      setColor((node.data.color as string) || DEFAULT_NODE_COLOR);
       setUrl((node.data.url as string) || "");
       // Focus the label input when panel opens
       setTimeout(() => labelInputRef.current?.focus(), 0);

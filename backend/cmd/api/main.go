@@ -35,8 +35,7 @@ func main() {
 		if env != "" && env != "dev" {
 			log.Fatalf("ALLOWED_ORIGIN environment variable is required in %s environment", env)
 		}
-		slog.Warn("ALLOWED_ORIGIN not set, defaulting to '*'")
-		allowedOrigin = "*"
+		slog.Warn("ALLOWED_ORIGIN not set; CORS will reject cross-origin requests. Set ALLOWED_ORIGIN in .env for local development.")
 	}
 
 	repo, err := repository.NewDynamoDB(context.Background(), tableName)

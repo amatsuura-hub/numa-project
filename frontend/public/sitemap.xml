@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- TODO: 将来的には Lambda で動的生成し、公開ロードマップのURLも含める -->
+<!-- NOTE: ドメインは本番ドメイン取得後に変更すること -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://numa-roadmap.com/</loc>

@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { DEFAULT_NODE_COLOR } from "../../constants/depth";
 
 interface RoadmapNodeData {
   label: string;
@@ -27,7 +28,7 @@ function RoadmapNode({ data, selected }: NodeProps) {
       className={`rounded-lg border-2 bg-white px-4 py-3 shadow-sm transition-shadow ${
         selected ? "shadow-md ring-2 ring-numa-400" : ""
       } ${onToggleComplete ? "cursor-pointer hover:shadow-md" : ""}`}
-      style={{ borderColor: color || "#16a34a", minWidth: 150, maxWidth: 250 }}
+      style={{ borderColor: color || DEFAULT_NODE_COLOR, minWidth: 150, maxWidth: 250 }}
       onClick={handleClick}
     >
       <Handle type="target" position={Position.Top} className="!bg-numa-400" />
@@ -46,7 +47,7 @@ function RoadmapNode({ data, selected }: NodeProps) {
         )}
         <div
           className={`text-sm font-semibold ${isCompleted ? "line-through opacity-70" : ""}`}
-          style={{ color: color || "#16a34a" }}
+          style={{ color: color || DEFAULT_NODE_COLOR }}
         >
           {label}
         </div>

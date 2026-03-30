@@ -25,11 +25,11 @@ func (h *Handler) CreateEdge(ctx context.Context, userID string, roadmapID strin
 		return nil, err
 	}
 
-	detail, err := h.repo.GetRoadmapDetail(ctx, roadmapID)
+	edgeCount, err := h.repo.CountEdges(ctx, roadmapID)
 	if err != nil {
 		return nil, NewAPIError(ErrInternal, "Failed to check edge count")
 	}
-	if detail != nil && len(detail.Edges) >= model.MaxEdgesPerRoadmap {
+	if edgeCount >= model.MaxEdgesPerRoadmap {
 		return nil, NewAPIError(ErrBadRequest, "maximum 200 edges per roadmap")
 	}
 

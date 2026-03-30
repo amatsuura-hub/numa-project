@@ -8,17 +8,29 @@ import (
 	"unicode/utf8"
 )
 
+// Validation limits for user-submitted text fields.
+const (
+	maxTitleLen       = 100
+	maxDescriptionLen = 1000
+	maxCategoryLen    = 50
+	maxNodeLabelLen   = 50
+	maxNodeDescLen    = 500
+	maxTagLen         = 30
+	maxTagsCount      = 5
+	maxBatchNodes     = 100
+)
+
 func validateTags(tags []string) error {
-	if len(tags) > 5 {
-		return NewAPIError(ErrBadRequest, "maximum 5 tags allowed")
+	if len(tags) > maxTagsCount {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("maximum %d tags allowed", maxTagsCount))
 	}
 	seen := make(map[string]bool, len(tags))
 	for _, tag := range tags {
 		if tag == "" {
 			return NewAPIError(ErrBadRequest, "tags cannot be empty")
 		}
-		if utf8.RuneCountInString(tag) > 30 {
-			return NewAPIError(ErrBadRequest, fmt.Sprintf("each tag must be 30 characters or less (got %d)", utf8.RuneCountInString(tag)))
+		if utf8.RuneCountInString(tag) > maxTagLen {
+			return NewAPIError(ErrBadRequest, fmt.Sprintf("each tag must be %d characters or less (got %d)", maxTagLen, utf8.RuneCountInString(tag)))
 		}
 		if seen[tag] {
 			return NewAPIError(ErrBadRequest, "duplicate tags are not allowed")
@@ -33,14 +45,14 @@ func validateRoadmapFields(title string, description string, category string, ta
 	if title == "" {
 		return NewAPIError(ErrBadRequest, "title is required")
 	}
-	if utf8.RuneCountInString(title) > 100 {
-		return NewAPIError(ErrBadRequest, fmt.Sprintf("title must be 100 characters or less (got %d)", utf8.RuneCountInString(title)))
+	if utf8.RuneCountInString(title) > maxTitleLen {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("title must be %d characters or less (got %d)", maxTitleLen, utf8.RuneCountInString(title)))
 	}
-	if utf8.RuneCountInString(description) > 1000 {
-		return NewAPIError(ErrBadRequest, fmt.Sprintf("description must be 1000 characters or less (got %d)", utf8.RuneCountInString(description)))
+	if utf8.RuneCountInString(description) > maxDescriptionLen {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("description must be %d characters or less (got %d)", maxDescriptionLen, utf8.RuneCountInString(description)))
 	}
-	if utf8.RuneCountInString(category) > 50 {
-		return NewAPIError(ErrBadRequest, fmt.Sprintf("category must be 50 characters or less (got %d)", utf8.RuneCountInString(category)))
+	if utf8.RuneCountInString(category) > maxCategoryLen {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("category must be %d characters or less (got %d)", maxCategoryLen, utf8.RuneCountInString(category)))
 	}
 	if err := validateTags(tags); err != nil {
 		return err
@@ -69,11 +81,11 @@ func validateNodeFields(label, description, color, rawURL string) error {
 	if label == "" {
 		return NewAPIError(ErrBadRequest, "label is required")
 	}
-	if utf8.RuneCountInString(label) > 50 {
-		return NewAPIError(ErrBadRequest, fmt.Sprintf("node label must be 50 characters or less (got %d)", utf8.RuneCountInString(label)))
+	if utf8.RuneCountInString(label) > maxNodeLabelLen {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("node label must be %d characters or less (got %d)", maxNodeLabelLen, utf8.RuneCountInString(label)))
 	}
-	if utf8.RuneCountInString(description) > 500 {
-		return NewAPIError(ErrBadRequest, fmt.Sprintf("node description must be 500 characters or less (got %d)", utf8.RuneCountInString(description)))
+	if utf8.RuneCountInString(description) > maxNodeDescLen {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("node description must be %d characters or less (got %d)", maxNodeDescLen, utf8.RuneCountInString(description)))
 	}
 	if color != "" && !hexColorRegex.MatchString(color) {
 		return NewAPIError(ErrBadRequest, "color must be a valid hex color (e.g. #4c6ef5)")
@@ -100,8 +112,8 @@ func validateBatchUpdateNodesBody(body string, req *BatchUpdateNodesRequest) err
 	if len(req.Nodes) == 0 {
 		return NewAPIError(ErrBadRequest, "nodes array is required")
 	}
-	if len(req.Nodes) > 100 {
-		return NewAPIError(ErrBadRequest, "maximum 100 nodes per batch")
+	if len(req.Nodes) > maxBatchNodes {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("maximum %d nodes per batch", maxBatchNodes))
 	}
 	for _, n := range req.Nodes {
 		if n.NodeID == "" {

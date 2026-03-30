@@ -135,6 +135,7 @@ module "monitoring" {
   dynamodb_table_name  = module.dynamodb.table_name
   api_gateway_name     = module.api_gateway.rest_api_name
   api_gateway_stage    = var.environment
+  dlq_name             = module.lambda.dlq_name
 }
 
 # DNS module — uncomment and set domain_name variable to enable custom domain

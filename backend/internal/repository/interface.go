@@ -26,10 +26,12 @@ type Repository interface {
 	PutNode(ctx context.Context, node *model.Node) error
 	DeleteNode(ctx context.Context, roadmapID, nodeID string) error
 	BatchPutNodes(ctx context.Context, nodes []model.Node) error
+	CountNodes(ctx context.Context, roadmapID string) (int, error)
 
 	// Edge
 	PutEdge(ctx context.Context, edge *model.Edge) error
 	DeleteEdge(ctx context.Context, roadmapID, edgeID string) error
+	CountEdges(ctx context.Context, roadmapID string) (int, error)
 
 	// Like
 	IsLiked(ctx context.Context, roadmapID, userID string) (bool, error)
