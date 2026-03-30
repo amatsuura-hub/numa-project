@@ -73,7 +73,11 @@ function RoadmapEditor() {
         }}
         nodeTypes={nodeTypes}
         fitView
-        defaultEdgeOptions={{ type: "smoothstep", animated: true }}
+        defaultEdgeOptions={{
+          type: "smoothstep",
+          animated: true,
+          style: { strokeWidth: 2, stroke: "rgba(45,90,50,0.5)" },
+        }}
       >
         <Background />
         <Controls />

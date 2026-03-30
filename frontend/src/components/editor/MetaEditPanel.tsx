@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import toast from "react-hot-toast";
 import { useEditorStore } from "../../stores/editorStore";
 import { CATEGORIES } from "../../types";
 
@@ -9,6 +10,7 @@ function MetaEditPanel() {
   const [category, setCategory] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (meta) {
@@ -19,15 +21,25 @@ function MetaEditPanel() {
     }
   }, [meta]);
 
-  const handleSave = async () => {
-    await updateMeta({
-      title,
-      description,
-      category,
-      tags: meta?.tags || [],
-      isPublic,
-    });
-  };
+  const saveWith = useCallback(
+    async (overrides: { title?: string; description?: string; category?: string; isPublic?: boolean } = {}) => {
+      setIsSaving(true);
+      try {
+        await updateMeta({
+          title: overrides.title ?? title,
+          description: overrides.description ?? description,
+          category: overrides.category ?? category,
+          tags: meta?.tags || [],
+          isPublic: overrides.isPublic ?? isPublic,
+        });
+      } catch {
+        toast.error("設定の保存に失敗しました");
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [title, description, category, isPublic, meta?.tags, updateMeta],
+  );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -57,10 +69,10 @@ function MetaEditPanel() {
       </button>
 
       {isOpen && (
-        <div className="mt-2 w-72 rounded-lg bg-white p-4 shadow-lg">
+        <div className="mt-2 w-72 rounded-lg border border-numa-border-subtle bg-white p-4 shadow-lg">
           <div className="space-y-3">
             <div>
-              <label htmlFor="meta-title" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="meta-title" className="mb-1 block text-sm font-semibold text-[#5a4e3a]">
                 タイトル
               </label>
               <input
@@ -68,39 +80,40 @@ function MetaEditPanel() {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                onBlur={handleSave}
+                onBlur={() => saveWith()}
                 maxLength={100}
-                className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-numa-500 focus:outline-none"
+                className="w-full rounded border border-numa-border px-3 py-1.5 text-sm text-numa-text focus:border-swamp-700 focus:outline-none"
               />
             </div>
 
             <div>
-              <label htmlFor="meta-description" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="meta-description" className="mb-1 block text-sm font-semibold text-[#5a4e3a]">
                 説明
               </label>
               <textarea
                 id="meta-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                onBlur={handleSave}
+                onBlur={() => saveWith()}
                 maxLength={1000}
                 rows={2}
-                className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-numa-500 focus:outline-none"
+                className="w-full rounded border border-numa-border px-3 py-1.5 text-sm text-numa-text focus:border-swamp-700 focus:outline-none"
               />
             </div>
 
             <div>
-              <label htmlFor="meta-category" className="mb-1 block text-sm font-medium text-gray-700">
+              <label htmlFor="meta-category" className="mb-1 block text-sm font-semibold text-[#5a4e3a]">
                 カテゴリ
               </label>
               <select
                 id="meta-category"
                 value={category}
                 onChange={(e) => {
-                  setCategory(e.target.value);
-                  setTimeout(handleSave, 0);
+                  const val = e.target.value;
+                  setCategory(val);
+                  saveWith({ category: val });
                 }}
-                className="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-numa-500 focus:outline-none"
+                className="w-full rounded border border-numa-border px-3 py-1.5 text-sm text-numa-text focus:border-swamp-700 focus:outline-none"
               >
                 <option value="">選択してください</option>
                 {Object.entries(CATEGORIES).map(([id, name]) => (
@@ -117,15 +130,24 @@ function MetaEditPanel() {
                 id="isPublic"
                 checked={isPublic}
                 onChange={(e) => {
-                  setIsPublic(e.target.checked);
-                  setTimeout(handleSave, 0);
+                  const val = e.target.checked;
+                  setIsPublic(val);
+                  saveWith({ isPublic: val });
                 }}
-                className="h-4 w-4 rounded border-gray-300 text-numa-600 focus:ring-numa-500"
+                className="h-4 w-4 rounded border-gray-300 text-swamp-700 focus:ring-swamp-700"
               />
-              <label htmlFor="isPublic" className="text-sm text-gray-700">
+              <label htmlFor="isPublic" className="text-sm font-medium text-numa-text">
                 公開する
               </label>
             </div>
+
+            <button
+              onClick={() => saveWith()}
+              disabled={isSaving}
+              className="w-full rounded bg-swamp-700 px-4 py-2 text-sm font-bold text-white hover:bg-swamp-800 transition disabled:opacity-50"
+            >
+              {isSaving ? "保存中..." : "設定を保存"}
+            </button>
           </div>
         </div>
       )}

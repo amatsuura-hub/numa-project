@@ -104,6 +104,10 @@ func (h *Handler) UncompleteNode(ctx context.Context, userID, roadmapID, nodeID 
 		return nil, NewAPIError(ErrForbidden, "Cannot track progress on a private roadmap")
 	}
 
+	if !containsNode(detail.Nodes, nodeID) {
+		return nil, NewAPIError(ErrNotFound, fmt.Sprintf("Node %s not found in roadmap", nodeID))
+	}
+
 	totalNodes := len(detail.Nodes)
 	p, err := h.repo.UncompleteNode(ctx, userID, roadmapID, nodeID, totalNodes)
 	if err != nil {

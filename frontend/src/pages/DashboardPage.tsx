@@ -143,7 +143,7 @@ function DashboardPage() {
       </div>
 
       {/* Tabs */}
-      <div className="mb-6 flex border-b border-[rgba(80,60,30,0.08)]">
+      <div className="mb-6 flex border-b border-numa-border-light">
         {tabs.map((t) => (
           <button
             key={t.key}
@@ -183,7 +183,7 @@ function DashboardPage() {
             {roadmaps.map((roadmap) => (
               <div
                 key={roadmap.roadmapId}
-                className="rounded-md border border-[rgba(80,60,30,0.12)] bg-white p-4 transition hover:border-[rgba(45,90,50,0.25)] hover:-translate-y-0.5"
+                className="rounded-md border border-numa-border-soft bg-white p-4 transition hover:border-swamp-700/25 hover:-translate-y-0.5"
               >
                 <div className="mb-2 flex items-start justify-between">
                   <Link
@@ -193,10 +193,10 @@ function DashboardPage() {
                     {roadmap.title}
                   </Link>
                   <span
-                    className={`ml-2 shrink-0 rounded px-2 py-0.5 text-xs ${
+                    className={`ml-2 shrink-0 rounded border px-2 py-0.5 text-xs font-medium ${
                       roadmap.isPublic
-                        ? "bg-swamp-50 text-swamp-700"
-                        : "bg-[#f0ead8] text-numa-text-hint"
+                        ? "border-swamp-700/20 bg-swamp-50 text-swamp-700"
+                        : "border-numa-border bg-[#f0ead8] text-numa-text-muted"
                     }`}
                   >
                     {roadmap.isPublic ? "公開" : "非公開"}
@@ -210,12 +210,12 @@ function DashboardPage() {
                 )}
 
                 {roadmap.category && (
-                  <span className="mb-2 inline-block rounded bg-swamp-50 px-2 py-0.5 text-xs text-swamp-700">
+                  <span className="mb-2 inline-block rounded border border-swamp-700/20 bg-swamp-50 px-2 py-0.5 text-xs text-swamp-700">
                     {CATEGORIES[roadmap.category as Category] || roadmap.category}
                   </span>
                 )}
 
-                <div className="mt-3 flex items-center gap-2 text-xs text-numa-text-hint">
+                <div className="mt-3 flex items-center gap-2 text-sm text-[#8a7e6e]">
                   <span>♡ {roadmap.likeCount}</span>
                   <span>·</span>
                   <span>
@@ -226,7 +226,7 @@ function DashboardPage() {
                 <div className="mt-3 flex gap-2">
                   <Link
                     to={`/roadmaps/${roadmap.roadmapId}/edit`}
-                    className="rounded border border-[rgba(80,60,30,0.15)] px-3 py-1 text-xs text-numa-text-muted hover:bg-[#f5f0e8] transition"
+                    className="rounded border border-numa-border-medium px-3 py-1 text-sm text-numa-text-muted hover:bg-[#f5f0e8] transition"
                   >
                     編集
                   </Link>
@@ -234,13 +234,13 @@ function DashboardPage() {
                     <>
                       <button
                         onClick={() => handleDelete(roadmap.roadmapId)}
-                        className="rounded bg-red-600 px-3 py-1 text-xs font-bold text-white hover:bg-red-700 transition"
+                        className="rounded bg-red-600 px-3 py-1 text-sm font-bold text-white hover:bg-red-700 transition"
                       >
                         削除する
                       </button>
                       <button
                         onClick={() => setConfirmDeleteId(null)}
-                        className="rounded border border-[rgba(80,60,30,0.15)] px-3 py-1 text-xs text-numa-text-muted hover:bg-[#f5f0e8] transition"
+                        className="rounded border border-numa-border-medium px-3 py-1 text-sm text-numa-text-muted hover:bg-[#f5f0e8] transition"
                       >
                         キャンセル
                       </button>
@@ -248,7 +248,7 @@ function DashboardPage() {
                   ) : (
                     <button
                       onClick={() => setConfirmDeleteId(roadmap.roadmapId)}
-                      className="rounded border border-[rgba(180,100,100,0.2)] px-3 py-1 text-xs text-[#b08080] hover:bg-red-50 transition"
+                      className="rounded border border-[rgba(180,100,100,0.3)] px-3 py-1 text-sm text-[#a06060] hover:bg-red-50 transition"
                     >
                       削除
                     </button>
@@ -282,7 +282,7 @@ function DashboardPage() {
                 <Link
                   key={item.roadmapId}
                   to={`/roadmaps/${item.roadmapId}`}
-                  className="block rounded-md border border-[rgba(80,60,30,0.12)] bg-white p-4 transition hover:border-[rgba(45,90,50,0.25)] hover:-translate-y-0.5"
+                  className="block rounded-md border border-numa-border-soft bg-white p-4 transition hover:border-swamp-700/25 hover:-translate-y-0.5"
                 >
                   <h3 className="text-base font-bold text-numa-text">
                     {item.roadmap.title}
@@ -337,7 +337,7 @@ function DashboardPage() {
                 <Link
                   key={p.roadmapId}
                   to={`/roadmaps/${p.roadmapId}`}
-                  className="block rounded-md border border-[rgba(80,60,30,0.12)] bg-white p-4 transition hover:border-[rgba(45,90,50,0.25)] hover:-translate-y-0.5"
+                  className="block rounded-md border border-numa-border-soft bg-white p-4 transition hover:border-swamp-700/25 hover:-translate-y-0.5"
                 >
                   <div className="mb-2 flex items-center justify-between">
                     <h3 className="text-base font-bold text-numa-text">

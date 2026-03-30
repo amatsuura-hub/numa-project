@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-lambda-go/events"
 )
 
 func TestHandler_MissingSub(t *testing.T) {
+	os.Setenv("TABLE_NAME", "test-table")
 	event := events.CognitoEventUserPoolsPostConfirmation{
 		Request: events.CognitoEventUserPoolsPostConfirmationRequest{
 			UserAttributes: map[string]string{
@@ -26,6 +28,7 @@ func TestHandler_MissingSub(t *testing.T) {
 }
 
 func TestHandler_MissingEmail(t *testing.T) {
+	os.Setenv("TABLE_NAME", "test-table")
 	event := events.CognitoEventUserPoolsPostConfirmation{
 		Request: events.CognitoEventUserPoolsPostConfirmationRequest{
 			UserAttributes: map[string]string{
@@ -44,6 +47,7 @@ func TestHandler_MissingEmail(t *testing.T) {
 }
 
 func TestHandler_InvalidEmail(t *testing.T) {
+	os.Setenv("TABLE_NAME", "test-table")
 	event := events.CognitoEventUserPoolsPostConfirmation{
 		Request: events.CognitoEventUserPoolsPostConfirmationRequest{
 			UserAttributes: map[string]string{

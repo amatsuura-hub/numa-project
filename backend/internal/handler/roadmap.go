@@ -9,6 +9,17 @@ import (
 	"github.com/numa-project/backend/internal/model"
 )
 
+// validCategories is the whitelist of allowed category values.
+// Must match frontend CATEGORIES in src/types/index.ts.
+var validCategories = map[string]bool{
+	"programming": true, "web":          true, "ai-ml":        true,
+	"design":      true, "music":        true, "dtm":          true,
+	"gaming":      true, "cooking":      true, "fitness":      true,
+	"language":    true, "business":     true, "finance":      true,
+	"photography": true, "craft":        true, "math-science": true,
+	"hobby":       true,
+}
+
 // CreateRoadmapRequest is the JSON body for creating a roadmap.
 type CreateRoadmapRequest struct {
 	Title       string   `json:"title"`
@@ -224,7 +235,13 @@ func (h *Handler) GetMyRoadmaps(ctx context.Context, userID string, params map[s
 func (h *Handler) ExploreRoadmaps(ctx context.Context, params map[string]string) (interface{}, error) {
 	limit := parseLimit(params, model.DefaultPageLimit, model.MaxPageLimitExplore)
 
-	roadmaps, cursor, err := h.repo.ExploreRoadmaps(ctx, params["category"], limit, params["cursor"])
+	// Validate category against known list; ignore invalid values.
+	category := params["category"]
+	if category != "" && !validCategories[category] {
+		category = ""
+	}
+
+	roadmaps, cursor, err := h.repo.ExploreRoadmaps(ctx, category, limit, params["cursor"])
 	if err != nil {
 		return nil, NewAPIError(ErrInternal, "Failed to get roadmaps")
 	}

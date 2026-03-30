@@ -361,6 +361,34 @@ func TestGetMyRoadmaps(t *testing.T) {
 	}
 }
 
+func TestGetRoadmap_PrivateAccess(t *testing.T) {
+	repo := newMockRepo()
+	setupRoadmapOwner(repo, "r-private", "owner-1")
+	repo.roadmaps["r-private"].IsPublic = false
+	h := New(repo)
+
+	// Owner can access their private roadmap
+	_, err := h.GetRoadmap(context.Background(), "owner-1", "r-private")
+	if err != nil {
+		t.Fatalf("owner should access own private roadmap, got: %v", err)
+	}
+
+	// Other user cannot access private roadmap
+	_, err = h.GetRoadmap(context.Background(), "other-user", "r-private")
+	if err == nil {
+		t.Fatal("expected error for non-owner accessing private roadmap")
+	}
+	if err.Error() != "Access denied" {
+		t.Errorf("expected 'Access denied', got %q", err.Error())
+	}
+
+	// Anonymous user cannot access private roadmap
+	_, err = h.GetRoadmap(context.Background(), "", "r-private")
+	if err == nil {
+		t.Fatal("expected error for anonymous user accessing private roadmap")
+	}
+}
+
 func TestExploreRoadmaps(t *testing.T) {
 	repo := newMockRepo()
 	repo.roadmaps["r-1"] = &model.RoadmapMeta{RoadmapID: "r-1", UserID: "user-1", IsPublic: true}

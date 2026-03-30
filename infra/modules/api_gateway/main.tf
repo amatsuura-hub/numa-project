@@ -191,6 +191,28 @@ resource "aws_wafv2_web_acl" "api" {
   }
 
   rule {
+    name     = "aws-managed-common"
+    priority = 0
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        vendor_name = "AWS"
+        name        = "AWSManagedRulesCommonRuleSet"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.prefix}-api-common-rules"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  rule {
     name     = "rate-limit"
     priority = 1
 

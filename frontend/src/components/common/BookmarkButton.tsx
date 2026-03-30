@@ -36,6 +36,7 @@ function BookmarkButton({ roadmapId, initialBookmarked }: BookmarkButtonProps) {
     <button
       onClick={handleToggle}
       disabled={!user || isLoading}
+      aria-label={isBookmarked ? "ブックマークを解除" : "ブックマーク"}
       className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
         isBookmarked
           ? "border-numa-300 bg-numa-50 text-numa-600"

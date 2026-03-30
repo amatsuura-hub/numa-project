@@ -15,8 +15,14 @@ export default {
           "text-hint": "#9a9080",
           gold: "#6a5230",
           brown: "#3a2e18",
-          border: "rgba(80,60,30,.15)",
-          "border-hover": "rgba(80,60,30,.25)",
+          border: {
+            DEFAULT: "rgba(80,60,30,.15)",
+            light: "rgba(80,60,30,.08)",
+            subtle: "rgba(80,60,30,.10)",
+            soft: "rgba(80,60,30,.12)",
+            medium: "rgba(80,60,30,.20)",
+            hover: "rgba(80,60,30,.25)",
+          },
           // Legacy green (used by editor, dashboard, etc.)
           50: "#f0fdf4",
           100: "#dcfce7",

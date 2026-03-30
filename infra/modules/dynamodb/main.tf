@@ -74,4 +74,10 @@ resource "aws_dynamodb_table" "main" {
   server_side_encryption {
     enabled = true
   }
+
+  # TTL — enable when time-limited records (sessions, verification codes) are added.
+  # ttl {
+  #   attribute_name = "ExpiresAt"
+  #   enabled        = true
+  # }
 }

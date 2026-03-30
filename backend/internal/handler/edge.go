@@ -25,11 +25,26 @@ func (h *Handler) CreateEdge(ctx context.Context, userID string, roadmapID strin
 		return nil, err
 	}
 
-	edgeCount, err := h.repo.CountEdges(ctx, roadmapID)
+	// Verify both source and target nodes exist in the roadmap.
+	detail, err := h.repo.GetRoadmapDetail(ctx, roadmapID)
 	if err != nil {
-		return nil, NewAPIError(ErrInternal, "Failed to check edge count")
+		return nil, NewAPIError(ErrInternal, "Failed to get roadmap")
 	}
-	if edgeCount >= model.MaxEdgesPerRoadmap {
+	if detail == nil {
+		return nil, NewAPIError(ErrNotFound, "Roadmap not found")
+	}
+	nodeIDs := make(map[string]bool, len(detail.Nodes))
+	for _, n := range detail.Nodes {
+		nodeIDs[n.NodeID] = true
+	}
+	if !nodeIDs[req.SourceNodeID] {
+		return nil, NewAPIError(ErrBadRequest, "source node does not exist in this roadmap")
+	}
+	if !nodeIDs[req.TargetNodeID] {
+		return nil, NewAPIError(ErrBadRequest, "target node does not exist in this roadmap")
+	}
+
+	if len(detail.Edges) >= model.MaxEdgesPerRoadmap {
 		return nil, NewAPIError(ErrBadRequest, "maximum 200 edges per roadmap")
 	}
 

@@ -98,9 +98,21 @@ func validateNodeFields(label, description, color, rawURL string) error {
 	return nil
 }
 
+const maxNodePos = 10000.0
+
+func validateNodePosition(x, y float64) error {
+	if x < -maxNodePos || x > maxNodePos || y < -maxNodePos || y > maxNodePos {
+		return NewAPIError(ErrBadRequest, fmt.Sprintf("node position must be between -%v and %v", maxNodePos, maxNodePos))
+	}
+	return nil
+}
+
 func validateCreateNodeBody(body string, req *CreateNodeRequest) error {
 	if err := json.Unmarshal([]byte(body), req); err != nil {
 		return NewAPIError(ErrBadRequest, "Invalid request body")
+	}
+	if err := validateNodePosition(req.PosX, req.PosY); err != nil {
+		return err
 	}
 	return validateNodeFields(req.Label, req.Description, req.Color, req.URL)
 }
@@ -119,6 +131,9 @@ func validateBatchUpdateNodesBody(body string, req *BatchUpdateNodesRequest) err
 		if n.NodeID == "" {
 			return NewAPIError(ErrBadRequest, "nodeId is required for each node")
 		}
+		if err := validateNodePosition(n.PosX, n.PosY); err != nil {
+			return err
+		}
 		if err := validateNodeFields(n.Label, n.Description, n.Color, n.URL); err != nil {
 			return err
 		}
@@ -132,6 +147,9 @@ func validateCreateEdgeBody(body string, req *CreateEdgeRequest) error {
 	}
 	if req.SourceNodeID == "" || req.TargetNodeID == "" {
 		return NewAPIError(ErrBadRequest, "sourceNodeId and targetNodeId are required")
+	}
+	if req.SourceNodeID == req.TargetNodeID {
+		return NewAPIError(ErrBadRequest, "sourceNodeId and targetNodeId must be different")
 	}
 	return nil
 }

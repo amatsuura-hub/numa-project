@@ -13,6 +13,7 @@ clean:
 	rm -rf bin/
 
 deploy: build
+	cd bin && zip -j bootstrap.zip bootstrap
 	aws lambda update-function-code \
 		--function-name $${LAMBDA_FUNCTION_NAME} \
 		--zip-file fileb://bin/bootstrap.zip

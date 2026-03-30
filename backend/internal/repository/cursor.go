@@ -9,6 +9,9 @@ import (
 )
 
 // encodeCursor encodes a DynamoDB LastEvaluatedKey to a base64 string.
+// NOTE: Only string (S) attribute types are supported. If numeric (N) or
+// other types appear in the key, they will be silently dropped. This is
+// sufficient for the current schema where all key attributes are strings.
 func encodeCursor(key map[string]types.AttributeValue) string {
 	m := make(map[string]string, len(key))
 	for k, v := range key {

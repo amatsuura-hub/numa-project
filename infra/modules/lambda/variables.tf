@@ -39,9 +39,9 @@ variable "cognito_user_pool_arn" {
 }
 
 variable "api_memory_size" {
-  description = "Memory size for API Lambda (MB)"
+  description = "Memory size for API Lambda (MB). Go benefits from 256+ for better CPU allocation."
   type        = number
-  default     = 128
+  default     = 256
 }
 
 variable "api_timeout" {

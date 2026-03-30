@@ -26,7 +26,7 @@ func main() {
 
 	tableName := os.Getenv("TABLE_NAME")
 	if tableName == "" {
-		tableName = "dev-numa-main"
+		log.Fatal("TABLE_NAME environment variable is required")
 	}
 
 	allowedOrigin := os.Getenv("ALLOWED_ORIGIN")

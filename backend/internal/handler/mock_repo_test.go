@@ -175,16 +175,6 @@ func (m *mockRepo) BatchPutNodes(_ context.Context, nodes []model.Node) error {
 	return nil
 }
 
-func (m *mockRepo) CountEdges(_ context.Context, roadmapID string) (int, error) {
-	if m.err != nil {
-		return 0, m.err
-	}
-	if d, ok := m.details[roadmapID]; ok {
-		return len(d.Edges), nil
-	}
-	return 0, nil
-}
-
 func (m *mockRepo) PutEdge(_ context.Context, edge *model.Edge) error {
 	m.putEdgeCalled = true
 	if m.err != nil {

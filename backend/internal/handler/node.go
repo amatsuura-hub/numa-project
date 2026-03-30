@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/numa-project/backend/internal/model"
@@ -74,6 +75,7 @@ func (h *Handler) CreateNode(ctx context.Context, userID string, roadmapID strin
 	}
 
 	nodeID := uuid.New().String()
+	now := time.Now().UTC().Format(time.RFC3339)
 	node := &model.Node{
 		PK:          model.PKPrefixRoadmap + roadmapID,
 		SK:          model.SKPrefixNode + nodeID,
@@ -85,6 +87,8 @@ func (h *Handler) CreateNode(ctx context.Context, userID string, roadmapID strin
 		Color:       req.Color,
 		URL:         req.URL,
 		Order:       req.Order,
+		CreatedAt:   now,
+		UpdatedAt:   now,
 	}
 
 	if err := h.repo.PutNode(ctx, node); err != nil {
@@ -95,6 +99,8 @@ func (h *Handler) CreateNode(ctx context.Context, userID string, roadmapID strin
 }
 
 // UpdateNode updates an existing node in a roadmap.
+// NOTE: Currently a full replacement (PutItem). Partial updates via UpdateExpression
+// would be more efficient but require repository layer changes.
 func (h *Handler) UpdateNode(ctx context.Context, userID string, roadmapID string, nodeID string, body string) (interface{}, error) {
 	if err := h.checkRoadmapOwnership(ctx, userID, roadmapID); err != nil {
 		return nil, err
@@ -105,6 +111,7 @@ func (h *Handler) UpdateNode(ctx context.Context, userID string, roadmapID strin
 		return nil, err
 	}
 
+	now := time.Now().UTC().Format(time.RFC3339)
 	node := &model.Node{
 		PK:          model.PKPrefixRoadmap + roadmapID,
 		SK:          model.SKPrefixNode + nodeID,
@@ -116,6 +123,7 @@ func (h *Handler) UpdateNode(ctx context.Context, userID string, roadmapID strin
 		Color:       cnReq.Color,
 		URL:         cnReq.URL,
 		Order:       cnReq.Order,
+		UpdatedAt:   now,
 	}
 
 	if err := h.repo.PutNode(ctx, node); err != nil {
@@ -148,6 +156,7 @@ func (h *Handler) BatchUpdateNodes(ctx context.Context, userID string, roadmapID
 		return nil, err
 	}
 
+	now := time.Now().UTC().Format(time.RFC3339)
 	var nodes []model.Node
 	for _, n := range req.Nodes {
 		nodes = append(nodes, model.Node{
@@ -161,6 +170,7 @@ func (h *Handler) BatchUpdateNodes(ctx context.Context, userID string, roadmapID
 			Color:       n.Color,
 			URL:         n.URL,
 			Order:       n.Order,
+			UpdatedAt:   now,
 		})
 	}
 

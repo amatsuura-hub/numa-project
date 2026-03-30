@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Link } from "react-router-dom";
 import type { RoadmapMeta, Category } from "../../types";
 import { CATEGORIES } from "../../types";
+import { DEPTH_COLORS } from "../../constants/depth";
 
 interface RoadmapCardProps {
   roadmap: RoadmapMeta;
@@ -49,11 +50,9 @@ const RoadmapCard = memo(function RoadmapCard({ roadmap, linkTo }: RoadmapCardPr
 
       {/* Depth bar */}
       <div className="flex gap-0.5 mt-2.5">
-        {["bg-[#e0d8c4]", "bg-[#c8dab8]", "bg-[#8aba82]", "bg-[#5a9a52]", "bg-[#2d5a32]"].map(
-          (color, i) => (
-            <div key={i} className={`h-[3px] flex-1 rounded-sm ${color}`} />
-          ),
-        )}
+        {DEPTH_COLORS.map((color, i) => (
+          <div key={i} className="h-[3px] flex-1 rounded-sm" style={{ backgroundColor: color }} />
+        ))}
       </div>
     </Link>
   );

@@ -11,4 +11,6 @@ type Node struct {
 	Color       string  `dynamodbav:"color,omitempty" json:"color,omitempty"`
 	URL         string  `dynamodbav:"url,omitempty" json:"url,omitempty"`
 	Order       int     `dynamodbav:"order" json:"order"`
+	CreatedAt   string  `dynamodbav:"createdAt,omitempty" json:"createdAt,omitempty"`
+	UpdatedAt   string  `dynamodbav:"updatedAt,omitempty" json:"updatedAt,omitempty"`
 }

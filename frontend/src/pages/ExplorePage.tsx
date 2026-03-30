@@ -62,7 +62,7 @@ function ExplorePage() {
     "flex-shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition";
   const catActive = "bg-swamp-700 text-white";
   const catInactive =
-    "bg-white border border-[rgba(80,60,30,0.12)] text-numa-text-muted hover:border-swamp-700/30 hover:text-swamp-700";
+    "bg-white border border-numa-border-soft text-[#5a4e3a] hover:border-swamp-700/30 hover:text-swamp-700";
 
   return (
     <div>
@@ -96,8 +96,8 @@ function ExplorePage() {
       {isLoading ? (
         <LoadingSpinner />
       ) : roadmaps.length === 0 ? (
-        <div className="mt-6 rounded-md border border-[rgba(80,60,30,0.08)] bg-white py-20 text-center">
-          <p className="mb-2 text-lg text-numa-text-muted">
+        <div className="mt-6 rounded-md border border-numa-border-light bg-white py-20 text-center">
+          <p className="mb-2 text-xl text-numa-text-muted">
             {activeCategory
               ? "このカテゴリにはまだロードマップがありません"
               : "まだ公開ロードマップがありません"}
@@ -126,7 +126,7 @@ function ExplorePage() {
               <button
                 onClick={() => fetchRoadmaps(activeCategory, true)}
                 disabled={isLoadingMore}
-                className="rounded border border-[rgba(80,60,30,0.15)] px-6 py-2 text-sm text-numa-text-muted hover:bg-[#f5f0e8] transition disabled:opacity-50"
+                className="rounded border border-numa-border px-6 py-2 text-sm text-numa-text-muted hover:bg-[#f5f0e8] transition disabled:opacity-50"
               >
                 {isLoadingMore ? "読み込み中..." : "もっと見る"}
               </button>

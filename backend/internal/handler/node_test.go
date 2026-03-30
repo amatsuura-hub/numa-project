@@ -93,6 +93,11 @@ func TestCreateEdgeRequest_Validation(t *testing.T) {
 			body:    `{"sourceNodeId":"abc","targetNodeId":""}`,
 			wantErr: true,
 		},
+		{
+			name:    "self-loop",
+			body:    `{"sourceNodeId":"abc","targetNodeId":"abc"}`,
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -253,6 +258,11 @@ func TestBatchUpdateNodes(t *testing.T) {
 func TestCreateEdge(t *testing.T) {
 	repo := newMockRepo()
 	setupRoadmapOwner(repo, "r-1", "user-1")
+	// Add nodes so edge creation can verify they exist.
+	repo.details["r-1"].Nodes = []model.Node{
+		{NodeID: "n1", Label: "Node 1"},
+		{NodeID: "n2", Label: "Node 2"},
+	}
 	h := New(repo)
 
 	body := `{"sourceNodeId":"n1","targetNodeId":"n2"}`
@@ -266,6 +276,33 @@ func TestCreateEdge(t *testing.T) {
 	}
 	if !repo.putEdgeCalled {
 		t.Error("expected PutEdge to be called")
+	}
+}
+
+func TestCreateEdge_SelfLoop(t *testing.T) {
+	repo := newMockRepo()
+	setupRoadmapOwner(repo, "r-1", "user-1")
+	h := New(repo)
+
+	body := `{"sourceNodeId":"n1","targetNodeId":"n1"}`
+	_, err := h.CreateEdge(context.Background(), "user-1", "r-1", body)
+	if err == nil {
+		t.Fatal("expected error for self-loop edge")
+	}
+}
+
+func TestCreateEdge_NodeNotFound(t *testing.T) {
+	repo := newMockRepo()
+	setupRoadmapOwner(repo, "r-1", "user-1")
+	repo.details["r-1"].Nodes = []model.Node{
+		{NodeID: "n1", Label: "Node 1"},
+	}
+	h := New(repo)
+
+	body := `{"sourceNodeId":"n1","targetNodeId":"n-missing"}`
+	_, err := h.CreateEdge(context.Background(), "user-1", "r-1", body)
+	if err == nil {
+		t.Fatal("expected error for non-existent target node")
 	}
 }
 

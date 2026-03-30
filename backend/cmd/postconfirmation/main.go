@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"strings"
 	"time"
@@ -23,7 +23,7 @@ func main() {
 func handler(ctx context.Context, event events.CognitoEventUserPoolsPostConfirmation) (events.CognitoEventUserPoolsPostConfirmation, error) {
 	tableName := os.Getenv("TABLE_NAME")
 	if tableName == "" {
-		tableName = "dev-numa-main"
+		return event, fmt.Errorf("TABLE_NAME environment variable is required")
 	}
 
 	cfg, err := config.LoadDefaultConfig(ctx)
@@ -71,6 +71,6 @@ func handler(ctx context.Context, event events.CognitoEventUserPoolsPostConfirma
 		return event, fmt.Errorf("putting user item: %w", err)
 	}
 
-	log.Printf("Created user profile for %s (%s)", userID, displayName)
+	slog.Info("created user profile", "userId", userID, "displayName", displayName)
 	return event, nil
 }

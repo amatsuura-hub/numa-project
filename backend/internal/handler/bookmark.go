@@ -62,6 +62,8 @@ func (h *Handler) GetMyBookmarks(ctx context.Context, userID string, params map[
 		Roadmap   *model.RoadmapMeta `json:"roadmap,omitempty"`
 	}
 
+	// TODO: This is an N+1 query — each bookmark triggers a separate GetRoadmapMeta call.
+	// Optimize with BatchGetItem when bookmark counts grow.
 	var items []BookmarkItem
 	for _, b := range bookmarks {
 		roadmapID := strings.TrimPrefix(b.SK, model.SKPrefixBookmark)

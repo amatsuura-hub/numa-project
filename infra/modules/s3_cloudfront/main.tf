@@ -149,6 +149,8 @@ resource "aws_cloudfront_response_headers_policy" "security" {
       override        = true
     }
 
+    # NOTE: 'unsafe-inline' in style-src is required for Tailwind CSS runtime-generated styles.
+    # Consider migrating to nonce-based CSP when Tailwind supports it.
     content_security_policy {
       content_security_policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com; font-src 'self' https://fonts.gstatic.com"
       override                = true

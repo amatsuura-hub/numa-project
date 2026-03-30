@@ -59,7 +59,10 @@ func (d *DynamoDB) LikeRoadmap(ctx context.Context, roadmapID, userID string) er
 			},
 		},
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("liking roadmap: %w", err)
+	}
+	return nil
 }
 
 // UnlikeRoadmap removes a like and decrements likeCount atomically.
@@ -91,5 +94,8 @@ func (d *DynamoDB) UnlikeRoadmap(ctx context.Context, roadmapID, userID string) 
 			},
 		},
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("unliking roadmap: %w", err)
+	}
+	return nil
 }

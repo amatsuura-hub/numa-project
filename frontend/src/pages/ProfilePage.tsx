@@ -23,8 +23,12 @@ function ProfilePage() {
       setDisplayName(data.displayName || "");
       setBio(data.bio || "");
       setXHandle(data.xHandle || "");
-    } catch {
-      // user may not exist yet
+    } catch (err) {
+      // 404 is expected for new users; other errors should be reported
+      const msg = err instanceof Error ? err.message : "";
+      if (!msg.includes("not found") && !msg.includes("404")) {
+        toast.error("プロフィールの読み込みに失敗しました");
+      }
     } finally {
       setIsLoading(false);
     }

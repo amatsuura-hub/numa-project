@@ -40,6 +40,7 @@ function LikeButton({ roadmapId, initialLiked, initialCount }: LikeButtonProps) 
     <button
       onClick={handleToggle}
       disabled={!user || isLoading}
+      aria-label={isLiked ? "いいねを取り消す" : "いいね"}
       className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
         isLiked
           ? "border-red-300 bg-red-50 text-red-600"

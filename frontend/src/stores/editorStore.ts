@@ -158,7 +158,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   onConnect: (connection) => {
-    const edgeId = `edge-${Date.now()}`;
+    const edgeId = `edge-${crypto.randomUUID()}`;
     set((state) => ({
       edges: addEdge({ ...connection, id: edgeId, type: "smoothstep", animated: true }, state.edges),
       isDirty: true,
@@ -168,7 +168,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   addNode: (posX: number, posY: number) => {
     nodeCounter++;
-    const nodeId = `node-${Date.now()}`;
+    const nodeId = `node-${crypto.randomUUID()}`;
     const newNode: Node = {
       id: nodeId,
       position: { x: posX, y: posY },
@@ -253,8 +253,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
                 e.id === edge.id ? { ...e, id: savedEdge.edgeId } : e,
               ),
             }));
-          } catch {
-            // edge may already exist
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : "";
+            if (!msg.includes("already exists")) {
+              toast.error("エッジの保存に失敗しました");
+            }
           }
         }
       }

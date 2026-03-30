@@ -50,7 +50,10 @@ func (d *DynamoDB) BookmarkRoadmap(ctx context.Context, userID, roadmapID string
 		Item:                item,
 		ConditionExpression: aws.String("attribute_not_exists(PK) AND attribute_not_exists(SK)"),
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("bookmarking roadmap: %w", err)
+	}
+	return nil
 }
 
 // UnbookmarkRoadmap removes a bookmark.
@@ -62,7 +65,10 @@ func (d *DynamoDB) UnbookmarkRoadmap(ctx context.Context, userID, roadmapID stri
 			"SK": &types.AttributeValueMemberS{Value: model.SKPrefixBookmark + roadmapID},
 		},
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("removing bookmark: %w", err)
+	}
+	return nil
 }
 
 // GetMyBookmarks returns a user's bookmarks with pagination.

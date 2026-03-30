@@ -234,21 +234,25 @@ func (d *DynamoDB) GetMyRoadmaps(ctx context.Context, userID string, limit int32
 }
 
 // ExploreRoadmaps queries GSI2 for public roadmaps.
+// Category filtering uses FilterExpression on the GSI2 "PUBLIC" partition
+// because all public roadmaps share GSI2PK = "PUBLIC".
 func (d *DynamoDB) ExploreRoadmaps(ctx context.Context, category string, limit int32, cursor string) ([]model.RoadmapMeta, string, error) {
-	gsi2pk := model.GSI2Public
-	if category != "" {
-		gsi2pk = "CAT#" + category
+	exprValues := map[string]types.AttributeValue{
+		":pk": &types.AttributeValueMemberS{Value: model.GSI2Public},
 	}
 
 	input := &dynamodb.QueryInput{
 		TableName:              &d.TableName,
 		IndexName:              aws.String("GSI2"),
 		KeyConditionExpression: aws.String("GSI2PK = :pk"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: gsi2pk},
-		},
+		ExpressionAttributeValues: exprValues,
 		ScanIndexForward: aws.Bool(false),
 		Limit:            &limit,
+	}
+
+	if category != "" {
+		input.FilterExpression = aws.String("category = :cat")
+		exprValues[":cat"] = &types.AttributeValueMemberS{Value: category}
 	}
 
 	if cursor != "" {

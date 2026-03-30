@@ -1,6 +1,9 @@
 # Remote backend configuration
-# To bootstrap: first create the S3 bucket and DynamoDB table manually or
-# with the bootstrap script, then uncomment this block and run `terraform init`.
+# Bootstrap resources (S3 bucket + DynamoDB lock table) are created below.
+# Once they exist, enable the remote backend by uncommenting the block below
+# and running:
+#   terraform init -migrate-state
+# This will move local state to S3. Required for team collaboration and CI.
 #
 # terraform {
 #   backend "s3" {

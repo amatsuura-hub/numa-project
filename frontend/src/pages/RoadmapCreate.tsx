@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   DndContext,
@@ -75,7 +75,7 @@ function SortableNode({ node, index, total, onUpdate, onRemove }: SortableNodePr
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-start gap-3 rounded-md border border-[rgba(80,60,30,0.08)] bg-[#faf8f4] p-4"
+      className="flex items-start gap-3 rounded-md border border-numa-border-light bg-[#faf8f4] p-4"
     >
       {/* Drag handle */}
       <button
@@ -91,7 +91,7 @@ function SortableNode({ node, index, total, onUpdate, onRemove }: SortableNodePr
 
       {/* Depth indicator — round badge */}
       <div
-        className={`mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+        className={`mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold ${
           deep ? "text-white" : "text-numa-text"
         }`}
         style={{ backgroundColor: bg }}
@@ -293,6 +293,18 @@ function RoadmapCreate() {
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
+  // Warn before leaving with unsaved changes
+  const hasContent = title.trim() !== "" || nodes.some((n) => n.label.trim() !== "");
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasContent) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasContent]);
+
   // DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -453,7 +465,7 @@ function RoadmapCreate() {
 
   const inputClass =
     "w-full rounded border px-3 py-2.5 text-sm bg-white text-numa-text placeholder:text-[#c0b8a8] focus:outline-none focus:ring-1 focus:ring-swamp-700/20";
-  const inputBorder = "border-[rgba(80,60,30,0.15)] focus:border-swamp-700";
+  const inputBorder = "border-numa-border focus:border-swamp-700";
   const inputError = "border-red-400 focus:border-red-500 focus:ring-red-500/20";
 
   /* ---- Render ---- */
@@ -477,7 +489,7 @@ function RoadmapCreate() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => nodes.filter((n) => n.label.trim()).length > 0 && setShowPreview(true)}
-            className="rounded border border-[rgba(80,60,30,0.2)] px-4 py-2 text-sm text-numa-text-muted hover:border-[rgba(80,60,30,0.35)] hover:text-numa-text transition"
+            className="rounded border border-numa-border-medium px-4 py-2 text-sm text-numa-text-muted hover:border-numa-border-hover hover:text-numa-text transition"
           >
             プレビュー
           </button>
@@ -492,7 +504,7 @@ function RoadmapCreate() {
       </div>
 
       {/* Meta form — white card */}
-      <section className="mb-6 rounded-lg border border-[rgba(80,60,30,0.1)] bg-white p-6">
+      <section className="mb-6 rounded-lg border border-numa-border-subtle bg-white p-6">
         <div className="space-y-4">
           <div>
             <label htmlFor="create-title" className="mb-1 block text-sm font-semibold text-numa-text-muted">
@@ -559,7 +571,7 @@ function RoadmapCreate() {
       </section>
 
       {/* Nodes — white card */}
-      <section className="mb-6 rounded-lg border border-[rgba(80,60,30,0.1)] bg-white p-6">
+      <section className="mb-6 rounded-lg border border-numa-border-subtle bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-numa-text">ステップ</h2>
           <span className="text-sm text-numa-text-hint">{nodes.length} 個</span>
@@ -584,7 +596,7 @@ function RoadmapCreate() {
 
         <button
           onClick={addNode}
-          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-[rgba(80,60,30,0.2)] py-3 text-sm text-numa-text-muted hover:border-swamp-700/30 hover:text-swamp-700 transition"
+          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-numa-border-medium py-3 text-sm text-numa-text-muted hover:border-swamp-700/30 hover:text-swamp-700 transition"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -594,7 +606,7 @@ function RoadmapCreate() {
       </section>
 
       {/* Edges — white card */}
-      <section className="mb-6 rounded-lg border border-[rgba(80,60,30,0.1)] bg-white p-6">
+      <section className="mb-6 rounded-lg border border-numa-border-subtle bg-white p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-numa-text">つながり</h2>
           <button
@@ -614,7 +626,7 @@ function RoadmapCreate() {
               return (
                 <div
                   key={e.id}
-                  className="flex items-center justify-between rounded border border-[rgba(80,60,30,0.08)] bg-[#faf8f4] px-3 py-1.5 text-xs"
+                  className="flex items-center justify-between rounded border border-numa-border-light bg-[#faf8f4] px-3 py-1.5 text-xs"
                 >
                   <span className="text-numa-text-muted">
                     {src?.label || "（未入力）"} → {tgt?.label || "（未入力）"}

@@ -41,6 +41,15 @@ async function request<T>(
       });
 
       if (!response.ok) {
+        // On 401, try refreshing the token once (Cognito getSession handles refresh internally).
+        if (response.status === 401 && attempt === 0) {
+          const freshToken = await getAuthToken();
+          if (freshToken && freshToken !== token) {
+            headers["Authorization"] = `Bearer ${freshToken}`;
+            continue;
+          }
+        }
+
         if (isRetryable(response.status) && attempt < retries) {
           await new Promise((r) => setTimeout(r, RETRY_DELAY * (attempt + 1)));
           continue;

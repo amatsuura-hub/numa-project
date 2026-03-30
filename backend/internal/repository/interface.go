@@ -31,7 +31,6 @@ type Repository interface {
 	// Edge
 	PutEdge(ctx context.Context, edge *model.Edge) error
 	DeleteEdge(ctx context.Context, roadmapID, edgeID string) error
-	CountEdges(ctx context.Context, roadmapID string) (int, error)
 
 	// Like
 	IsLiked(ctx context.Context, roadmapID, userID string) (bool, error)

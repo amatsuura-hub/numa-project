@@ -18,6 +18,8 @@ function Header() {
           onClick={() => setMenuOpen(!menuOpen)}
           className="inline-flex items-center justify-center rounded-md p-2 text-numa-text-muted hover:text-numa-text sm:hidden"
           aria-label="メニュー"
+          aria-expanded={menuOpen}
+          aria-controls="mobile-nav"
         >
           {menuOpen ? (
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -31,7 +33,7 @@ function Header() {
         </button>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-5 sm:flex text-[13px] text-[#6a6050]">
+        <nav className="hidden items-center gap-5 sm:flex text-[13px] text-[#5a4e3a]">
           <Link to="/explore" className="hover:text-numa-brown">
             探す
           </Link>
@@ -52,7 +54,7 @@ function Header() {
               </Link>
               <button
                 onClick={logout}
-                className="text-numa-text-hint hover:text-numa-brown"
+                className="text-[#8a7e6e] hover:text-numa-brown"
               >
                 ログアウト
               </button>
@@ -75,7 +77,7 @@ function Header() {
 
       {/* Mobile nav */}
       {menuOpen && (
-        <nav className="border-t border-[rgba(90,70,40,.08)] px-8 pb-4 pt-2 sm:hidden">
+        <nav id="mobile-nav" className="border-t border-[rgba(90,70,40,.08)] px-8 pb-4 pt-2 sm:hidden">
           <div className="flex flex-col gap-3 text-[13px] text-numa-text-muted">
             <Link to="/explore" onClick={() => setMenuOpen(false)} className="hover:text-numa-brown">
               探す

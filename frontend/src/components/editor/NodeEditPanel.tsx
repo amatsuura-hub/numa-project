@@ -46,8 +46,19 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
 
   if (!node) return null;
 
+  const isValidUrl = (value: string): boolean => {
+    if (!value) return true;
+    try {
+      const parsed = new URL(value);
+      return ["http:", "https:"].includes(parsed.protocol);
+    } catch {
+      return false;
+    }
+  };
+
   const handleSave = () => {
-    updateNodeData(node.id, { label, description, color, url });
+    const safeUrl = isValidUrl(url) ? url : "";
+    updateNodeData(node.id, { label, description, color, url: safeUrl });
   };
 
   const handleDelete = () => {
@@ -106,21 +117,25 @@ function NodeEditPanel({ node, onClose }: NodeEditPanelProps) {
           </label>
           <p className="mb-2 text-xs text-gray-400">浅い → 深い</p>
           <div className="flex flex-wrap gap-2">
-            {NODE_COLORS.map((c) => (
-              <button
-                key={c}
-                onClick={() => {
-                  setColor(c);
-                  updateNodeData(node.id, { label, description, color: c, url });
-                }}
-                className={`h-7 w-7 rounded-full border-2 ${
-                  color === c ? "border-gray-800" : "border-transparent"
-                }`}
-                style={{ backgroundColor: c }}
-                aria-label={`色 ${c}`}
-                aria-pressed={color === c}
-              />
-            ))}
+            {NODE_COLORS.map((c, i) => {
+              const depthNames = ["とても浅い", "浅い", "ふつう", "深い", "とても深い"];
+              const depthName = depthNames[Math.min(i, depthNames.length - 1)] || `深さ ${i + 1}`;
+              return (
+                <button
+                  key={c}
+                  onClick={() => {
+                    setColor(c);
+                    updateNodeData(node.id, { label, description, color: c, url });
+                  }}
+                  className={`h-7 w-7 rounded-full border-2 ${
+                    color === c ? "border-gray-800" : "border-transparent"
+                  }`}
+                  style={{ backgroundColor: c }}
+                  aria-label={depthName}
+                  aria-pressed={color === c}
+                />
+              );
+            })}
           </div>
         </div>
 

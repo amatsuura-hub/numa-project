@@ -1,5 +1,8 @@
 package handler
 
+// TODO: Implement DeleteUser endpoint for GDPR compliance.
+// Should cascade-delete: roadmaps, progress, likes, bookmarks, and Cognito user.
+
 import (
 	"context"
 	"encoding/json"
@@ -83,6 +86,8 @@ func (h *Handler) GetUserProfile(ctx context.Context, targetUserID string) (inte
 }
 
 // GetUserPublicRoadmaps returns a user's public roadmaps.
+// TODO: Currently fetches all user roadmaps and filters in-memory.
+// Optimize with a GSI2 query filtered by userId when data volume grows.
 func (h *Handler) GetUserPublicRoadmaps(ctx context.Context, targetUserID string, params map[string]string) (interface{}, error) {
 	limit := parseLimit(params, model.DefaultPageLimit, model.MaxPageLimitDefault)
 

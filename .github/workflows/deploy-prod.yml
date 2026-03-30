@@ -1,3 +1,6 @@
+# Production deployment workflow.
+# For additional safety, configure GitHub Environment protection rules:
+#   Settings > Environments > "production" > Required reviewers
 name: Deploy (Production)
 
 on:
@@ -119,3 +122,14 @@ jobs:
           aws cloudfront create-invalidation \
             --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"
+
+  notify-on-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [deploy-backend, deploy-frontend]
+    if: failure()
+    steps:
+      - name: Report failure
+        run: |
+          echo "::error::Production deployment failed. Check the logs above for details."
+          echo "Rollback: re-run the workflow from the last known-good commit."

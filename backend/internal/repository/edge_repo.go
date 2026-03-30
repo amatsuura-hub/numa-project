@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
@@ -43,19 +42,3 @@ func (d *DynamoDB) DeleteEdge(ctx context.Context, roadmapID, edgeID string) err
 	return nil
 }
 
-// CountEdges returns the number of edges for a roadmap using a SELECT COUNT query.
-func (d *DynamoDB) CountEdges(ctx context.Context, roadmapID string) (int, error) {
-	out, err := d.Client.Query(ctx, &dynamodb.QueryInput{
-		TableName:              &d.TableName,
-		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :prefix)"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk":     &types.AttributeValueMemberS{Value: model.PKPrefixRoadmap + roadmapID},
-			":prefix": &types.AttributeValueMemberS{Value: model.SKPrefixEdge},
-		},
-		Select: types.SelectCount,
-	})
-	if err != nil {
-		return 0, fmt.Errorf("counting edges: %w", err)
-	}
-	return int(out.Count), nil
-}
