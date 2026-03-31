@@ -147,7 +147,7 @@ function HeroPreview() {
         edges={HERO_EDGES}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.03 }}
+        fitViewOptions={{ padding: 0.01 }}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}
