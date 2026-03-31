@@ -61,8 +61,8 @@ export function useRoadmapDetail(id: string | undefined) {
           const { data } = await roadmapApi.completeNode(id, nodeId);
           setProgress(data);
         }
-      } catch {
-        toast.error("進捗の更新に失敗しました");
+      } catch (e) {
+        toast.error(getErrorMessage(e));
       }
     },
     [user, id, progress],

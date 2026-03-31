@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useEditorStore } from "../stores/editorStore";
+import { getErrorMessage } from "../utils/getErrorMessage";
 import { CATEGORIES } from "../types";
 import RoadmapEditor from "../components/editor/RoadmapEditor";
 import PageHead from "../components/common/PageHead";
@@ -73,8 +74,8 @@ function RoadmapEditPage() {
       });
       setShowCreateForm(false);
       navigate(`/roadmaps/${newId}/edit`, { replace: true });
-    } catch {
-      toast.error("ロードマップの作成に失敗しました");
+    } catch (e) {
+      toast.error(getErrorMessage(e));
     }
   };
 

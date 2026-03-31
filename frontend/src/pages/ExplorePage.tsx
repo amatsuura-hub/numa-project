@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
+import { getErrorMessage } from "../utils/getErrorMessage";
 import type { RoadmapMeta } from "../types";
 import { CATEGORIES } from "../types";
 import RoadmapCard from "../components/common/RoadmapCard";
@@ -39,8 +40,8 @@ function ExplorePage() {
         }
         setCursor(data.cursor);
         setHasMore(!!data.cursor);
-      } catch {
-        toast.error("ロードマップの読み込みに失敗しました");
+      } catch (e) {
+        toast.error(getErrorMessage(e));
       } finally {
         setIsLoading(false);
         setIsLoadingMore(false);

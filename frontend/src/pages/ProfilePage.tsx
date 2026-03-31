@@ -48,8 +48,8 @@ function ProfilePage() {
     try {
       await userApi.updateMe({ displayName, bio, xHandle });
       toast.success("プロフィールを更新しました");
-    } catch {
-      toast.error("更新に失敗しました");
+    } catch (e) {
+      toast.error(getErrorMessage(e));
     } finally {
       setIsSaving(false);
     }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
+import { getErrorMessage } from "../utils/getErrorMessage";
 import type { RoadmapMeta, BookmarkItem, ProgressWithRoadmap } from "../types";
 import { CATEGORIES, NUMA_LEVELS, type Category } from "../types";
 import PageHead from "../components/common/PageHead";
@@ -32,8 +33,8 @@ function DashboardPage() {
     try {
       const { data } = await roadmapApi.getMy();
       setRoadmaps(data.roadmaps || []);
-    } catch {
-      toast.error("ロードマップの読み込みに失敗しました");
+    } catch (e) {
+      toast.error(getErrorMessage(e));
     } finally {
       setIsLoading(false);
     }
@@ -44,8 +45,8 @@ function DashboardPage() {
     try {
       const { data } = await roadmapApi.getBookmarks();
       setBookmarks(data.bookmarks || []);
-    } catch {
-      toast.error("ブックマークの読み込みに失敗しました");
+    } catch (e) {
+      toast.error(getErrorMessage(e));
     } finally {
       setIsLoading(false);
     }
@@ -56,8 +57,8 @@ function DashboardPage() {
     try {
       const { data } = await roadmapApi.getMyProgress();
       setProgressList(data.progress || []);
-    } catch {
-      toast.error("進捗データの読み込みに失敗しました");
+    } catch (e) {
+      toast.error(getErrorMessage(e));
     } finally {
       setIsLoading(false);
     }
@@ -110,8 +111,8 @@ function DashboardPage() {
       if (cancelled) return;
       try {
         await roadmapApi.delete(id);
-      } catch {
-        toast.error("削除に失敗しました");
+      } catch (e) {
+        toast.error(getErrorMessage(e));
         setRoadmaps((prev) => [...prev, target]);
       } finally {
         setDeletingIds((prev) => {

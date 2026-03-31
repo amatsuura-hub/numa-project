@@ -340,7 +340,7 @@ function RoadmapCreate() {
     if (edges.some((e) => e.sourceId === edgeSource && e.targetId === edgeTarget)) return;
     setEdges((prev) => [
       ...prev,
-      { id: `edge-${Date.now()}`, sourceId: edgeSource, targetId: edgeTarget },
+      { id: `edge-${crypto.randomUUID()}`, sourceId: edgeSource, targetId: edgeTarget },
     ]);
     setEdgeSource("");
     setEdgeTarget("");
@@ -356,7 +356,7 @@ function RoadmapCreate() {
     const newEdges: DraftEdge[] = [];
     for (let i = 0; i < nodes.length - 1; i++) {
       newEdges.push({
-        id: `edge-auto-${Date.now()}-${i}`,
+        id: `edge-auto-${crypto.randomUUID()}`,
         sourceId: nodes[i].id,
         targetId: nodes[i + 1].id,
       });

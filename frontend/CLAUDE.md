@@ -21,11 +21,12 @@ frontend/src/
 │   │   ├── LikeButton.tsx      # いいねボタン (aria-label 付き)
 │   │   ├── LoadingSpinner.tsx  # ローディングスピナー
 │   │   ├── PageHead.tsx        # <Helmet> ラッパー (title, description, og:*, twitter:*)
+│   │   ├── HeroPreview.tsx      # TopPage ヒーローセクション (Go ロードマップサンプル、React Flow 読み取り専用)
 │   │   ├── RoadmapCard.tsx     # ロードマップカード (DEPTH_COLORS 使用)
 │   │   └── ShareButton.tsx     # X (Twitter) 共有ボタン
 │   ├── editor/
 │   │   ├── RoadmapEditor.tsx   # React Flow エディタ本体
-│   │   ├── RoadmapNode.tsx     # カスタムノードコンポーネント
+│   │   ├── RoadmapNode.tsx     # カスタムノードコンポーネント (完了チェックボタン、pointerEvents:all)
 │   │   ├── EditorToolbar.tsx   # エディタツールバー
 │   │   ├── MetaEditPanel.tsx   # メタ情報編集パネル
 │   │   └── NodeEditPanel.tsx   # ノード編集パネル (URL http/https バリデーション、深度名 aria-label)
@@ -35,7 +36,7 @@ frontend/src/
 ├── constants/
 │   └── depth.ts                # DEFAULT_NODE_COLOR, NODE_COLORS (8色), DEPTH_COLORS (5色), depthColor()
 ├── hooks/
-│   └── useRoadmapDetail.ts     # ロードマップ詳細取得カスタムフック
+│   └── useRoadmapDetail.ts     # ロードマップ詳細取得 + 進捗トグル (handleToggleComplete)
 ├── pages/
 │   ├── TopPage.tsx             # トップページ
 │   ├── ExplorePage.tsx         # 公開ロードマップ一覧 (カテゴリフィルタ)

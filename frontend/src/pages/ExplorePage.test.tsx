@@ -131,9 +131,7 @@ describe("ExplorePage", () => {
       </MemoryRouter>,
     );
     await waitFor(() => {
-      expect(toast.default.error).toHaveBeenCalledWith(
-        "ロードマップの読み込みに失敗しました",
-      );
+      expect(toast.default.error).toHaveBeenCalledWith("fail");
     });
   });
 });

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import { useEditorStore } from "../../stores/editorStore";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 import { CATEGORIES } from "../../types";
 
 function MetaEditPanel() {
@@ -32,8 +33,8 @@ function MetaEditPanel() {
           tags: meta?.tags || [],
           isPublic: overrides.isPublic ?? isPublic,
         });
-      } catch {
-        toast.error("設定の保存に失敗しました");
+      } catch (e) {
+        toast.error(getErrorMessage(e));
       } finally {
         setIsSaving(false);
       }

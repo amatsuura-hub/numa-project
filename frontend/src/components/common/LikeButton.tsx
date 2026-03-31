@@ -2,6 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { roadmapApi } from "../../api/roadmap";
 import { useAuthStore } from "../../stores/authStore";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 interface LikeButtonProps {
   roadmapId: string;
@@ -29,8 +30,8 @@ function LikeButton({ roadmapId, initialLiked, initialCount }: LikeButtonProps) 
         setIsLiked(true);
         setCount((c) => c + 1);
       }
-    } catch {
-      toast.error("操作に失敗しました");
+    } catch (e) {
+      toast.error(getErrorMessage(e));
     } finally {
       setIsLoading(false);
     }

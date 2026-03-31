@@ -2,6 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { roadmapApi } from "../../api/roadmap";
 import { useAuthStore } from "../../stores/authStore";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 interface BookmarkButtonProps {
   roadmapId: string;
@@ -25,8 +26,8 @@ function BookmarkButton({ roadmapId, initialBookmarked }: BookmarkButtonProps) {
         await roadmapApi.bookmark(roadmapId);
         setIsBookmarked(true);
       }
-    } catch {
-      toast.error("操作に失敗しました");
+    } catch (e) {
+      toast.error(getErrorMessage(e));
     } finally {
       setIsLoading(false);
     }

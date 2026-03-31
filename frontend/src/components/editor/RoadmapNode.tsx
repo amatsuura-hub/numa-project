@@ -52,6 +52,7 @@ function RoadmapNode({ data, selected }: NodeProps) {
         padding: "18px 24px",
         opacity: isCompleted ? 0.7 : 1,
         boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+        pointerEvents: "all" as const,
       }}
     >
       <Handle type="target" position={Position.Top} className="!bg-swamp-600" />

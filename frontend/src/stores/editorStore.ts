@@ -115,9 +115,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         isDirty: false,
       });
       nodeCounter = data.nodes.length;
-    } catch {
+    } catch (e) {
       set({ isLoading: false });
-      toast.error("ロードマップの読み込みに失敗しました");
+      toast.error(getErrorMessage(e));
     }
   },
 
@@ -257,16 +257,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
           } catch (err) {
             const msg = getErrorMessage(err);
             if (!msg.includes("already exists")) {
-              toast.error("エッジの保存に失敗しました");
+              toast.error(msg);
             }
           }
         }
       }
 
       set({ isDirty: false, isSaving: false });
-    } catch {
+    } catch (e) {
       set({ isSaving: false });
-      toast.error("保存に失敗しました");
+      toast.error(getErrorMessage(e));
     }
   },
 

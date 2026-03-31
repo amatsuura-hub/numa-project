@@ -114,7 +114,7 @@ describe("ProfilePage", () => {
     await userEvent.click(screen.getByText("保存"));
 
     await waitFor(() => {
-      expect(toast.default.error).toHaveBeenCalledWith("更新に失敗しました");
+      expect(toast.default.error).toHaveBeenCalledWith("fail");
     });
   });
 

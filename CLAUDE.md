@@ -44,6 +44,7 @@ numa-project/
 | ノード削除時のエッジカスケード | DeleteNode 時に参照エッジを先に削除してから本体を削除 |
 | UpdateNode で CreatedAt 保持 | PutItem ではなく UpdateExpression で更新し、CreatedAt を上書きしない |
 | OGP 対応 | `/api/ogp/:roadmapId` で bot 向け HTML 返却。`PageHead` コンポーネントで SPA 内の og:* 設定。`robots.txt`, `sitemap.xml` は `frontend/public/` に静的配置 |
+| ノード完了ボタン (pointerEvents) | React Flow の `elementsSelectable={false}` + `nodesDraggable={false}` でノード内 `pointer-events: none` が適用されるため、RoadmapNode に `pointerEvents: "all"` を設定 |
 
 ## カテゴリ同期ルール
 
