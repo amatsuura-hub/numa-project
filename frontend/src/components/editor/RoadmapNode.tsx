@@ -47,11 +47,11 @@ function RoadmapNode({ data, selected }: NodeProps) {
         borderRight: "1px solid rgba(80,60,30,0.1)",
         borderBottom: "1px solid rgba(80,60,30,0.1)",
         backgroundColor: s.bg,
-        minWidth: 200,
-        maxWidth: 280,
-        padding: "10px 14px",
+        minWidth: 220,
+        maxWidth: 320,
+        padding: "14px 20px",
         opacity: isCompleted ? 0.7 : 1,
-        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
       }}
     >
       <Handle type="target" position={Position.Top} className="!bg-swamp-600" />
@@ -65,8 +65,8 @@ function RoadmapNode({ data, selected }: NodeProps) {
             }}
             aria-label={isCompleted ? "完了を取り消す" : "完了にする"}
             style={{
-              width: 22,
-              height: 22,
+              width: 24,
+              height: 24,
               borderRadius: "50%",
               border: isCompleted
                 ? "2px solid #2d5a32"
@@ -96,8 +96,10 @@ function RoadmapNode({ data, selected }: NodeProps) {
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
-            className="text-[14px] font-semibold leading-snug"
             style={{
+              fontSize: 15,
+              fontWeight: 600,
+              lineHeight: 1.4,
               color: s.text,
               textDecoration: isCompleted ? "line-through" : "none",
             }}
@@ -106,8 +108,13 @@ function RoadmapNode({ data, selected }: NodeProps) {
           </div>
           {description && (
             <div
-              className="mt-1 line-clamp-2 text-[11px] leading-relaxed"
-              style={{ color: s.sub }}
+              className="line-clamp-2"
+              style={{
+                fontSize: 12,
+                lineHeight: 1.5,
+                marginTop: 4,
+                color: s.sub,
+              }}
             >
               {description}
             </div>

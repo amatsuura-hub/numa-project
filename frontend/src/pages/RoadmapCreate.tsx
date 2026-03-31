@@ -172,10 +172,10 @@ function PreviewModal({ nodes, edges, onClose }: PreviewModalProps) {
   // Compute dagre layout
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 80 });
+  g.setGraph({ rankdir: "TB", nodesep: 80, ranksep: 100 });
 
   nodes.forEach((n) => {
-    g.setNode(n.id, { width: 220, height: 70 });
+    g.setNode(n.id, { width: 260, height: 80 });
   });
   edges.forEach((e) => {
     g.setEdge(e.sourceId, e.targetId);
@@ -395,11 +395,11 @@ function RoadmapCreate() {
       // 2. Build dagre layout for positions
       const g = new dagre.graphlib.Graph();
       g.setDefaultEdgeLabel(() => ({}));
-      g.setGraph({ rankdir: "TB", nodesep: 80, ranksep: 100 });
+      g.setGraph({ rankdir: "TB", nodesep: 80, ranksep: 100, marginx: 20, marginy: 20 });
 
       const validNodeIds = new Set(validNodes.map((n) => n.id));
       validNodes.forEach((n) => {
-        g.setNode(n.id, { width: 200, height: 60 });
+        g.setNode(n.id, { width: 260, height: 80 });
       });
       const validEdges = edges.filter(
         (e) => validNodeIds.has(e.sourceId) && validNodeIds.has(e.targetId),
