@@ -80,7 +80,7 @@ function TopPage() {
       <PageHead />
 
       {/* ─── Hero (2-col asymmetric) ─── */}
-      <div className="grid md:grid-cols-2 min-h-[600px] relative overflow-hidden">
+      <div className="grid md:grid-cols-2 min-h-[700px] relative overflow-hidden">
         {/* Left: text + CTA */}
         <div className="flex flex-col justify-center px-8 py-6 md:py-8 md:pr-10">
           <span className="text-[11px] tracking-[3px] text-numa-gold uppercase mb-2">
@@ -114,7 +114,7 @@ function TopPage() {
         {/* Right: warm bg + stripe pattern + React Flow preview */}
         <div className="relative bg-numa-bg-warm flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 numa-stripe-pattern" />
-          <Suspense fallback={<div className="w-full h-full min-h-[600px]" />}>
+          <Suspense fallback={<div className="w-full h-full min-h-[700px]" />}>
             <HeroPreview />
           </Suspense>
         </div>

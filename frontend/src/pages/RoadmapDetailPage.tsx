@@ -134,6 +134,7 @@ function RoadmapDetailPage() {
     label: e.label || "",
     type: "smoothstep",
     animated: true,
+    style: { strokeWidth: 2 },
   }));
 
   const isOwner = user?.userId === detail.meta.userId;
@@ -189,13 +190,13 @@ function RoadmapDetailPage() {
         </p>
       )}
 
-      <div className="h-[70vh] w-full rounded-lg border border-numa-200 sm:h-[calc(100vh-220px)]" style={{ minHeight: 600 }}>
+      <div className="h-[70vh] w-full rounded-lg border border-numa-200 sm:h-[calc(100vh-220px)]" style={{ minHeight: 700 }}>
         <ReactFlow
           nodes={flowNodes}
           edges={flowEdges}
           nodeTypes={nodeTypes}
           fitView
-          fitViewOptions={{ padding: 0.15 }}
+          fitViewOptions={{ padding: 0.1 }}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}

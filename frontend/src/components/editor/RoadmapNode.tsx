@@ -47,11 +47,11 @@ function RoadmapNode({ data, selected }: NodeProps) {
         borderRight: "1px solid rgba(80,60,30,0.1)",
         borderBottom: "1px solid rgba(80,60,30,0.1)",
         backgroundColor: s.bg,
-        minWidth: 220,
-        maxWidth: 320,
-        padding: "14px 20px",
+        minWidth: 280,
+        maxWidth: 380,
+        padding: "18px 24px",
         opacity: isCompleted ? 0.7 : 1,
-        boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
       }}
     >
       <Handle type="target" position={Position.Top} className="!bg-swamp-600" />
@@ -65,8 +65,8 @@ function RoadmapNode({ data, selected }: NodeProps) {
             }}
             aria-label={isCompleted ? "完了を取り消す" : "完了にする"}
             style={{
-              width: 24,
-              height: 24,
+              width: 28,
+              height: 28,
               borderRadius: "50%",
               border: isCompleted
                 ? "2px solid #2d5a32"
@@ -82,7 +82,7 @@ function RoadmapNode({ data, selected }: NodeProps) {
             }}
           >
             {isCompleted && (
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
                 <path
                   d="M2 6L5 9L10 3"
                   stroke="white"
@@ -97,7 +97,7 @@ function RoadmapNode({ data, selected }: NodeProps) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div
             style={{
-              fontSize: 15,
+              fontSize: 17,
               fontWeight: 600,
               lineHeight: 1.4,
               color: s.text,
@@ -110,9 +110,9 @@ function RoadmapNode({ data, selected }: NodeProps) {
             <div
               className="line-clamp-2"
               style={{
-                fontSize: 12,
+                fontSize: 13,
                 lineHeight: 1.5,
-                marginTop: 4,
+                marginTop: 5,
                 color: s.sub,
               }}
             >
