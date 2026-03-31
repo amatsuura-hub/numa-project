@@ -26,6 +26,20 @@
 - レスポンシブデザイン・SEO/OGP 対応
 - 沼テーマ（深度カラーパレット + 生物シルエット装飾）
 
+## スクリーンショット
+
+### トップページ
+![トップページ](docs/screenshots/top.png)
+
+### ロードマップ詳細
+![ロードマップ詳細](docs/screenshots/detail.png)
+
+### ロードマップ作成
+![ロードマップ作成](docs/screenshots/create.png)
+
+### 探索ページ
+![探索ページ](docs/screenshots/explore.png)
+
 ## セットアップ
 
 ### 前提ツール
