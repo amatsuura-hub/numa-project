@@ -33,61 +33,87 @@ function RoadmapNode({ data, selected }: NodeProps) {
   const { label, description, color, isCompleted, onToggleComplete, nodeId } =
     data as unknown as RoadmapNodeData;
 
-  const handleClick = () => {
-    if (onToggleComplete && nodeId) {
-      onToggleComplete(nodeId);
-    }
-  };
-
   const s = nodeStyle(color);
+  const showCheck = !!onToggleComplete;
 
   return (
     <div
-      className={`rounded-md border-l-[3px] shadow-sm transition-shadow ${
+      className={`rounded border-l-[3px] shadow-sm transition-shadow ${
         selected ? "shadow-md ring-2 ring-swamp-400" : ""
-      } ${onToggleComplete ? "cursor-pointer hover:shadow-md" : ""}`}
+      }`}
       style={{
         borderLeftColor: s.border,
         borderTop: "1px solid rgba(80,60,30,0.1)",
         borderRight: "1px solid rgba(80,60,30,0.1)",
         borderBottom: "1px solid rgba(80,60,30,0.1)",
         backgroundColor: s.bg,
-        minWidth: 180,
-        maxWidth: 260,
-        padding: "12px 16px",
+        minWidth: 200,
+        maxWidth: 280,
+        padding: "10px 14px",
+        opacity: isCompleted ? 0.7 : 1,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
       }}
-      onClick={handleClick}
     >
       <Handle type="target" position={Position.Top} className="!bg-swamp-600" />
 
-      <div className="flex items-center gap-2">
-        {isCompleted !== undefined && (
-          <span
-            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs ${
-              isCompleted
-                ? "bg-swamp-700 text-white"
-                : "border-2 border-gray-300"
-            }`}
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+        {showCheck && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (nodeId) onToggleComplete(nodeId);
+            }}
+            aria-label={isCompleted ? "完了を取り消す" : "完了にする"}
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: "50%",
+              border: isCompleted
+                ? "2px solid #2d5a32"
+                : "2px solid rgba(80,60,30,0.2)",
+              background: isCompleted ? "#2d5a32" : "transparent",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              flexShrink: 0,
+              marginTop: 2,
+              padding: 0,
+            }}
           >
-            {isCompleted && "✓"}
-          </span>
+            {isCompleted && (
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path
+                  d="M2 6L5 9L10 3"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
+          </button>
         )}
-        <div
-          className={`text-[14px] font-semibold leading-snug ${isCompleted ? "line-through opacity-70" : ""}`}
-          style={{ color: s.text }}
-        >
-          {label}
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            className="text-[14px] font-semibold leading-snug"
+            style={{
+              color: s.text,
+              textDecoration: isCompleted ? "line-through" : "none",
+            }}
+          >
+            {label}
+          </div>
+          {description && (
+            <div
+              className="mt-1 line-clamp-2 text-[11px] leading-relaxed"
+              style={{ color: s.sub }}
+            >
+              {description}
+            </div>
+          )}
         </div>
       </div>
-
-      {description && (
-        <div
-          className="mt-1.5 line-clamp-2 text-xs leading-relaxed"
-          style={{ color: s.sub }}
-        >
-          {description}
-        </div>
-      )}
 
       <Handle type="source" position={Position.Bottom} className="!bg-swamp-600" />
     </div>

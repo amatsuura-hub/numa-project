@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   DndContext,
@@ -22,8 +22,11 @@ import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
 import { CATEGORIES } from "../types";
 import { depthColor } from "../constants/depth";
+import { ReactFlow, Background, type Node, type Edge } from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 import { getErrorMessage } from "../utils/getErrorMessage";
 import PageHead from "../components/common/PageHead";
+import RoadmapNode from "../components/editor/RoadmapNode";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -164,13 +167,15 @@ interface PreviewModalProps {
 }
 
 function PreviewModal({ nodes, edges, onClose }: PreviewModalProps) {
+  const nodeTypes = useMemo(() => ({ roadmapNode: RoadmapNode }), []);
+
   // Compute dagre layout
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 80 });
 
-  nodes.forEach((n, i) => {
-    g.setNode(n.id, { width: 180, height: 50, label: n.label, index: i });
+  nodes.forEach((n) => {
+    g.setNode(n.id, { width: 220, height: 70 });
   });
   edges.forEach((e) => {
     g.setEdge(e.sourceId, e.targetId);
@@ -178,21 +183,35 @@ function PreviewModal({ nodes, edges, onClose }: PreviewModalProps) {
 
   dagre.layout(g);
 
-  const positioned = nodes.map((n) => {
+  const flowNodes: Node[] = nodes.map((n, i) => {
     const gn = g.node(n.id);
-    return { ...n, x: gn.x - 90, y: gn.y - 25 };
+    return {
+      id: n.id,
+      position: { x: gn.x - 110, y: gn.y - 35 },
+      data: {
+        label: n.label || `ステップ ${i + 1}`,
+        description: n.description || "",
+        color: depthColor(i, nodes.length),
+        url: "",
+      },
+      type: "roadmapNode",
+      draggable: false,
+      selectable: false,
+    };
   });
 
-  // Calculate SVG viewBox
-  const minX = Math.min(...positioned.map((n) => n.x)) - 20;
-  const minY = Math.min(...positioned.map((n) => n.y)) - 20;
-  const maxX = Math.max(...positioned.map((n) => n.x + 180)) + 20;
-  const maxY = Math.max(...positioned.map((n) => n.y + 50)) + 20;
+  const flowEdges: Edge[] = edges.map((e) => ({
+    id: e.id,
+    source: e.sourceId,
+    target: e.targetId,
+    type: "smoothstep",
+    animated: true,
+  }));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
       <div
-        className="relative mx-4 max-h-[80vh] w-full max-w-2xl overflow-auto rounded-lg bg-white p-6 shadow-xl"
+        className="relative mx-4 w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
@@ -204,64 +223,31 @@ function PreviewModal({ nodes, edges, onClose }: PreviewModalProps) {
           </button>
         </div>
 
-        <svg
-          viewBox={`${minX} ${minY} ${maxX - minX} ${maxY - minY}`}
-          className="w-full"
-          style={{ minHeight: 200 }}
-        >
-          {/* Edges */}
-          {edges.map((e) => {
-            const src = positioned.find((n) => n.id === e.sourceId);
-            const tgt = positioned.find((n) => n.id === e.targetId);
-            if (!src || !tgt) return null;
-            return (
-              <line
-                key={e.id}
-                x1={src.x + 90}
-                y1={src.y + 50}
-                x2={tgt.x + 90}
-                y2={tgt.y}
-                stroke="#8a7e6e"
-                strokeWidth={1.5}
-                markerEnd="url(#arrowhead)"
-              />
-            );
-          })}
-          {/* Arrow marker */}
-          <defs>
-            <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-              <polygon points="0 0, 8 3, 0 6" fill="#8a7e6e" />
-            </marker>
-          </defs>
-          {/* Nodes */}
-          {positioned.map((n, i) => {
-            const bg = depthColor(i, positioned.length);
-            const deep = isDeepColor(bg);
-            return (
-              <g key={n.id}>
-                <rect
-                  x={n.x}
-                  y={n.y}
-                  width={180}
-                  height={50}
-                  rx={6}
-                  fill={bg}
-                  stroke="rgba(80,60,30,.12)"
-                />
-                <text
-                  x={n.x + 90}
-                  y={n.y + 29}
-                  textAnchor="middle"
-                  fontSize={12}
-                  fontWeight={600}
-                  fill={deep ? "#fff" : "#252018"}
-                >
-                  {n.label || `ステップ ${i + 1}`}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
+        <div style={{ height: 500 }}>
+          <ReactFlow
+            nodes={flowNodes}
+            edges={flowEdges}
+            nodeTypes={nodeTypes}
+            fitView
+            fitViewOptions={{ padding: 0.2 }}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            elementsSelectable={false}
+            panOnDrag={false}
+            zoomOnScroll={false}
+            zoomOnPinch={false}
+            zoomOnDoubleClick={false}
+            preventScrolling={false}
+            proOptions={{ hideAttribution: true }}
+            defaultEdgeOptions={{
+              type: "smoothstep",
+              style: { stroke: "rgba(45,90,50,0.3)", strokeWidth: 1.5 },
+              animated: true,
+            }}
+          >
+            <Background color="rgba(45,90,50,0.06)" gap={20} size={1} />
+          </ReactFlow>
+        </div>
       </div>
     </div>
   );

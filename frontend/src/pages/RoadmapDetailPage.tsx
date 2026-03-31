@@ -185,7 +185,7 @@ function RoadmapDetailPage() {
 
       {user && (
         <p className="mb-2 text-xs text-gray-400">
-          ノードをクリックして進捗を記録できます
+          ノードの丸ボタンをクリックして進捗を記録できます
         </p>
       )}
 
