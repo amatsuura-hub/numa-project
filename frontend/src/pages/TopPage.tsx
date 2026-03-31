@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { roadmapApi } from "../api/roadmap";
@@ -7,6 +7,8 @@ import { CATEGORIES } from "../types";
 import PageHead from "../components/common/PageHead";
 import RoadmapCard from "../components/common/RoadmapCard";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+
+const HeroPreview = lazy(() => import("../components/common/HeroPreview"));
 
 /* ── Fallback roadmaps (shown when API returns empty) ── */
 const FALLBACK_ROADMAPS: RoadmapMeta[] = [
@@ -47,63 +49,6 @@ const FALLBACK_ROADMAPS: RoadmapMeta[] = [
     updatedAt: "2026-03-15T00:00:00Z",
   },
 ];
-
-/* ── Hero node preview ── */
-function HeroNodePreview() {
-  return (
-    <div className="relative w-full max-w-[400px] min-h-[360px] z-[1]">
-      {/* ── Edges (SVG) ── */}
-      <svg
-        className="absolute inset-0 pointer-events-none"
-        viewBox="0 0 400 360"
-        aria-hidden="true"
-      >
-        <style>{`
-          @keyframes draw { from { stroke-dashoffset: 200; } to { stroke-dashoffset: 0; } }
-          .edge-line { stroke-dasharray: 200; animation: draw 2s ease-out forwards; }
-        `}</style>
-        {/* DTM入門 → DAWの選び方 */}
-        <line className="edge-line" x1="200" y1="48" x2="90" y2="92" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "0s" }} />
-        {/* DTM入門 → 音楽理論の基礎 */}
-        <line className="edge-line" x1="200" y1="48" x2="310" y2="102" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "0.2s" }} />
-        {/* DAWの選び方 → 最初の1曲 */}
-        <line className="edge-line" x1="90" y1="138" x2="100" y2="192" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "0.5s" }} />
-        {/* 音楽理論の基礎 → ミキシング */}
-        <line className="edge-line" x1="310" y1="148" x2="295" y2="205" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "0.6s" }} />
-        {/* 最初の1曲 → 自作曲を公開する */}
-        <line className="edge-line" x1="100" y1="238" x2="200" y2="312" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "0.9s" }} />
-        {/* ミキシング → 自作曲を公開する */}
-        <line className="edge-line" x1="295" y1="250" x2="200" y2="312" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "1.0s" }} />
-      </svg>
-
-      {/* ── Nodes ── */}
-      {/* Lv0: 入口 */}
-      <div className="absolute left-1/2 top-0 -translate-x-1/2 min-w-[160px] rounded border-l-[3px] px-5 py-3 text-center text-[14px] font-semibold shadow-sm bg-[#f0ead8] border-l-[#b8976a] text-[#5a4628]">
-        DTM入門
-      </div>
-      {/* Lv1 */}
-      <div className="absolute left-0 top-[92px] min-w-[160px] rounded border-l-[3px] px-5 py-3 text-[14px] font-semibold shadow-sm bg-[#e0f0d8] border-l-[#6aaa5c] text-[#2d6a28]">
-        DAWの選び方
-      </div>
-      {/* Lv1 (staggered) */}
-      <div className="absolute right-0 top-[102px] min-w-[160px] rounded border-l-[3px] px-5 py-3 text-[14px] font-semibold shadow-sm bg-[#e0f0d8] border-l-[#6aaa5c] text-[#2d6a28]">
-        音楽理論の基礎
-      </div>
-      {/* Lv2 */}
-      <div className="absolute left-[15px] top-[192px] min-w-[160px] rounded border-l-[3px] px-5 py-3 text-[14px] font-semibold shadow-sm bg-[#c0e0b0] border-l-[#43A047] text-[#1e5a20]">
-        最初の1曲
-      </div>
-      {/* Lv3 */}
-      <div className="absolute right-[15px] top-[205px] min-w-[160px] rounded border-l-[3px] px-5 py-3 text-[14px] font-semibold shadow-sm bg-[#a0d094] border-l-[#2d5a32] text-[#1a4a18]">
-        ミキシング
-      </div>
-      {/* Lv4: 最深 */}
-      <div className="absolute left-1/2 bottom-0 -translate-x-1/2 min-w-[160px] rounded border-l-[3px] px-5 py-3 text-center text-[14px] font-bold shadow-sm bg-[#2d5a32] border-l-[#1B5E20] text-white">
-        自作曲を公開する
-      </div>
-    </div>
-  );
-}
 
 const categoryEntries = Object.entries(CATEGORIES) as [Category, string][];
 
@@ -166,10 +111,12 @@ function TopPage() {
           </div>
         </div>
 
-        {/* Right: warm bg + stripe pattern + node preview */}
-        <div className="relative bg-numa-bg-warm flex items-center justify-center p-8 overflow-hidden">
+        {/* Right: warm bg + stripe pattern + React Flow preview */}
+        <div className="relative bg-numa-bg-warm flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 numa-stripe-pattern" />
-          <HeroNodePreview />
+          <Suspense fallback={<div className="w-full h-[480px]" />}>
+            <HeroPreview />
+          </Suspense>
         </div>
       </div>
 
