@@ -2,25 +2,20 @@
 
 熟練者が初心者向けにマインドマップ形式のロードマップを作成・公開・共有するWebアプリケーション。沼の深さ（色の濃さ）で学習の深度を表現する、緑基調の沼テーマデザイン。
 
-## スクリーンショット
-
-| トップページ | ロードマップ編集 |
-|:---:|:---:|
-| ![トップページ](docs/screenshots/home.png) | ![エディタ](docs/screenshots/editor.png) |
-
 ## 技術スタック
 
-- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS + React Flow
-- **Backend**: Go 1.22 + AWS Lambda
-- **Database**: DynamoDB (シングルテーブル設計)
-- **Auth**: Amazon Cognito
-- **Infra**: Terraform + AWS サーバーレス (CloudFront + S3, API Gateway, Lambda)
-- **CI/CD**: GitHub Actions
-- **監視**: CloudWatch アラーム + X-Ray トレーシング + 構造化ログ (slog)
+- **Frontend**: React 18 + TypeScript + Vite 5 + Tailwind CSS 3 + @xyflow/react 12 + Zustand 4 + React Router v6
+- **Backend**: Go 1.26 + AWS Lambda (provided.al2023) + aws-sdk-go-v2
+- **Database**: DynamoDB (シングルテーブル設計、GSI x3)
+- **Auth**: Amazon Cognito (SRP 認証 + JWT)
+- **Infra**: Terraform + AWS サーバーレス (CloudFront + S3, API Gateway + WAF, Lambda, DynamoDB, Cognito)
+- **CI/CD**: GitHub Actions (ci.yml / deploy.yml / deploy-prod.yml)
+- **監視**: CloudWatch アラーム + X-Ray トレーシング + 構造化ログ (slog) + SNS 通知
+- **その他**: @dnd-kit (ドラッグ&ドロップ) + dagre (グラフレイアウト) + react-helmet-async (SEO) + react-hot-toast (通知)
 
 ## 主な機能
 
-- マインドマップ形式のロードマップ作成・編集（React Flow）
+- マインドマップ形式のロードマップ作成・編集（@xyflow/react）
 - 自動保存（2秒 debounce）
 - ロードマップの公開・非公開設定
 - いいね・ブックマーク機能
@@ -35,7 +30,7 @@
 
 ### 前提ツール
 
-- Go 1.22+, Node.js 20 LTS, Docker, Terraform 1.5+, AWS CLI v2
+- Go 1.26+, Node.js 20 LTS, Docker, Terraform 1.5+, AWS CLI v2
 
 ### ローカル開発
 
@@ -110,6 +105,7 @@ cd frontend && npm run test
 | GET | `/api/users/:id/roadmaps` | ユーザーの公開ロードマップ |
 | GET | `/api/roadmaps/:id` | ロードマップ詳細（公開のみ） |
 | GET | `/api/roadmaps/explore` | 公開ロードマップ一覧 |
+| GET | `/api/ogp/:id` | OGP メタタグ HTML |
 
 ### 認証必要（Cognito JWT）
 
@@ -129,13 +125,14 @@ cd frontend && npm run test
 | PUT | `/api/roadmaps/:id/progress/nodes/:nodeId` | ノード完了 |
 | DELETE | `/api/roadmaps/:id/progress/nodes/:nodeId` | ノード未完了に戻す |
 | GET | `/api/progress` | 自分の全進捗一覧 |
-| GET | `/api/ogp/:id` | OGP メタタグ HTML（認証不要） |
 
 ## デプロイ
 
 ### GitHub Actions 設定
 
 **Secrets**: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+
+> **Note**: 現在は長期 AWS アクセスキーで認証しています。本番運用時は [GitHub Actions OIDC](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services) による短期トークン認証への移行を推奨します。
 
 **Variables**:
 
@@ -188,6 +185,7 @@ cd infra
 | エッジ | `ROADMAP#<roadmapId>` | `EDGE#<edgeId>` |
 | いいね | `ROADMAP#<roadmapId>` | `LIKE#<userId>` |
 | ブックマーク | `USER#<userId>` | `BOOKMARK#<roadmapId>` |
+| 進捗 | `USER#<userId>` | `PROGRESS#<roadmapId>` |
 
 GSI: GSI1（ユーザー別一覧）/ GSI2（公開フィード・カテゴリ別）/ GSI3（ブックマーク逆引き）
 

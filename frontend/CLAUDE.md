@@ -1,5 +1,7 @@
 # frontend/CLAUDE.md — フロントエンド開発ガイド
 
+> React/TypeScript 固有のルール・コンポーネント規約・デザイン詳細をまとめる。横断ルールは [CLAUDE.md](../CLAUDE.md)、外部向け情報は [README.md](../README.md) を参照。
+
 ## ディレクトリ構成
 
 ```
@@ -161,6 +163,15 @@ swamp-50〜900: 沼グラデーション (#e8f0e4 → #1B5E20)
 ### パスエイリアス
 
 `@` → `./src` (vite.config.ts で設定)
+
+### 追加ライブラリ
+
+| パッケージ | 用途 |
+|-----------|------|
+| `@dnd-kit/core` + `@dnd-kit/sortable` | RoadmapCreate でノードのドラッグ&ドロップ並び替え |
+| `dagre` | RoadmapCreate でグラフの自動レイアウト計算 |
+| `react-helmet-async` | `<PageHead>` 経由で SEO/OGP メタタグ設定 |
+| `react-hot-toast` | トースト通知 (`toast.success()` / `toast.error()`) |
 
 ## コーディングルール
 

@@ -51,39 +51,54 @@ const FALLBACK_ROADMAPS: RoadmapMeta[] = [
 /* ── Hero node preview ── */
 function HeroNodePreview() {
   return (
-    <div className="relative w-full max-w-[340px] min-h-[280px] z-[1]">
+    <div className="relative w-full max-w-[400px] min-h-[360px] z-[1]">
+      {/* ── Edges (SVG) ── */}
       <svg
         className="absolute inset-0 pointer-events-none"
-        viewBox="0 0 340 280"
+        viewBox="0 0 400 360"
         aria-hidden="true"
       >
         <style>{`
           @keyframes draw { from { stroke-dashoffset: 200; } to { stroke-dashoffset: 0; } }
           .edge-line { stroke-dasharray: 200; animation: draw 2s ease-out forwards; }
         `}</style>
-        <line className="edge-line" x1="170" y1="30" x2="60" y2="76" stroke="rgba(45,90,50,.18)" strokeWidth="1.5" style={{ animationDelay: "0s" }} />
-        <line className="edge-line" x1="170" y1="30" x2="280" y2="76" stroke="rgba(45,90,50,.18)" strokeWidth="1.5" style={{ animationDelay: "0.2s" }} />
-        <line className="edge-line" x1="50" y1="100" x2="50" y2="146" stroke="rgba(45,90,50,.15)" strokeWidth="1.5" style={{ animationDelay: "0.5s" }} />
-        <line className="edge-line" x1="290" y1="100" x2="290" y2="146" stroke="rgba(45,90,50,.15)" strokeWidth="1.5" style={{ animationDelay: "0.6s" }} />
-        <line className="edge-line" x1="50" y1="172" x2="170" y2="248" stroke="rgba(45,90,50,.12)" strokeWidth="1.5" style={{ animationDelay: "0.9s" }} />
-        <line className="edge-line" x1="290" y1="172" x2="170" y2="248" stroke="rgba(45,90,50,.12)" strokeWidth="1.5" style={{ animationDelay: "1.0s" }} />
+        {/* DTM入門 → DAWの選び方 */}
+        <line className="edge-line" x1="200" y1="48" x2="90" y2="92" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "0s" }} />
+        {/* DTM入門 → 音楽理論の基礎 */}
+        <line className="edge-line" x1="200" y1="48" x2="310" y2="102" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "0.2s" }} />
+        {/* DAWの選び方 → 最初の1曲 */}
+        <line className="edge-line" x1="90" y1="138" x2="100" y2="192" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "0.5s" }} />
+        {/* 音楽理論の基礎 → ミキシング */}
+        <line className="edge-line" x1="310" y1="148" x2="295" y2="205" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "0.6s" }} />
+        {/* 最初の1曲 → 自作曲を公開する */}
+        <line className="edge-line" x1="100" y1="238" x2="200" y2="312" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "0.9s" }} />
+        {/* ミキシング → 自作曲を公開する */}
+        <line className="edge-line" x1="295" y1="250" x2="200" y2="312" stroke="rgba(45,90,50,.3)" strokeWidth="1.5" style={{ animationDelay: "1.0s" }} />
       </svg>
-      <div className="absolute left-1/2 top-0 -translate-x-1/2 rounded px-4 py-2.5 text-xs font-semibold bg-[#e8dfc8] border-l-[3px] border-l-[#a07840] text-[#6a5530]">
+
+      {/* ── Nodes ── */}
+      {/* Lv0: 入口 */}
+      <div className="absolute left-1/2 top-0 -translate-x-1/2 min-w-[160px] rounded border-l-[3px] px-5 py-3 text-center text-[14px] font-semibold shadow-sm bg-[#f0ead8] border-l-[#b8976a] text-[#5a4628]">
         DTM入門
       </div>
-      <div className="absolute left-0 top-[70px] rounded px-4 py-2.5 text-xs font-semibold bg-swamp-50 border-l-[3px] border-l-swamp-400 text-swamp-600">
+      {/* Lv1 */}
+      <div className="absolute left-0 top-[92px] min-w-[160px] rounded border-l-[3px] px-5 py-3 text-[14px] font-semibold shadow-sm bg-[#e0f0d8] border-l-[#6aaa5c] text-[#2d6a28]">
         DAWの選び方
       </div>
-      <div className="absolute right-0 top-[70px] rounded px-4 py-2.5 text-xs font-semibold bg-swamp-100 border-l-[3px] border-l-swamp-500 text-swamp-700">
+      {/* Lv1 (staggered) */}
+      <div className="absolute right-0 top-[102px] min-w-[160px] rounded border-l-[3px] px-5 py-3 text-[14px] font-semibold shadow-sm bg-[#e0f0d8] border-l-[#6aaa5c] text-[#2d6a28]">
         音楽理論の基礎
       </div>
-      <div className="absolute left-[10px] top-[140px] rounded px-4 py-2.5 text-xs font-semibold bg-swamp-200 border-l-[3px] border-l-swamp-600 text-swamp-800">
+      {/* Lv2 */}
+      <div className="absolute left-[15px] top-[192px] min-w-[160px] rounded border-l-[3px] px-5 py-3 text-[14px] font-semibold shadow-sm bg-[#c0e0b0] border-l-[#43A047] text-[#1e5a20]">
         最初の1曲
       </div>
-      <div className="absolute right-[10px] top-[140px] rounded px-4 py-2.5 text-xs font-semibold bg-swamp-300 border-l-[3px] border-l-swamp-700 text-swamp-800">
+      {/* Lv3 */}
+      <div className="absolute right-[15px] top-[205px] min-w-[160px] rounded border-l-[3px] px-5 py-3 text-[14px] font-semibold shadow-sm bg-[#a0d094] border-l-[#2d5a32] text-[#1a4a18]">
         ミキシング
       </div>
-      <div className="absolute left-1/2 bottom-0 -translate-x-1/2 rounded px-4 py-2.5 text-xs font-bold bg-swamp-700 border-l-[3px] border-l-swamp-900 text-white">
+      {/* Lv4: 最深 */}
+      <div className="absolute left-1/2 bottom-0 -translate-x-1/2 min-w-[160px] rounded border-l-[3px] px-5 py-3 text-center text-[14px] font-bold shadow-sm bg-[#2d5a32] border-l-[#1B5E20] text-white">
         自作曲を公開する
       </div>
     </div>

@@ -1,5 +1,7 @@
 # backend/CLAUDE.md — バックエンド開発ガイド
 
+> Go Lambda 固有のルール・DynamoDB スキーマ・API 実装詳細をまとめる。横断ルールは [CLAUDE.md](../CLAUDE.md)、外部向け情報は [README.md](../README.md) を参照。
+
 ## アーキテクチャ
 
 ```
@@ -159,7 +161,7 @@ var (
 |---------|---------|
 | User | `GetUser`, `PutUser`, `UpdateUser` |
 | Roadmap | `PutRoadmap`, `GetRoadmapMeta`, `GetRoadmapDetail`, `UpdateRoadmapMeta`, `DeleteRoadmap`, `GetMyRoadmaps`, `ExploreRoadmaps` |
-| Node | `PutNode`, `DeleteNode`, `BatchPutNodes`, `CountNodes` |
+| Node | `PutNode`, `UpdateNode`, `DeleteNode`, `BatchPutNodes`, `CountNodes` |
 | Edge | `PutEdge`, `DeleteEdge` |
 | Like | `IsLiked`, `LikeRoadmap`, `UnlikeRoadmap` |
 | Bookmark | `IsBookmarked`, `BookmarkRoadmap`, `UnbookmarkRoadmap`, `GetMyBookmarks` |

@@ -159,6 +159,15 @@ func (m *mockRepo) PutNode(_ context.Context, node *model.Node) error {
 	return nil
 }
 
+func (m *mockRepo) UpdateNode(_ context.Context, node *model.Node) error {
+	m.putNodeCalled = true
+	if m.err != nil {
+		return m.err
+	}
+	m.nodes[node.NodeID] = node
+	return nil
+}
+
 func (m *mockRepo) DeleteNode(_ context.Context, _, _ string) error {
 	m.deleteNodeCalled = true
 	return m.err

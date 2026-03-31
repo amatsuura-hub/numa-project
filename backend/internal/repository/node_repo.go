@@ -28,6 +28,38 @@ func (d *DynamoDB) PutNode(ctx context.Context, node *model.Node) error {
 	return nil
 }
 
+// UpdateNode updates mutable fields of a node without overwriting CreatedAt.
+func (d *DynamoDB) UpdateNode(ctx context.Context, node *model.Node) error {
+	_, err := d.Client.UpdateItem(ctx, &dynamodb.UpdateItemInput{
+		TableName: &d.TableName,
+		Key: map[string]types.AttributeValue{
+			"PK": &types.AttributeValueMemberS{Value: node.PK},
+			"SK": &types.AttributeValueMemberS{Value: node.SK},
+		},
+		UpdateExpression: aws.String(
+			"SET label = :l, description = :d, posX = :x, posY = :y, " +
+				"color = :c, #u = :u, #o = :o, updatedAt = :ua"),
+		ExpressionAttributeNames: map[string]string{
+			"#u": "url",
+			"#o": "order",
+		},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":l":  &types.AttributeValueMemberS{Value: node.Label},
+			":d":  &types.AttributeValueMemberS{Value: node.Description},
+			":x":  &types.AttributeValueMemberN{Value: fmt.Sprintf("%g", node.PosX)},
+			":y":  &types.AttributeValueMemberN{Value: fmt.Sprintf("%g", node.PosY)},
+			":c":  &types.AttributeValueMemberS{Value: node.Color},
+			":u":  &types.AttributeValueMemberS{Value: node.URL},
+			":o":  &types.AttributeValueMemberN{Value: fmt.Sprintf("%d", node.Order)},
+			":ua": &types.AttributeValueMemberS{Value: node.UpdatedAt},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("updating node: %w", err)
+	}
+	return nil
+}
+
 // DeleteNode removes a node from DynamoDB.
 func (d *DynamoDB) DeleteNode(ctx context.Context, roadmapID, nodeID string) error {
 	_, err := d.Client.DeleteItem(ctx, &dynamodb.DeleteItemInput{

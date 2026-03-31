@@ -24,6 +24,7 @@ type Repository interface {
 
 	// Node
 	PutNode(ctx context.Context, node *model.Node) error
+	UpdateNode(ctx context.Context, node *model.Node) error
 	DeleteNode(ctx context.Context, roadmapID, nodeID string) error
 	BatchPutNodes(ctx context.Context, nodes []model.Node) error
 	CountNodes(ctx context.Context, roadmapID string) (int, error)

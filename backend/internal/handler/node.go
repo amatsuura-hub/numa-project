@@ -98,9 +98,8 @@ func (h *Handler) CreateNode(ctx context.Context, userID string, roadmapID strin
 	return node, nil
 }
 
-// UpdateNode updates an existing node in a roadmap.
-// NOTE: Currently a full replacement (PutItem). Partial updates via UpdateExpression
-// would be more efficient but require repository layer changes.
+// UpdateNode updates an existing node in a roadmap using partial update
+// (UpdateExpression) to preserve CreatedAt and other fields not in the request.
 func (h *Handler) UpdateNode(ctx context.Context, userID string, roadmapID string, nodeID string, body string) (interface{}, error) {
 	if err := h.checkRoadmapOwnership(ctx, userID, roadmapID); err != nil {
 		return nil, err
@@ -126,17 +125,32 @@ func (h *Handler) UpdateNode(ctx context.Context, userID string, roadmapID strin
 		UpdatedAt:   now,
 	}
 
-	if err := h.repo.PutNode(ctx, node); err != nil {
+	if err := h.repo.UpdateNode(ctx, node); err != nil {
 		return nil, NewAPIError(ErrInternal, "Failed to update node")
 	}
 
 	return node, nil
 }
 
-// DeleteNode removes a node from a roadmap.
+// DeleteNode removes a node and all edges referencing it from a roadmap.
 func (h *Handler) DeleteNode(ctx context.Context, userID string, roadmapID string, nodeID string) error {
 	if err := h.checkRoadmapOwnership(ctx, userID, roadmapID); err != nil {
 		return err
+	}
+
+	// Delete edges referencing this node to prevent orphaned edges.
+	detail, err := h.repo.GetRoadmapDetail(ctx, roadmapID)
+	if err != nil {
+		return NewAPIError(ErrInternal, "Failed to get roadmap detail")
+	}
+	if detail != nil {
+		for _, edge := range detail.Edges {
+			if edge.SourceNodeID == nodeID || edge.TargetNodeID == nodeID {
+				if err := h.repo.DeleteEdge(ctx, roadmapID, edge.EdgeID); err != nil {
+					return NewAPIError(ErrInternal, "Failed to delete edge referencing node")
+				}
+			}
+		}
 	}
 
 	if err := h.repo.DeleteNode(ctx, roadmapID, nodeID); err != nil {

@@ -145,7 +145,11 @@ func marshalTags(tags []string) types.AttributeValue {
 	return &types.AttributeValueMemberL{Value: items}
 }
 
-// DeleteRoadmap deletes META + all Nodes + all Edges for a roadmap.
+// DeleteRoadmap deletes META + all Nodes + all Edges + all Likes for a roadmap.
+// NOTE: Other users' Bookmark (USER#<id>/BOOKMARK#<roadmapId>) and Progress
+// (USER#<id>/PROGRESS#<roadmapId>) records are NOT deleted because they live
+// in different partition keys. GetMyBookmarks already skips deleted roadmaps.
+// A future DynamoDB Streams + Lambda cleanup job should handle async removal.
 func (d *DynamoDB) DeleteRoadmap(ctx context.Context, roadmapID string) error {
 	// First query all items with this PK
 	out, err := d.Client.Query(ctx, &dynamodb.QueryInput{

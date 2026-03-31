@@ -5,6 +5,7 @@ import { userApi } from "../api/user";
 import type { User, RoadmapMeta } from "../types";
 import { getErrorMessage } from "../utils/getErrorMessage";
 import RoadmapCard from "../components/common/RoadmapCard";
+import PageHead from "../components/common/PageHead";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
 function UserPage() {
@@ -57,6 +58,10 @@ function UserPage() {
 
   return (
     <div>
+      <PageHead
+        title={`${userProfile.displayName} のプロフィール`}
+        description={userProfile.bio || `${userProfile.displayName} の公開ロードマップ一覧`}
+      />
       <div className="mb-8">
         <h1 className="text-2xl font-bold">{userProfile.displayName}</h1>
         {userProfile.bio && (

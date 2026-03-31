@@ -50,11 +50,15 @@ func (d *DynamoDB) PutProgress(ctx context.Context, p *model.Progress) error {
 		TableName: &d.TableName,
 		Item:      item,
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("putting progress: %w", err)
+	}
+	return nil
 }
 
-// GetMyProgress returns all progress records for a user.
+// GetMyProgress returns all progress records for a user (capped at MaxPageLimitExplore).
 func (d *DynamoDB) GetMyProgress(ctx context.Context, userID string) ([]model.Progress, error) {
+	limit := int32(model.MaxPageLimitExplore)
 	input := &dynamodb.QueryInput{
 		TableName:              &d.TableName,
 		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :prefix)"),
@@ -63,6 +67,7 @@ func (d *DynamoDB) GetMyProgress(ctx context.Context, userID string) ([]model.Pr
 			":prefix": &types.AttributeValueMemberS{Value: model.SKPrefixProgress},
 		},
 		ScanIndexForward: aws.Bool(false),
+		Limit:            &limit,
 	}
 
 	out, err := d.Client.Query(ctx, input)

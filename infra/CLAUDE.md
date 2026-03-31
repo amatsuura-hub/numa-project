@@ -1,5 +1,7 @@
 # infra/CLAUDE.md — インフラ開発ガイド
 
+> Terraform モジュール構成・CI/CD ワークフロー・AWS リソース詳細をまとめる。横断ルールは [CLAUDE.md](../CLAUDE.md)、外部向け情報は [README.md](../README.md) を参照。
+
 ## 構成
 
 ```
@@ -10,8 +12,12 @@ infra/
 ├── backend.tf           # S3 + DynamoDB リモートステート (コメントで有効化手順記載)
 ├── terraform.tfvars     # デフォルト値 (dev)
 ├── environments/
-│   ├── dev/terraform.tfvars.example
-│   └── prod/terraform.tfvars
+│   ├── dev/
+│   │   ├── backend.hcl
+│   │   └── terraform.tfvars.example
+│   └── prod/
+│       ├── backend.hcl
+│       └── terraform.tfvars
 └── modules/
     ├── dynamodb/        # シングルテーブル + GSI1/GSI2/GSI3
     ├── cognito/         # ユーザープール + クライアント + PostConfirmation トリガー
