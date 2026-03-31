@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { roadmapApi } from "../api/roadmap";
 import type { RoadmapMeta, RoadmapNode, RoadmapEdge } from "../types";
 import { DEFAULT_NODE_COLOR } from "../constants/depth";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 interface EditorState {
   roadmapId: string | null;
@@ -254,7 +255,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
               ),
             }));
           } catch (err) {
-            const msg = err instanceof Error ? err.message : "";
+            const msg = getErrorMessage(err);
             if (!msg.includes("already exists")) {
               toast.error("エッジの保存に失敗しました");
             }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { userApi } from "../api/user";
 import { useAuthStore } from "../stores/authStore";
+import { getErrorMessage } from "../utils/getErrorMessage";
 import PageHead from "../components/common/PageHead";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
@@ -25,7 +26,7 @@ function ProfilePage() {
       setXHandle(data.xHandle || "");
     } catch (err) {
       // 404 is expected for new users; other errors should be reported
-      const msg = err instanceof Error ? err.message : "";
+      const msg = getErrorMessage(err);
       if (!msg.includes("not found") && !msg.includes("404")) {
         toast.error("プロフィールの読み込みに失敗しました");
       }

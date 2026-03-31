@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
+import PageHead from "../components/common/PageHead";
 
 function NotFoundPage() {
   return (
     <div className="flex flex-col items-center justify-center py-20">
+      <PageHead title="ページが見つかりません" />
       {/* Playful 404 */}
       <div className="mb-4 text-numa-200">
         <svg width="80" height="80" viewBox="0 0 100 100" fill="currentColor">

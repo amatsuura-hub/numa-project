@@ -182,7 +182,8 @@ var (
 | 変数 | 必須 | 用途 |
 |------|------|------|
 | `TABLE_NAME` | ○ | DynamoDB テーブル名 |
-| `COGNITO_USER_POOL_ID` | ○ | Cognito ユーザープール ID (API Lambda) |
-| `COGNITO_CLIENT_ID` | ○ | Cognito クライアント ID (API Lambda) |
+| `AWS_REGION` | △ | AWS リージョン（Lambda ランタイムが自動設定。ローカル開発時のみ手動設定） |
 | `ENVIRONMENT` | ○ | 環境名 (dev/prod) |
 | `ALLOWED_ORIGIN` | ○ | CORS 許可オリジン (API Lambda) |
+| `COGNITO_USER_POOL_ID` | △ | Terraform が Lambda 環境変数に設定。コードでは未使用（API Gateway で JWT 検証） |
+| `COGNITO_CLIENT_ID` | △ | Terraform が Lambda 環境変数に設定。コードでは未使用（API Gateway で JWT 検証） |

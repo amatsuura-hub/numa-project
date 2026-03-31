@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { useEditorStore } from "../stores/editorStore";
 import { CATEGORIES } from "../types";
 import RoadmapEditor from "../components/editor/RoadmapEditor";
+import PageHead from "../components/common/PageHead";
 import LoadingSpinner from "../components/common/LoadingSpinner";
 
 function useUnsavedChangesWarning(isDirty: boolean) {
@@ -80,6 +81,7 @@ function RoadmapEditPage() {
   if (showCreateForm && !id) {
     return (
       <div className="mx-auto max-w-md py-12">
+        <PageHead title="新規ロードマップ作成" />
         <h1 className="mb-8 text-center text-2xl font-bold">
           新規ロードマップ作成
         </h1>
@@ -172,7 +174,12 @@ function RoadmapEditPage() {
     return <LoadingSpinner />;
   }
 
-  return <RoadmapEditor />;
+  return (
+    <>
+      <PageHead title="ロードマップ編集" />
+      <RoadmapEditor />
+    </>
+  );
 }
 
 export default RoadmapEditPage;

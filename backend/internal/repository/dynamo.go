@@ -18,7 +18,9 @@ type DynamoDB struct {
 // NewDynamoDB creates a new DynamoDB repository client.
 func NewDynamoDB(ctx context.Context, tableName string) (*DynamoDB, error) {
 	var opts []func(*config.LoadOptions) error
-	opts = append(opts, config.WithRegion("ap-northeast-1"))
+	if region := os.Getenv("AWS_REGION"); region != "" {
+		opts = append(opts, config.WithRegion(region))
+	}
 
 	cfg, err := config.LoadDefaultConfig(ctx, opts...)
 	if err != nil {

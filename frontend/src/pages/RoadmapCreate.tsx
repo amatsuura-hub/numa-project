@@ -23,6 +23,7 @@ import { roadmapApi } from "../api/roadmap";
 import { CATEGORIES } from "../types";
 import { depthColor } from "../constants/depth";
 import { getErrorMessage } from "../utils/getErrorMessage";
+import PageHead from "../components/common/PageHead";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -472,6 +473,7 @@ function RoadmapCreate() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6">
+      <PageHead title="新規ロードマップ" />
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
