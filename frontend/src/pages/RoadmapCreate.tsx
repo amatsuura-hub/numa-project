@@ -125,7 +125,7 @@ function SortableNode({ node, index, total, onUpdate, onRemove }: SortableNodePr
             onChange={(e) => onUpdate(node.id, "description", e.target.value)}
             maxLength={500}
             placeholder="説明（任意）"
-            className="w-full border-none bg-transparent text-xs text-numa-text-muted placeholder:text-[#c0b8a8]/60 focus:outline-none"
+            className="w-full rounded border border-[rgba(80,60,30,0.1)] bg-white/50 px-3 py-2 text-sm text-numa-text-muted placeholder:text-[#b0a890] focus:border-[rgba(80,60,30,0.3)] focus:bg-white focus:outline-none"
           />
           {node.description.length > 0 && (
             <div className="text-right text-[10px] text-numa-text-hint mt-0.5">
@@ -138,7 +138,7 @@ function SortableNode({ node, index, total, onUpdate, onRemove }: SortableNodePr
           value={node.url}
           onChange={(e) => onUpdate(node.id, "url", e.target.value)}
           placeholder="参考URL（任意）"
-          className="w-full border-none bg-transparent text-xs text-numa-text-muted placeholder:text-[#c0b8a8]/60 focus:outline-none"
+          className="w-full rounded border border-[rgba(80,60,30,0.1)] bg-white/50 px-3 py-2 text-sm text-numa-text-muted placeholder:text-[#b0a890] focus:border-[rgba(80,60,30,0.3)] focus:bg-white focus:outline-none"
         />
       </div>
 

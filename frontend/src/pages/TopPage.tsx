@@ -114,7 +114,7 @@ function TopPage() {
         {/* Right: warm bg + stripe pattern + React Flow preview */}
         <div className="relative bg-numa-bg-warm flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 numa-stripe-pattern" />
-          <Suspense fallback={<div className="w-full h-[480px]" />}>
+          <Suspense fallback={<div className="w-full h-[540px]" />}>
             <HeroPreview />
           </Suspense>
         </div>
