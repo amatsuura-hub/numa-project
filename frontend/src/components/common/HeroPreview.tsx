@@ -37,16 +37,16 @@ const HeroNode = memo(function HeroNode({ data }: NodeProps) {
         background: c.bg,
         borderLeft: `3px solid ${c.border}`,
         borderRadius: 4,
-        padding: "14px 20px",
-        minWidth: 200,
-        maxWidth: 240,
+        padding: "10px 16px",
+        minWidth: 160,
+        maxWidth: 200,
         boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
       }}
     >
       <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
       <div
         style={{
-          fontSize: 15,
+          fontSize: 13,
           fontWeight: 600,
           color: c.text,
           lineHeight: 1.3,
@@ -55,7 +55,7 @@ const HeroNode = memo(function HeroNode({ data }: NodeProps) {
       >
         {label}
       </div>
-      <div style={{ fontSize: 12, color: c.desc, lineHeight: 1.3 }}>
+      <div style={{ fontSize: 10, color: c.desc, lineHeight: 1.3 }}>
         {description}
       </div>
       <Handle
@@ -78,43 +78,43 @@ const HERO_NODES: Node[] = [
   {
     id: "2",
     type: "heroNode",
-    position: { x: 220, y: 90 },
+    position: { x: 220, y: 80 },
     data: { label: "環境構築", description: "インストールとエディタ設定", depth: 1 },
   },
   {
     id: "3",
     type: "heroNode",
-    position: { x: 220, y: 180 },
+    position: { x: 220, y: 160 },
     data: { label: "基本文法", description: "変数、制御構文、スライス", depth: 1 },
   },
   {
     id: "4",
     type: "heroNode",
-    position: { x: 20, y: 270 },
+    position: { x: 20, y: 240 },
     data: { label: "関数と構造体", description: "メソッドとインターフェース", depth: 2 },
   },
   {
     id: "5",
     type: "heroNode",
-    position: { x: 420, y: 270 },
+    position: { x: 420, y: 240 },
     data: { label: "HTTPサーバー", description: "net/httpでWebサーバー実装", depth: 2 },
   },
   {
     id: "6",
     type: "heroNode",
-    position: { x: 220, y: 360 },
+    position: { x: 220, y: 320 },
     data: { label: "DB接続", description: "PostgreSQLへのCRUD", depth: 3 },
   },
   {
     id: "7",
     type: "heroNode",
-    position: { x: 220, y: 450 },
+    position: { x: 220, y: 400 },
     data: { label: "REST API設計", description: "ルーティングとミドルウェア", depth: 3 },
   },
   {
     id: "8",
     type: "heroNode",
-    position: { x: 220, y: 540 },
+    position: { x: 220, y: 480 },
     data: { label: "デプロイ", description: "Lambda + API Gateway", depth: 4 },
   },
 ];
