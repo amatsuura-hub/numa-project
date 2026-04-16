@@ -161,7 +161,6 @@ cd frontend && npm run test
 | `VITE_API_URL` | API URL | `https://api.numa-roadmap.com`（現稼働環境は `dev-numa-*` リソース命名のまま本番ドメインで公開中） |
 | `VITE_COGNITO_USER_POOL_ID` | Cognito User Pool ID | `ap-northeast-1_xxx` |
 | `VITE_COGNITO_CLIENT_ID` | Cognito App Client ID | `xxx` |
-| `VITE_CLOUDFRONT_URL` | フロント URL | `https://numa-roadmap.com` |
 
 ### CI/CD パイプライン
 

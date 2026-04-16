@@ -79,7 +79,6 @@ npm run preview      # vite preview (ビルド結果確認)
 | `VITE_API_URL` | ○ | API Gateway ベース URL |
 | `VITE_COGNITO_USER_POOL_ID` | ○ | Cognito ユーザープール ID |
 | `VITE_COGNITO_CLIENT_ID` | ○ | Cognito クライアント ID |
-| `VITE_CLOUDFRONT_URL` | △ | CloudFront URL (空文字許容) |
 
 ## 型定義 (`src/types/index.ts`)
 
