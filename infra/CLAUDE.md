@@ -32,7 +32,7 @@ infra/
 
 - Terraform >= 1.5.0
 - AWS Provider ~> 5.0
-- リージョン: `ap-northeast-1` (メイン) + `us-east-1` (CloudFront WAF・ACM)
+- リージョン: `ap-northeast-1` (メイン) + `us-east-1` (CloudFront 用 ACM 証明書)
 
 ## 命名規則
 
@@ -115,9 +115,21 @@ infra/
 - `environment: production` で backend + frontend デプロイ
 - **失敗時通知**: notify-on-failure ジョブ
 
+## 環境ファイルの運用ルール
+
+現状、実稼働インフラは root 直下の `infra/terraform.tfvars`（`environment = "dev"` 命名だが本番相当として使用）で管理している。`environments/` ディレクトリは将来の dev / prod 完全分離に備えた雛形。
+
+| 目的 | 実行コマンド（`infra/` 直下） |
+|------|-----|
+| 現稼働環境（デフォルト dev 命名）を apply | `terraform apply`（root `terraform.tfvars` が自動適用される） |
+| 将来 prod を別 state で切り出す場合 | `terraform init -backend-config=environments/prod/backend.hcl -reconfigure` → `terraform apply -var-file=environments/prod/terraform.tfvars` |
+| ローカル開発者の初期化 | `environments/dev/terraform.tfvars.example` を root `terraform.tfvars` にコピーして値を調整 |
+
+`terraform.tfvars` と `environments/*/terraform.tfvars` は **`.gitignore` で除外**。`backend.hcl` と `terraform.tfvars.example` だけがリポジトリにコミットされる。
+
 ## 注意事項
 
-- **リモートステート**: `backend.tf` にリソース定義済み。有効化は S3 バケット作成後にコメント解除 → `terraform init -migrate-state`
+- **リモートステート**: state bucket `numa-terraform-state`（バージョニング + SSE 有効）と lock table `numa-terraform-lock` は 2026-04-16 の Phase 1 apply で **bootstrap 完了済み**。`backend.tf` の `backend "s3"` ブロックはまだコメントアウトのままで、state は local ファイル (`infra/terraform.tfstate`) 管理。有効化は backend ブロックのコメント解除 → `terraform init -backend-config=environments/dev/backend.hcl -migrate-state` で S3 に移行する（未実施。TODO.md 4 節参照）
 - **`.terraform.lock.hcl`**: Git にコミットする（.gitignore から除外済み）
 - **CloudFront 用 ACM 証明書**: `us-east-1` プロバイダで作成する必要がある（CloudFront の制約）
 - **Lambda デプロイ**: 初回は placeholder zip。CI/CD で実バイナリに置換される
