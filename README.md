@@ -2,6 +2,8 @@
 
 熟練者が初心者向けにマインドマップ形式のロードマップを作成・公開・共有するWebアプリケーション。沼の深さ（色の濃さ）で学習の深度を表現する、緑基調の沼テーマデザイン。
 
+> 📌 直近の大規模変更の引き継ぎ情報: [docs/handoff-2026-04-16.md](docs/handoff-2026-04-16.md)
+
 ## 技術スタック
 
 - **Frontend**: React 18 + TypeScript + Vite 5 + Tailwind CSS 3 + @xyflow/react 12 + Zustand 4 + React Router v6
