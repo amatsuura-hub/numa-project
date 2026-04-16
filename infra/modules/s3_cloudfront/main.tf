@@ -1,4 +1,4 @@
-# S3 + CloudFront: Frontend hosting with OAC, security headers, caching, and WAF integration.
+# S3 + CloudFront: Frontend hosting with OAC, security headers, and caching.
 
 # Access log bucket for CloudFront and S3
 resource "aws_s3_bucket" "logs" {
@@ -185,7 +185,7 @@ resource "aws_cloudfront_distribution" "frontend" {
   comment             = "${var.prefix} frontend"
   http_version        = "http2and3"
   is_ipv6_enabled     = true
-  web_acl_id          = var.waf_web_acl_arn != "" ? var.waf_web_acl_arn : null
+  aliases             = var.aliases
 
   logging_config {
     include_cookies = false
@@ -229,7 +229,10 @@ resource "aws_cloudfront_distribution" "frontend" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = var.acm_certificate_arn == ""
+    acm_certificate_arn            = var.acm_certificate_arn != "" ? var.acm_certificate_arn : null
+    ssl_support_method             = var.acm_certificate_arn != "" ? "sni-only" : null
+    minimum_protocol_version       = var.acm_certificate_arn != "" ? "TLSv1.2_2021" : null
   }
 }
 

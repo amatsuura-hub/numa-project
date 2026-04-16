@@ -21,7 +21,7 @@ provider "aws" {
   }
 }
 
-# us-east-1 provider required for CloudFront WAF (CLOUDFRONT scope)
+# us-east-1 provider required for CloudFront ACM certificates (must be in us-east-1)
 provider "aws" {
   alias  = "us_east_1"
   region = "us-east-1"
@@ -36,7 +36,9 @@ provider "aws" {
 }
 
 locals {
-  prefix = "${var.environment}-${var.project_name}"
+  prefix           = "${var.environment}-${var.project_name}"
+  custom_domain_on = var.domain_name != ""
+  frontend_origin  = local.custom_domain_on ? "https://${var.domain_name}" : module.s3_cloudfront.cloudfront_url
 }
 
 module "dynamodb" {
@@ -55,73 +57,12 @@ module "cognito" {
 # On first deploy, set post_confirmation_lambda_arn = "" in cognito module,
 # then run terraform apply again with the actual ARN.
 
-# WAF for CloudFront (must be in us-east-1)
-resource "aws_wafv2_web_acl" "cloudfront" {
-  provider    = aws.us_east_1
-  name        = "${local.prefix}-cloudfront-waf"
-  description = "WAF for CloudFront - rate limiting"
-  scope       = "CLOUDFRONT"
-
-  default_action {
-    allow {}
-  }
-
-  rule {
-    name     = "aws-managed-common"
-    priority = 0
-
-    override_action {
-      none {}
-    }
-
-    statement {
-      managed_rule_group_statement {
-        vendor_name = "AWS"
-        name        = "AWSManagedRulesCommonRuleSet"
-      }
-    }
-
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "${local.prefix}-cf-common-rules"
-      sampled_requests_enabled   = true
-    }
-  }
-
-  rule {
-    name     = "rate-limit"
-    priority = 1
-
-    action {
-      block {}
-    }
-
-    statement {
-      rate_based_statement {
-        limit              = var.cloudfront_waf_rate_limit
-        aggregate_key_type = "IP"
-      }
-    }
-
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "${local.prefix}-cf-rate-limit"
-      sampled_requests_enabled   = true
-    }
-  }
-
-  visibility_config {
-    cloudwatch_metrics_enabled = true
-    metric_name                = "${local.prefix}-cloudfront-waf"
-    sampled_requests_enabled   = true
-  }
-}
-
 module "s3_cloudfront" {
   source = "./modules/s3_cloudfront"
   prefix = local.prefix
 
-  waf_web_acl_arn = aws_wafv2_web_acl.cloudfront.arn
+  aliases             = local.custom_domain_on ? [var.domain_name] : []
+  acm_certificate_arn = local.custom_domain_on ? module.dns[0].cloudfront_certificate_arn : ""
 }
 
 module "lambda" {
@@ -132,7 +73,7 @@ module "lambda" {
   dynamodb_table_arn    = module.dynamodb.table_arn
   cognito_user_pool_id  = module.cognito.user_pool_id
   cognito_client_id     = module.cognito.client_id
-  allowed_origin        = module.s3_cloudfront.cloudfront_url
+  allowed_origin        = local.frontend_origin
   cognito_user_pool_arn = module.cognito.user_pool_arn
   environment           = var.environment
 }
@@ -145,7 +86,7 @@ module "api_gateway" {
   lambda_function_name  = module.lambda.function_name
   lambda_invoke_arn     = module.lambda.invoke_arn
   cognito_user_pool_arn = module.cognito.user_pool_arn
-  allowed_origin        = module.s3_cloudfront.cloudfront_url
+  allowed_origin        = local.frontend_origin
   environment           = var.environment
 }
 
@@ -160,27 +101,25 @@ module "monitoring" {
   dlq_name             = module.lambda.dlq_name
 }
 
-# DNS module — uncomment and set domain_name variable to enable custom domain
-# module "dns" {
-#   source = "./modules/dns"
-#   prefix = local.prefix
-#
-#   domain_name = var.domain_name
-#   environment = var.environment
-#
-#   cloudfront_distribution_domain_name    = module.s3_cloudfront.distribution_domain_name
-#   cloudfront_distribution_hosted_zone_id = module.s3_cloudfront.distribution_hosted_zone_id
-#   api_gateway_rest_api_id                = module.api_gateway.rest_api_id
-#   api_gateway_stage_name                 = var.environment
-#
-#   providers = {
-#     aws           = aws
-#     aws.us_east_1 = aws.us_east_1
-#   }
-# }
-#
-# After enabling dns module, update these:
-# - lambda module: allowed_origin = "https://${var.domain_name}"
-# - api_gateway module: allowed_origin = "https://${var.domain_name}"
-# - frontend env vars: VITE_API_URL, VITE_CLOUDFRONT_URL
-# - Cognito callback URLs if applicable
+# DNS — enabled only when var.domain_name is set.
+# NOTE: After the first apply, retrieve Route53 NS records
+# (`terraform output dns_name_servers`) and configure them at the domain
+# registrar so DNS queries resolve to this hosted zone.
+module "dns" {
+  count  = local.custom_domain_on ? 1 : 0
+  source = "./modules/dns"
+  prefix = local.prefix
+
+  domain_name = var.domain_name
+  environment = var.environment
+
+  cloudfront_distribution_domain_name    = module.s3_cloudfront.distribution_domain_name
+  cloudfront_distribution_hosted_zone_id = module.s3_cloudfront.distribution_hosted_zone_id
+  api_gateway_rest_api_id                = module.api_gateway.rest_api_id
+  api_gateway_stage_name                 = var.environment
+
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
+}

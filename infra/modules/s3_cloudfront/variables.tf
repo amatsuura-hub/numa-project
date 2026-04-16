@@ -3,8 +3,14 @@ variable "prefix" {
   type        = string
 }
 
-variable "waf_web_acl_arn" {
-  description = "WAFv2 Web ACL ARN for CloudFront (must be in us-east-1)"
+variable "aliases" {
+  description = "Custom domain aliases for the CloudFront distribution (e.g. [\"numa-roadmap.com\"]). Empty to use default *.cloudfront.net."
+  type        = list(string)
+  default     = []
+}
+
+variable "acm_certificate_arn" {
+  description = "ACM certificate ARN (us-east-1) for the custom domain. Required when `aliases` is non-empty."
   type        = string
   default     = ""
 }

@@ -37,3 +37,20 @@ output "cognito_user_pool_arn" {
 output "monitoring_sns_topic_arn" {
   value = module.monitoring.sns_topic_arn
 }
+
+# DNS outputs — populated only when var.domain_name is set.
+# After the first apply, register `dns_name_servers` at the domain registrar.
+output "dns_name_servers" {
+  description = "Route 53 zone name servers (register these at the domain registrar)"
+  value       = try(module.dns[0].zone_name_servers, [])
+}
+
+output "frontend_url" {
+  description = "Public frontend URL (custom domain when set, otherwise CloudFront default)"
+  value       = local.frontend_origin
+}
+
+output "api_custom_domain_url" {
+  description = "API Gateway custom domain URL (only set when domain_name is configured)"
+  value       = try("https://${module.dns[0].api_domain_name}", "")
+}

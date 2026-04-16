@@ -33,12 +33,6 @@ variable "environment" {
   type        = string
 }
 
-variable "waf_rate_limit" {
-  description = "API WAF rate limit per IP (5-minute window)"
-  type        = number
-  default     = 2000
-}
-
 variable "throttling_burst_limit" {
   description = "API Gateway throttling burst limit"
   type        = number

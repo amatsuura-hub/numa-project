@@ -6,26 +6,26 @@
 
 ```
 infra/
-├── main.tf              # モジュール呼び出し + CloudFront WAF (us-east-1)
-├── variables.tf         # ルート変数 (environment, project_name, aws_region, domain_name, cloudfront_waf_rate_limit)
-├── outputs.tf           # 主要出力値
+├── main.tf              # モジュール呼び出し (DNS は domain_name 非空時のみ有効化)
+├── variables.tf         # ルート変数 (environment, project_name, aws_region, domain_name)
+├── outputs.tf           # 主要出力値 (DNS 有効時は dns_name_servers, frontend_url, api_custom_domain_url)
 ├── backend.tf           # S3 + DynamoDB リモートステート (コメントで有効化手順記載)
-├── terraform.tfvars     # デフォルト値 (dev)
+├── terraform.tfvars     # デフォルト値 (dev, ドメインなし)
 ├── environments/
 │   ├── dev/
 │   │   ├── backend.hcl
 │   │   └── terraform.tfvars.example
 │   └── prod/
 │       ├── backend.hcl
-│       └── terraform.tfvars
+│       └── terraform.tfvars  # domain_name = "numa-roadmap.com"
 └── modules/
     ├── dynamodb/        # シングルテーブル + GSI1/GSI2/GSI3
     ├── cognito/         # ユーザープール + クライアント + PostConfirmation トリガー
-    ├── s3_cloudfront/   # S3 (フロントエンド + ログ) + CloudFront + OAC + セキュリティヘッダー
+    ├── s3_cloudfront/   # S3 (フロントエンド + ログ) + CloudFront + OAC + セキュリティヘッダー (aliases / ACM 対応)
     ├── lambda/          # API Lambda + PostConfirmation Lambda + IAM + DLQ + ログ
-    ├── api_gateway/     # REST API + Cognito Authorizer + WAF + CORS + ステージ
+    ├── api_gateway/     # REST API + Cognito Authorizer + CORS + スロットリング + ステージ
     ├── monitoring/      # CloudWatch アラーム + SNS 通知
-    └── dns/             # Route 53 + ACM (現在無効)
+    └── dns/             # Route 53 ゾーン + ACM (CloudFront:us-east-1 / API:regional) + API Gateway カスタムドメイン
 ```
 
 ## Terraform バージョン
@@ -66,6 +66,7 @@ infra/
 - **フロントエンド S3**: 暗号化 (AES256)、バージョニング有効、30 日で非現行バージョン削除
 - **ログ S3**: 90 日でログ期限切れ
 - **CloudFront**: HTTP/2+3、IPv6、OAC アクセス、SPA ルーティング (403/404 → index.html)
+- **カスタムドメイン**: `aliases` + `acm_certificate_arn` (us-east-1) が設定されていれば SNI / TLSv1.2_2021 で適用。未設定時は CloudFront 既定証明書 (`*.cloudfront.net`)
 - **セキュリティヘッダー**: HSTS, X-Content-Type-Options, X-Frame-Options (DENY), XSS-Protection, Referrer-Policy, CSP
 - **CSP 注意**: `style-src 'unsafe-inline'` は Tailwind CSS のランタイムスタイル挿入に必要なため許容
 
@@ -80,8 +81,7 @@ infra/
 - **REST API** + `{proxy+}` リソース (ANY メソッド → Lambda プロキシ統合)
 - **Cognito Authorizer**: `method.request.header.Authorization` から JWT 検証
 - **OPTIONS**: MOCK 統合で CORS プリフライト応答
-- **WAF** (REGIONAL): `AWSManagedRulesCommonRuleSet` + レート制限 (デフォルト 2000/5分)
-- **スロットリング**: burst=50, rate=100 (デフォルト)
+- **スロットリング**: burst=50, rate=100 (デフォルト)。WAF はコスト削減のため廃止済み
 - **X-Ray**: ステージレベルで有効
 - **ログ**: CloudWatch に詳細アクセスログ (30 日保持)
 
@@ -89,9 +89,11 @@ infra/
 - **CloudWatch アラーム**: Lambda エラー (>5)、DynamoDB スロットル (>0)、API Gateway 5xx (>5)、4xx (>50)、DLQ メッセージ (>0)
 - **SNS トピック**: アラーム通知先。`alert_email` 設定時はメールサブスクリプション追加
 
-### dns (現在無効)
-- Route 53 ゾーン + ACM 証明書 (CloudFront 用 us-east-1 + API 用 ap-northeast-1)
+### dns (`var.domain_name` 非空時のみ有効)
+- Route 53 ゾーン + ACM 証明書 (CloudFront 用 us-east-1 + API 用 regional)
 - カスタムドメイン: フロントエンド `domain_name` → CloudFront、API `api.domain_name` → API Gateway
+- prod では `domain_name = "numa-roadmap.com"` を `environments/prod/terraform.tfvars` で設定
+- 初回 apply 後、`terraform output dns_name_servers` で取得した NS レコードをドメインレジストラ側に登録する必要あり
 
 ## CI/CD ワークフロー
 
@@ -117,7 +119,8 @@ infra/
 
 - **リモートステート**: `backend.tf` にリソース定義済み。有効化は S3 バケット作成後にコメント解除 → `terraform init -migrate-state`
 - **`.terraform.lock.hcl`**: Git にコミットする（.gitignore から除外済み）
-- **CloudFront WAF**: `us-east-1` プロバイダで作成する必要がある（CloudFront の制約）
+- **CloudFront 用 ACM 証明書**: `us-east-1` プロバイダで作成する必要がある（CloudFront の制約）
 - **Lambda デプロイ**: 初回は placeholder zip。CI/CD で実バイナリに置換される
-- **DNS モジュール**: 本番でカスタムドメインが必要な場合に `main.tf` のコメントを解除して有効化
+- **DNS モジュール**: `var.domain_name` 非空時のみ `count=1` で有効化。dev は既定の CloudFront/API Gateway ドメインをそのまま使用
+- **NS レコード登録**: 初回 apply 後にレジストラ側へ Route 53 NS を設定（Terraform 管理外の手動作業）
 - **手動ロールバック**: deploy.yml で旧バージョンを保存しているため、`aws lambda update-function-code --zip-file` で復元可能

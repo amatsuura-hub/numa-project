@@ -225,7 +225,7 @@ func route(ctx context.Context, req events.APIGatewayProxyRequest, h *handler.Ha
 		if siteURL == "" {
 			siteURL = allowedOrigin
 			if siteURL == "*" {
-				siteURL = "https://numa.example.com"
+				siteURL = "https://numa-roadmap.com"
 			}
 		}
 		htmlContent, ogpErr := h.HandleOGP(ctx, roadmapID, siteURL)

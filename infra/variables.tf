@@ -17,13 +17,7 @@ variable "aws_region" {
 }
 
 variable "domain_name" {
-  description = "Custom domain name (e.g. example.com). Leave empty to skip DNS setup."
+  description = "Custom domain name (e.g. numa-roadmap.com). Leave empty to skip DNS/ACM setup."
   type        = string
   default     = ""
-}
-
-variable "cloudfront_waf_rate_limit" {
-  description = "CloudFront WAF rate limit per IP (5-minute window)"
-  type        = number
-  default     = 5000
 }

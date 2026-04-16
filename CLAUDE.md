@@ -40,7 +40,8 @@ numa-project/
 | いいねカウント | TransactWriteItems で Like レコード作成と likeCount インクリメントをアトミック実行 |
 | 自動保存 | エディタ変更時に 2 秒 debounce で `scheduleSave()` → `save()` |
 | 401 トークンリフレッシュ | API クライアントが 401 受信 → Cognito `getSession()` で新トークン取得 → リトライ |
-| WAF 二重配置 | CloudFront (us-east-1) + API Gateway (ap-northeast-1) 両方に `AWSManagedRulesCommonRuleSet` + レート制限 |
+| カスタムドメイン | prod は `numa-roadmap.com`（フロント）+ `api.numa-roadmap.com`（API）。dev は `domain_name=""` で CloudFront/API Gateway 既定ドメインのまま |
+| WAF 不使用 | 維持費削減のため CloudFront/API Gateway の WAFv2 Web ACL は配置しない。レート対策は API Gateway スロットリングで代替 |
 | ノード削除時のエッジカスケード | DeleteNode 時に参照エッジを先に削除してから本体を削除 |
 | UpdateNode で CreatedAt 保持 | PutItem ではなく UpdateExpression で更新し、CreatedAt を上書きしない |
 | OGP 対応 | `/api/ogp/:roadmapId` で bot 向け HTML 返却。`PageHead` コンポーネントで SPA 内の og:* 設定。`robots.txt`, `sitemap.xml` は `frontend/public/` に静的配置 |

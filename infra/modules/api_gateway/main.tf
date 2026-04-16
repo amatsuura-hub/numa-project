@@ -1,4 +1,4 @@
-# API Gateway: REST API with Cognito auth, CORS, WAF rate limiting, and CloudWatch logging.
+# API Gateway: REST API with Cognito auth, CORS, throttling, and CloudWatch logging.
 
 resource "aws_api_gateway_rest_api" "main" {
   name        = "${var.prefix}-api"
@@ -99,6 +99,8 @@ resource "aws_api_gateway_deployment" "main" {
       aws_api_gateway_integration.proxy,
       aws_api_gateway_method.proxy_options,
       aws_api_gateway_integration.proxy_options,
+      aws_api_gateway_integration_response.proxy_options,
+      aws_api_gateway_method_response.proxy_options,
     ]))
   }
 
@@ -178,72 +180,6 @@ resource "aws_iam_role" "api_gateway_cloudwatch" {
 resource "aws_iam_role_policy_attachment" "api_gateway_cloudwatch" {
   role       = aws_iam_role.api_gateway_cloudwatch.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
-}
-
-# WAF — rate limiting for API Gateway
-resource "aws_wafv2_web_acl" "api" {
-  name        = "${var.prefix}-api-waf"
-  description = "WAF for API Gateway - rate limiting"
-  scope       = "REGIONAL"
-
-  default_action {
-    allow {}
-  }
-
-  rule {
-    name     = "aws-managed-common"
-    priority = 0
-
-    override_action {
-      none {}
-    }
-
-    statement {
-      managed_rule_group_statement {
-        vendor_name = "AWS"
-        name        = "AWSManagedRulesCommonRuleSet"
-      }
-    }
-
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "${var.prefix}-api-common-rules"
-      sampled_requests_enabled   = true
-    }
-  }
-
-  rule {
-    name     = "rate-limit"
-    priority = 1
-
-    action {
-      block {}
-    }
-
-    statement {
-      rate_based_statement {
-        limit              = var.waf_rate_limit
-        aggregate_key_type = "IP"
-      }
-    }
-
-    visibility_config {
-      cloudwatch_metrics_enabled = true
-      metric_name                = "${var.prefix}-api-rate-limit"
-      sampled_requests_enabled   = true
-    }
-  }
-
-  visibility_config {
-    cloudwatch_metrics_enabled = true
-    metric_name                = "${var.prefix}-api-waf"
-    sampled_requests_enabled   = true
-  }
-}
-
-resource "aws_wafv2_web_acl_association" "api" {
-  resource_arn = aws_api_gateway_stage.main.arn
-  web_acl_arn  = aws_wafv2_web_acl.api.arn
 }
 
 # Lambda permission for API Gateway
