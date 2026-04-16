@@ -42,6 +42,8 @@ numa-project/
 | 401 トークンリフレッシュ | API クライアントが 401 受信 → Cognito `getSession()` で新トークン取得 → リトライ |
 | カスタムドメイン | prod は `numa-roadmap.com`（フロント）+ `api.numa-roadmap.com`（API）。dev は `domain_name=""` で CloudFront/API Gateway 既定ドメインのまま |
 | WAF 不使用 | 維持費削減のため CloudFront/API Gateway の WAFv2 Web ACL は配置しない。レート対策は API Gateway スロットリングで代替 |
+| API Gateway 再デプロイ トリガー | `aws_api_gateway_deployment.triggers` の hash に `method`, `integration`, `method_response`, `integration_response` を全て含める。response 側を漏らすと CORS origin など response parameter 変更がステージに反映されない |
+| Lambda 監視三点セット | DLQ (SQS, 14 日保持) + X-Ray Active トレーシング + CloudWatch アラーム 6 種（Lambda Errors / DLQ Messages / DynamoDB RW Throttle / API 5xx / 4xx）を `monitoring` モジュールに集約し、SNS トピック `${prefix}-alarms` に集約通知（`alert_email` 未設定時は subscription なし） |
 | ノード削除時のエッジカスケード | DeleteNode 時に参照エッジを先に削除してから本体を削除 |
 | UpdateNode で CreatedAt 保持 | PutItem ではなく UpdateExpression で更新し、CreatedAt を上書きしない |
 | OGP 対応 | `/api/ogp/:roadmapId` で bot 向け HTML 返却。`PageHead` コンポーネントで SPA 内の og:* 設定。`robots.txt`, `sitemap.xml` は `frontend/public/` に静的配置 |

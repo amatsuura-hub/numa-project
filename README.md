@@ -156,10 +156,10 @@ cd frontend && npm run test
 | `POST_CONFIRMATION_LAMBDA_NAME` | Cognito トリガー Lambda | `dev-numa-post-confirmation` |
 | `S3_BUCKET_NAME` | フロントエンド S3 バケット | `dev-numa-frontend` |
 | `CLOUDFRONT_DISTRIBUTION_ID` | CloudFront ID | `E1234567890ABC` |
-| `VITE_API_URL` | API URL | prod: `https://api.numa-roadmap.com` / dev: `https://xxx.execute-api...` |
+| `VITE_API_URL` | API URL | `https://api.numa-roadmap.com`（現稼働環境は `dev-numa-*` リソース命名のまま本番ドメインで公開中） |
 | `VITE_COGNITO_USER_POOL_ID` | Cognito User Pool ID | `ap-northeast-1_xxx` |
 | `VITE_COGNITO_CLIENT_ID` | Cognito App Client ID | `xxx` |
-| `VITE_CLOUDFRONT_URL` | フロント URL | prod: `https://numa-roadmap.com` / dev: `https://dxxx.cloudfront.net` |
+| `VITE_CLOUDFRONT_URL` | フロント URL | `https://numa-roadmap.com` |
 
 ### CI/CD パイプライン
 
@@ -176,6 +176,29 @@ cd infra
 # 1. cognito の post_confirmation_lambda_arn = "" で apply
 # 2. Lambda ARN 生成後、元に戻して再 apply
 ```
+
+### カスタムドメイン有効化（初回のみ）
+
+ACM DNS 検証はレジストラ側に AWS の NS が登録されるまで完了しないため、apply は 2 段階に分けて実施する:
+
+```bash
+cd infra
+
+# 1. domain_name = "..." を root terraform.tfvars に追加
+# 2. Route 53 ゾーンだけ先に作成（apply がここで止まる前にゾーンを完成させる）
+terraform apply -target='module.dns[0].aws_route53_zone.main'
+
+# 3. 出力された NS 4 件をドメインレジストラ側の DNS 設定に登録
+terraform output dns_name_servers
+
+# 4. NS の反映を確認
+dig +short NS <domain> @8.8.8.8
+
+# 5. 残り（ACM 証明書検証 + CloudFront aliases + API Gateway カスタムドメイン）を apply
+terraform apply
+```
+
+NS 反映前に手順 5 を走らせると ACM 検証が最大 45 分ハングしてから timeout する。
 
 ## アーキテクチャ
 

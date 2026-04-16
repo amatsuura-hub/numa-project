@@ -84,6 +84,7 @@ infra/
 - **スロットリング**: burst=50, rate=100 (デフォルト)。WAF はコスト削減のため廃止済み
 - **X-Ray**: ステージレベルで有効
 - **ログ**: CloudWatch に詳細アクセスログ (30 日保持)
+- **再デプロイ トリガー**: `aws_api_gateway_deployment.triggers` の hash には `aws_api_gateway_method`, `aws_api_gateway_integration`, `aws_api_gateway_method_response`, `aws_api_gateway_integration_response` を全て含める。response 系を漏らすと CORS origin 変更など response 変数の差分があってもステージに配備されず、古いレスポンスが返り続ける
 
 ### monitoring
 - **CloudWatch アラーム**: Lambda エラー (>5)、DynamoDB スロットル (>0)、API Gateway 5xx (>5)、4xx (>50)、DLQ メッセージ (>0)
