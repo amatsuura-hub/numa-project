@@ -71,7 +71,6 @@ npm-debug.log*
 coverage/
 
 # Project docs (not for GitHub)
-TODO.md
 numa-spec.md
 numa-implementation-guide.md
 numa-mockups.html
